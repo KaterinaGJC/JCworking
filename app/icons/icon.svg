@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="景臣的工作生活">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4A7BF0"/>
+      <stop offset="1" stop-color="#1F9D8B"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <g fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="128" y="152" width="256" height="236" rx="40"/>
+    <path d="M128 228h256"/>
+    <path d="M196 120v62M316 120v62"/>
+    <path d="M196 300l40 40 84-88"/>
+  </g>
+</svg>

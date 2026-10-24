@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>hello</title></head>
+<body>
+  <button id="btn">加一</button>
+  <span id="out">0</span>
+  <input id="inp" />
+  <script>
+    let n = 0;
+    document.getElementById('btn').addEventListener('click', () => {
+      document.getElementById('out').textContent = String(++n);
+    });
+  </script>
+</body>
+</html>

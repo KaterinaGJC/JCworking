@@ -1,0 +1,112 @@
+/* 设计令牌：颜色、字号、间距、圆角、动效 —— 与已确认的原型一致 */
+:root{
+  --bg:#F4F5F7; --card:#FFFFFF; --card2:#F7F8FA;
+  --text:#16181D; --text2:#6B7280; --text3:#9AA1AC;
+  --line:#ECEEF2; --line-strong:#E2E5EA;
+  --blue:#3B6FE0; --teal:#1F9D8B; --purple:#7A5AF0; --amber:#E8A020;
+  --red:#E14B4B; --green:#2FA36B;
+  --shadow:0 1px 2px rgba(16,24,40,.04), 0 10px 24px -16px rgba(16,24,40,.18);
+  --r:16px;
+  --sp:4px;
+  --font:15px;
+  --dur:.18s;
+}
+[data-theme="dark"]{
+  --bg:#14161A; --card:#1E2126; --card2:#242830;
+  --text:#EDEFF3; --text2:#9AA1AC; --text3:#717885;
+  --line:#2A2E35; --line-strong:#343941;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 24px -16px rgba(0,0,0,.6);
+}
+
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+html{background:var(--bg)}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:var(--font); line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+a{color:inherit; text-decoration:none}
+button{font-family:inherit}
+input,textarea,select{font-family:inherit; font-size:inherit; color:inherit}
+h1,h2,h3,p,ul,ol{margin:0; padding:0}
+ul,ol{list-style:none}
+[hidden]{display:none !important}
+.hidden{display:none !important}
+
+.app{
+  max-width:430px; margin:0 auto; min-height:100%;
+  background:var(--bg); position:relative; display:flex; flex-direction:column;
+}
+@media (min-width:481px){
+  body{background:#E9EBEF}
+  .app{box-shadow:0 0 0 1px rgba(0,0,0,.04), 0 24px 60px -30px rgba(0,0,0,.35)}
+}
+[data-theme="dark"] body{background:var(--bg)}
+
+main{flex:1; padding:0 16px calc(96px + env(safe-area-inset-bottom)); min-height:0}
+body.detail main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+
+.topbar{
+  position:sticky; top:0; z-index:30;
+  display:flex; align-items:center; gap:6px;
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+}
+.topbar .titles{flex:1; min-width:0}
+.topbar h1{margin:0; font-size:17px; font-weight:650; letter-spacing:.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.topbar .sub{font-size:12px; color:var(--text3); margin-top:1px}
+.icon-btn{
+  width:40px; height:40px; flex:0 0 auto; border:0; border-radius:12px;
+  background:transparent; color:var(--text); display:grid; place-items:center; cursor:pointer;
+  transition:background var(--dur), transform .1s;
+}
+.icon-btn:active{background:var(--card2); transform:scale(.94)}
+.ico{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round}
+
+/* 页面进出动效 */
+.page{animation:fadein .2s cubic-bezier(.2,.8,.3,1)}
+@keyframes fadein{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+@keyframes slideup{from{transform:translateY(100%)} to{transform:none}}
+
+.tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
+  max-width:430px; margin:0 auto;
+  display:flex; padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-top:1px solid var(--line);
+}
+.tabbar[hidden]{display:none}
+.tab{
+  flex:1; border:0; background:transparent; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:7px 0 6px; color:var(--text3); font-size:10.5px; font-weight:600;
+  text-decoration:none; transition:color var(--dur);
+}
+.tab .ico{width:23px; height:23px; stroke-width:1.7}
+.tab.on{color:var(--text)}
+.tab.on .ico{stroke-width:2.1}
+.tab[data-act="home"].on,.tab[data-act="plan"].on{color:var(--blue)}
+.tab[data-act="schedule"].on{color:var(--teal)}
+.tab[data-act="fun"].on{color:var(--purple)}
+.tab[data-act="memo"].on{color:var(--amber)}
+
+.fab{
+  position:fixed; z-index:35; right:max(18px, calc(50vw - 215px + 18px));
+  bottom:calc(76px + env(safe-area-inset-bottom));
+  width:54px; height:54px; border-radius:18px; border:0; cursor:pointer;
+  background:var(--text); color:var(--bg); display:grid; place-items:center;
+  box-shadow:0 10px 24px -8px rgba(16,24,40,.45);
+  transition:transform .12s;
+}
+.fab:active{transform:scale(.93)}
+.fab[hidden]{display:none}
+.fab .ico{width:24px; height:24px; stroke-width:2.2}

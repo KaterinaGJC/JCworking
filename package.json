@@ -1,0 +1,12 @@
+{
+  "name": "jc-life-app",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "景臣的个人工作生活 App（可添加到安卓桌面的离线应用）",
+  "scripts": {
+    "serve": "node tools/server.mjs app 8123",
+    "icons": "node tools/make-icons.mjs",
+    "test": "node tests/run-all.mjs"
+  }
+}

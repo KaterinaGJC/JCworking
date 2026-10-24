@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F5F7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>景臣 · 我的工作生活</title>
+<style>
+  /* ---------- 基础 ---------- */
+  :root{
+    --bg:#F4F5F7; --card:#FFFFFF; --card2:#F7F8FA;
+    --text:#16181D; --text2:#6B7280; --text3:#9AA1AC;
+    --line:#ECEEF2; --line-strong:#E2E5EA;
+    --blue:#3B6FE0; --teal:#1F9D8B; --purple:#7A5AF0; --amber:#E8A020;
+    --red:#E14B4B; --green:#2FA36B;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 10px 24px -16px rgba(16,24,40,.18);
+    --r:16px;
+  }
+  [data-theme="dark"]{
+    --bg:#14161A; --card:#1E2126; --card2:#242830;
+    --text:#EDEFF3; --text2:#9AA1AC; --text3:#717885;
+    --line:#2A2E35; --line-strong:#343941;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 24px -16px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  html{background:var(--bg)}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    background:var(--bg); color:var(--text);
+    font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (min-width:481px){ body{background:#E9EBEF} }
+  [data-theme="dark"] body{background:var(--bg)}
+  a{color:inherit; text-decoration:none}
+  .app{
+    max-width:430px; margin:0 auto; min-height:100vh; min-height:100dvh;
+    background:var(--bg); position:relative; display:flex; flex-direction:column;
+    box-shadow:0 0 0 1px rgba(0,0,0,.04), 0 24px 60px -30px rgba(0,0,0,.35);
+  }
+  @media (max-width:480px){
+    body{background:var(--bg)}
+    .app{box-shadow:none; max-width:none}
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:30;
+    display:flex; align-items:center; gap:8px;
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+    background:color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter:saturate(180%) blur(14px);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);
+  }
+  .topbar .titles{flex:1; min-width:0}
+  .topbar h1{
+    margin:0; font-size:17px; font-weight:650; letter-spacing:.2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .topbar .sub{font-size:12px; color:var(--text3); margin-top:1px}
+  .icon-btn{
+    width:40px; height:40px; flex:0 0 auto; border:0; border-radius:12px;
+    background:transparent; color:var(--text); display:grid; place-items:center;
+    cursor:pointer; transition:background .15s, transform .1s;
+  }
+  .icon-btn:active{background:var(--card2); transform:scale(.94)}
+  .icon-btn.hidden{display:none}
+  .ico{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8;
+       stroke-linecap:round; stroke-linejoin:round}
+
+  /* ---------- 视图 ---------- */
+  main{flex:1; padding:0 16px calc(96px + env(safe-area-inset-bottom)); overflow-x:hidden}
+  .page{display:none; animation:in .22s cubic-bezier(.2,.8,.3,1)}
+  .page.active{display:block}
+  @keyframes in{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+  /* ---------- 通用 ---------- */
+  .card{
+    background:var(--card); border-radius:var(--r); padding:14px;
+    box-shadow:var(--shadow); margin-bottom:12px;
+  }
+  .card-head{display:flex; align-items:center; gap:8px; margin-bottom:2px}
+  .card-head .ico{width:18px; height:18px}
+  .card-title{flex:1; font-size:15px; font-weight:600; display:flex; align-items:center; gap:7px}
+  .card-meta{font-size:13px; color:var(--text3); display:flex; align-items:center; gap:4px}
+  .card-meta .ico{width:16px; height:16px; color:var(--text3)}
+  .frac{font-variant-numeric:tabular-nums; color:var(--text2); font-weight:600}
+  .sec-title{font-size:13px; color:var(--text3); font-weight:600; margin:16px 4px 8px; letter-spacing:.3px}
+  .sec-title:first-child{margin-top:4px}
+  .muted{color:var(--text3)}
+  .emptystate{
+    text-align:center; color:var(--text3); font-size:14px;
+    padding:26px 0 20px;
+  }
+  .plus-btn{
+    border:0; background:var(--card2); color:var(--text2); border-radius:10px;
+    width:34px; height:34px; display:grid; place-items:center; cursor:pointer;
+  }
+  .plus-btn:active{transform:scale(.93)}
+
+  /* ---------- 首页 ---------- */
+  .hero{padding:6px 2px 18px}
+  .hero .date{font-size:24px; font-weight:700; letter-spacing:-.4px}
+  .hero .sum{margin-top:6px; font-size:14px; color:var(--text2)}
+  .hero .sum b{color:var(--text); font-weight:600}
+  .mini-list{list-style:none; margin:10px 0 0; padding:0}
+  .mini-list li{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
+  .mini-list li .when{color:var(--text3); font-size:13px; width:46px; flex:0 0 auto;
+    font-variant-numeric:tabular-nums}
+  .mini-list li .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .cbox{
+    width:20px; height:20px; flex:0 0 auto; border-radius:50%;
+    border:1.6px solid var(--line-strong); display:grid; place-items:center;
+  }
+  .cbox.done{background:var(--green); border-color:var(--green)}
+  .cbox.done::after{content:""; width:9px; height:5px; border-left:1.8px solid #fff;
+    border-bottom:1.8px solid #fff; transform:rotate(-45deg) translate(1px,-1px)}
+  .row.done .t{color:var(--text3); text-decoration:line-through}
+  .note-line{display:flex; align-items:baseline; gap:10px; padding:7px 0; font-size:14.5px}
+  .note-line .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .note-line .when{font-size:12px; color:var(--text3); flex:0 0 auto}
+  .quick-add{display:flex; gap:8px; align-items:center; margin-top:8px;
+    background:var(--card2); border-radius:12px; padding:6px 6px 6px 14px}
+  .quick-add input{
+    flex:1; border:0; background:transparent; font-size:15px; color:var(--text);
+    padding:8px 0; outline:none; font-family:inherit;
+  }
+  .quick-add input::placeholder{color:var(--text3)}
+  .quick-add .go{
+    border:0; background:var(--blue); color:#fff; width:34px; height:34px;
+    border-radius:10px; display:grid; place-items:center; cursor:pointer; flex:0 0 auto;
+  }
+  .fun-row{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
+  .fun-row .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .badge{
+    font-size:11.5px; padding:3px 8px; border-radius:999px; flex:0 0 auto;
+    background:var(--card2); color:var(--text2); font-weight:600; letter-spacing:.2px;
+  }
+  .badge.red{background:rgba(225,75,75,.12); color:#C93B3B}
+  .badge.amber{background:rgba(232,160,32,.14); color:#A97211}
+  .badge.teal{background:rgba(31,157,139,.12); color:#12796C}
+  .badge.purple{background:rgba(122,90,240,.12); color:#6247C9}
+  .badge.blue{background:rgba(59,111,224,.12); color:#2F5BC4}
+  [data-theme="dark"] .badge.red{color:#F08A8A}
+  [data-theme="dark"] .badge.amber{color:#E0B460}
+  [data-theme="dark"] .badge.teal{color:#5FC9BA}
+  [data-theme="dark"] .badge.purple{color:#A996F5}
+  [data-theme="dark"] .badge.blue{color:#8FADF0}
+
+  /* ---------- 计划 ---------- */
+  .datebar{display:flex; align-items:center; gap:6px; padding:2px 0 12px}
+  .datebar .mid{flex:1; text-align:center; font-size:15px; font-weight:600;
+    font-variant-numeric:tabular-nums}
+  .datebar .today{
+    font-size:12px; color:var(--blue); background:rgba(59,111,224,.1);
+    padding:5px 10px; border-radius:999px; font-weight:600; border:0; cursor:pointer;
+  }
+  .titem{display:flex; gap:12px; align-items:flex-start; padding:12px 0}
+  .titem + .titem{border-top:1px solid var(--line)}
+  .titem .time{
+    width:48px; flex:0 0 auto; font-size:13px; color:var(--text2); font-weight:600;
+    font-variant-numeric:tabular-nums; padding-top:1px;
+  }
+  .titem .body{flex:1; min-width:0}
+  .titem .body .t{font-size:15.5px; font-weight:500}
+  .titem .body .d{font-size:12.5px; color:var(--text3); margin-top:2px}
+  .titem.done .body .t{color:var(--text3); text-decoration:line-through}
+  .donegroup{margin-top:6px}
+  .donegroup .h{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text3);
+    padding:10px 2px; cursor:pointer}
+  .donegroup .h .ico{width:16px; height:16px; transition:transform .2s}
+  .donegroup.open .h .ico{transform:rotate(180deg)}
+  .donegroup .list{display:none}
+  .donegroup.open .list{display:block}
+
+  /* ---------- 课表 ---------- */
+  .week-head{display:flex; align-items:center; gap:4px; padding:2px 0 14px}
+  .week-head .range{flex:1; text-align:center; font-size:14px; font-weight:600;
+    font-variant-numeric:tabular-nums; letter-spacing:.2px}
+  .linkbtn{border:0; background:transparent; color:var(--blue); font-size:13.5px;
+    font-weight:600; cursor:pointer; padding:6px 4px; display:flex; align-items:center; gap:1px}
+  .linkbtn .ico{width:15px; height:15px}
+  .daygroup{margin-bottom:16px}
+  .daygroup .dhead{display:flex; align-items:baseline; gap:8px; margin:0 4px 8px}
+  .daygroup .dhead .dn{font-size:14.5px; font-weight:650}
+  .daygroup .dhead .dd{font-size:12.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+  .daygroup .dhead .tn{font-size:11.5px; color:var(--blue); background:rgba(59,111,224,.1);
+    padding:2px 7px; border-radius:999px; font-weight:600}
+  .daygroup .none{font-size:13.5px; color:var(--text3); padding:2px 4px 0}
+  .lesson{
+    background:var(--card); border-radius:14px; padding:12px 14px; margin-bottom:8px;
+    box-shadow:var(--shadow); display:flex; gap:12px; align-items:center;
+    cursor:pointer; transition:transform .12s;
+  }
+  .lesson:active{transform:scale(.985)}
+  .lesson .lbar{width:3px; align-self:stretch; border-radius:3px; background:var(--teal); flex:0 0 auto}
+  .lesson.onetoone .lbar{background:var(--teal)}
+  .lesson.small .lbar{background:var(--purple)}
+  .lesson .lmain{flex:1; min-width:0}
+  .lesson .ltop{display:flex; align-items:center; gap:8px}
+  .lesson .ltime{font-size:13.5px; font-weight:650; font-variant-numeric:tabular-nums;
+    color:var(--text2); letter-spacing:.2px}
+  .lesson .type{font-size:11px; color:var(--text3); background:var(--card2);
+    padding:2px 6px; border-radius:6px}
+  .lesson .lname{font-size:15.5px; font-weight:600; margin-top:4px; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap}
+  .lesson .lsub{font-size:12.5px; color:var(--text3); margin-top:2px}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--line-strong); flex:0 0 auto}
+  .dot.done{background:var(--green)}
+  .dot.leave{background:var(--amber)}
+  .dot.makeup{background:var(--blue)}
+
+  /* ---------- 课次详情 ---------- */
+  .dhead-big{padding:4px 2px 16px}
+  .dhead-big .d1{font-size:20px; font-weight:700; letter-spacing:-.2px;
+    font-variant-numeric:tabular-nums}
+  .dhead-big .d2{margin-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .selectish{
+    display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:600;
+    background:var(--card); border-radius:999px; padding:6px 12px; box-shadow:var(--shadow);
+    cursor:pointer; color:var(--text);
+  }
+  .selectish .ico{width:14px; height:14px; color:var(--text3)}
+  .field{margin-bottom:12px}
+  .field label{display:block; font-size:12.5px; color:var(--text3); font-weight:600;
+    margin:0 2px 6px; letter-spacing:.3px}
+  .textarea{
+    width:100%; background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:12px 14px; font:inherit; font-size:15px; color:var(--text);
+    resize:none; outline:none; line-height:1.6; display:block;
+  }
+  .textarea:focus{border-color:color-mix(in srgb, var(--blue) 45%, var(--line))}
+  .textarea::placeholder{color:var(--text3)}
+  .sturow{display:flex; gap:10px; align-items:center}
+  .sturow + .sturow{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+  .stuname{font-size:15.5px; font-weight:600; flex:1}
+  .tagset{display:flex; gap:6px; flex-wrap:wrap}
+  .tag{font-size:12.5px; padding:5px 10px; border-radius:999px; background:var(--card2);
+    color:var(--text2); border:1px solid transparent; cursor:pointer}
+  .tag.on{background:rgba(47,163,107,.12); color:#1F8355; border-color:rgba(47,163,107,.35); font-weight:600}
+  .tag.on.warn{background:rgba(232,160,32,.14); color:#A97211; border-color:rgba(232,160,32,.35)}
+  [data-theme="dark"] .tag.on{color:#7BD3A8}
+  [data-theme="dark"] .tag.on.warn{color:#E0B460}
+  .bigbtn{
+    width:100%; border:0; border-radius:16px; padding:16px; font-size:16px; font-weight:650;
+    background:var(--teal); color:#fff; cursor:pointer; font-family:inherit;
+    box-shadow:0 8px 20px -10px rgba(31,157,139,.7); margin:4px 0 8px;
+  }
+  .bigbtn:active{transform:scale(.985)}
+  .bigbtn.ghost{background:var(--card); color:var(--text2); box-shadow:none;
+    border:1px solid var(--line)}
+
+  /* ---------- 学生 ---------- */
+  .statrow{display:flex; gap:10px; margin-bottom:14px}
+  .stat{flex:1; background:var(--card); border-radius:14px; padding:12px; box-shadow:var(--shadow)}
+  .stat .n{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums}
+  .stat .l{font-size:12px; color:var(--text3); margin-top:2px}
+  .stu-item{display:flex; align-items:center; gap:10px; padding:14px 2px; cursor:pointer}
+  .stu-item + .stu-item{border-top:1px solid var(--line)}
+  .avatar{width:38px; height:38px; border-radius:50%; background:rgba(31,157,139,.12);
+    color:#12796C; display:grid; place-items:center; font-weight:650; font-size:15px; flex:0 0 auto}
+  .stu-item .t{flex:1; font-size:15.5px; font-weight:600}
+  .stu-item .c{font-size:12.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+  .history{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:10px;
+    box-shadow:var(--shadow)}
+  .history .h1{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2);
+    font-variant-numeric:tabular-nums; margin-bottom:8px}
+  .history .h1 .sep{color:var(--text3)}
+  .history .h2{font-size:14.5px; line-height:1.6; margin-bottom:6px}
+  .history .h2 b{color:var(--text3); font-weight:600; font-size:12.5px; margin-right:6px}
+  .history .h3{font-size:13px; color:var(--text2); line-height:1.55}
+  .history .h3 b{color:var(--text3); font-weight:600; font-size:12.5px; margin-right:6px}
+
+  /* ---------- 分段控件 ---------- */
+  .seg{
+    display:flex; gap:2px; background:var(--card2); border-radius:12px; padding:3px;
+    margin:2px 0 16px;
+  }
+  .seg button{
+    flex:1; border:0; background:transparent; font-family:inherit; font-size:13.5px;
+    font-weight:600; color:var(--text2); padding:9px 4px; border-radius:9px; cursor:pointer;
+    transition:background .18s, color .18s;
+  }
+  .seg button.on{background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(16,24,40,.1)}
+
+  /* ---------- 娱乐 ---------- */
+  .gcard{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:9px;
+    box-shadow:var(--shadow)}
+  .gcard .gt{display:flex; align-items:center; gap:8px}
+  .gcard .gn{font-size:15.5px; font-weight:650; flex:1; min-width:0; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap}
+  .stars{font-size:13px; color:var(--amber); letter-spacing:1px}
+  .gcard .gd{font-size:13px; color:var(--text2); margin-top:6px; line-height:1.55}
+  .gcard .ga{margin-top:10px; display:flex; gap:8px}
+  .minibtn{border:1px solid var(--line-strong); background:transparent; color:var(--text2);
+    font-family:inherit; font-size:12.5px; font-weight:600; padding:6px 12px;
+    border-radius:9px; cursor:pointer}
+  .minibtn.primary{background:var(--card2); border-color:transparent; color:var(--text)}
+  .minibtn:active{transform:scale(.96)}
+  .grouph{font-size:12.5px; color:var(--text3); font-weight:650; margin:14px 4px 8px;
+    display:flex; align-items:center; gap:6px; letter-spacing:.3px}
+  .grouph .cnt{color:var(--text3); font-weight:500}
+  .acard{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:9px;
+    box-shadow:var(--shadow); display:flex; gap:12px; align-items:flex-start}
+  .acard .amain{flex:1; min-width:0}
+  .acard .an{font-size:15px; font-weight:600}
+  .acard .ag{font-size:12.5px; color:var(--text3); margin-top:3px}
+  .countdown{font-size:12.5px; font-weight:700; color:var(--amber);
+    font-variant-numeric:tabular-nums; flex:0 0 auto; padding-top:1px}
+  .countdown.urgent{color:var(--red)}
+  .countdown.over{color:var(--text3); font-weight:500}
+  .trow{display:flex; align-items:center; gap:10px; padding:13px 2px}
+  .trow + .trow{border-top:1px solid var(--line)}
+  .trow .tmain{flex:1; min-width:0}
+  .trow .tn{font-size:15px; font-weight:600; display:flex; align-items:center; gap:7px}
+  .trow .td{font-size:12.5px; color:var(--text3); margin-top:3px}
+  .plusep{border:0; background:var(--card2); color:var(--text); font-family:inherit;
+    font-size:13px; font-weight:650; border-radius:9px; padding:8px 12px; cursor:pointer;
+    font-variant-numeric:tabular-nums; flex:0 0 auto}
+  .plusep:active{transform:scale(.95)}
+  .today-mark{font-size:10.5px; color:#fff; background:var(--red); padding:2px 6px;
+    border-radius:5px; font-weight:650; letter-spacing:.2px}
+  .ecard{background:var(--card); border-radius:14px; padding:14px; margin-bottom:10px;
+    box-shadow:var(--shadow)}
+  .ecard .eh{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+  .ecard .en{font-size:16px; font-weight:650; flex:1; min-width:0; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap}
+  .ecard .eb{font-size:14px; color:var(--text2); line-height:1.65;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+  .ecard .ef{font-size:12px; color:var(--text3); margin-top:10px;
+    display:flex; align-items:center; gap:8px}
+
+  /* ---------- 备忘 ---------- */
+  .memo-entry{display:flex; gap:8px; align-items:flex-start; margin-bottom:16px}
+  .memo-entry .textarea{min-height:76px; background:var(--card)}
+  .memo-entry .savebtn{
+    align-self:stretch; width:52px; border:0; border-radius:14px; background:var(--amber);
+    color:#4A3606; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
+    flex:0 0 auto;
+  }
+  .masonry{column-count:2; column-gap:10px}
+  .note{
+    break-inside:avoid; margin:0 0 10px; padding:12px; border-radius:14px;
+    font-size:14px; line-height:1.55; position:relative; box-shadow:0 1px 2px rgba(16,24,40,.05);
+  }
+  .note .nt{word-break:break-word}
+  .note .nw{font-size:11.5px; opacity:.55; margin-top:9px; display:flex;
+    align-items:center; gap:5px}
+  .note .nw .ico{width:12px; height:12px}
+  .pinmark{width:5px; height:5px; border-radius:50%; background:currentColor;
+    display:inline-block; opacity:.8}
+  .note.y{background:#FFF7DE; color:#5B4A16}
+  .note.b{background:#E9F1FF; color:#22406E}
+  .note.g{background:#E7F7EF; color:#1B4F3B}
+  .note.p{background:#FBEBF3; color:#6B2A47}
+  [data-theme="dark"] .note.y{background:#332C18; color:#EBDFB4}
+  [data-theme="dark"] .note.b{background:#1D2A40; color:#BFCFEC}
+  [data-theme="dark"] .note.g{background:#17302A; color:#B6E0CB}
+  [data-theme="dark"] .note.p{background:#31202B; color:#EBC6D8}
+
+  /* ---------- 设置 ---------- */
+  .sgroup{background:var(--card); border-radius:14px; margin-bottom:12px;
+    box-shadow:var(--shadow); overflow:hidden}
+  .sgroup .sgt{font-size:12.5px; color:var(--text3); font-weight:650; padding:14px 16px 0;
+    letter-spacing:.3px}
+  .srow{display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer}
+  .srow + .srow{border-top:1px solid var(--line)}
+  .srow .sl{flex:1; font-size:15px}
+  .srow .sv{font-size:13.5px; color:var(--text3)}
+  .srow .ico{width:16px; height:16px; color:var(--text3)}
+  .srow.danger .sl{color:var(--red)}
+  .seg-inline{display:flex; gap:2px; background:var(--card2); border-radius:9px; padding:2px}
+  .seg-inline button{border:0; background:transparent; font-family:inherit; font-size:12.5px;
+    color:var(--text2); padding:6px 10px; border-radius:7px; cursor:pointer; font-weight:600}
+  .seg-inline button.on{background:var(--card); color:var(--text);
+    box-shadow:0 1px 2px rgba(16,24,40,.1)}
+  .proto-note{font-size:12.5px; color:var(--text3); line-height:1.6; padding:6px 6px 20px}
+
+  /* ---------- 底部标签栏 ---------- */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    max-width:430px; margin:0 auto;
+    display:flex; padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+    background:color-mix(in srgb, var(--card) 92%, transparent);
+    backdrop-filter:saturate(180%) blur(18px);
+    -webkit-backdrop-filter:saturate(180%) blur(18px);
+    border-top:1px solid var(--line);
+  }
+  .tabbar.hidden{display:none}
+  .tab{
+    flex:1; border:0; background:transparent; font-family:inherit; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:7px 0 6px; color:var(--text3); font-size:10.5px; font-weight:600;
+    text-decoration:none; transition:color .18s;
+  }
+  .tab .ico{width:23px; height:23px; stroke-width:1.7}
+  .tab.on{color:var(--text)}
+  .tab.on .ico{stroke-width:2.1}
+  .tab[data-act="home"].on{color:var(--blue)}
+  .tab[data-act="plan"].on{color:var(--blue)}
+  .tab[data-act="schedule"].on{color:var(--teal)}
+  .tab[data-act="fun"].on{color:var(--purple)}
+  .tab[data-act="memo"].on{color:var(--amber)}
+
+  /* ---------- FAB ---------- */
+  .fab{
+    position:fixed; z-index:35; right:max(18px, calc(50vw - 215px + 18px));
+    bottom:calc(76px + env(safe-area-inset-bottom));
+    width:54px; height:54px; border-radius:18px; border:0; cursor:pointer;
+    background:var(--text); color:var(--bg); display:grid; place-items:center;
+    box-shadow:0 10px 24px -8px rgba(16,24,40,.45);
+    transition:transform .12s;
+  }
+  .fab:active{transform:scale(.93)}
+  .fab.hidden{display:none}
+  .fab .ico{width:24px; height:24px; stroke-width:2.2}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 图标 -->
+  <svg style="display:none" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.4l2.6 2.6L16 9.6"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8.6" r="3.2"/><path d="M3.6 19.6c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><path d="M16 5.8a3.2 3.2 0 0 1 0 6.2M17.4 15c2 .7 3.4 2.4 3.4 4.6"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-game" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="10.5" rx="5"/><path d="M8 10.4v3.4M6.3 12.1h3.4"/><circle cx="16.2" cy="11.4" r=".9" fill="currentColor" stroke="none"/><circle cx="17.9" cy="13.4" r=".9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5v4h4M9 13h6M9 16.5h4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 7.5h9M17.5 7.5H20M4 16.5h4M12 16.5h8"/><circle cx="14.8" cy="7.5" r="2.2"/><circle cx="9" cy="16.5" r="2.2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9.5 12 15.5 18 9.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.8"/><path d="M16.2 16.2 20.5 20.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9.5 3.5h5l-.8 4.7 2.8 2.8h-4v8.5h-2v-8.5h-4l2.8-2.8z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.4l4.4 4.4L19 7.2"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+  </svg>
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <button class="icon-btn hidden" id="btnBack" aria-label="返回"><svg class="ico"><use href="#i-back"/></svg></button>
+    <div class="titles">
+      <h1 id="pageTitle">景臣</h1>
+      <div class="sub" id="pageSub"></div>
+    </div>
+    <button class="icon-btn hidden" id="btnGear" aria-label="设置"><svg class="ico"><use href="#i-gear"/></svg></button>
+    <button class="icon-btn hidden" id="btnStu" aria-label="学生"><svg class="ico"><use href="#i-people"/></svg></button>
+    <button class="icon-btn hidden" id="btnSearch" aria-label="搜索"><svg class="ico"><use href="#i-search"/></svg></button>
+    <button class="icon-btn hidden" id="btnPlus" aria-label="新增"><svg class="ico"><use href="#i-plus"/></svg></button>
+  </header>
+
+  <main id="views">
+
+    <!-- ============ 首页 ============ -->
+    <section class="page" id="p-home">
+      <div class="hero">
+        <div class="date">10月24日 周六</div>
+        <div class="sum">今天还有 <b>4 件事</b>没做完，晚上 8 点去趟超市</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg class="ico" style="color:var(--blue)"><use href="#i-plan"/></svg>今日计划
+          </div>
+          <div class="card-meta"><span class="frac">4/8</span><svg class="ico"><use href="#i-right"/></svg></div>
+        </div>
+        <ul class="mini-list">
+          <li><span class="cbox"></span><span class="when">09:00</span><span class="t">备下午的课</span></li>
+          <li><span class="cbox"></span><span class="when">14:00</span><span class="t">联系家长</span></li>
+          <li><span class="cbox"></span><span class="when">20:00</span><span class="t">去超市买电池</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg class="ico" style="color:var(--amber)"><use href="#i-note"/></svg>快速备忘
+          </div>
+          <div class="card-meta"><svg class="ico"><use href="#i-right"/></svg></div>
+        </div>
+        <div class="note-line"><span class="t">买电池（遥控器那种 5 号）</span><span class="when">10 分钟前</span></div>
+        <div class="note-line"><span class="t">问一下周四小班调课</span><span class="when">1 小时前</span></div>
+        <div class="quick-add">
+          <input id="homeQuick" placeholder="记点什么…" />
+          <button class="go" aria-label="保存"><svg class="ico" style="width:18px;height:18px"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg class="ico" style="color:var(--purple)"><use href="#i-game"/></svg>游戏娱乐
+          </div>
+          <div class="card-meta"><svg class="ico"><use href="#i-right"/></svg></div>
+        </div>
+        <div class="fun-row"><span class="badge red">还剩 1 天</span><span class="t">明日方舟 · 危机合约</span></div>
+        <div class="fun-row"><span class="badge amber">今天更新</span><span class="t">葬送的芙莉莲 · 第 8 集</span></div>
+        <div class="fun-row"><span class="badge purple">体验</span><span class="t">通关《星露谷物语》的第一百二十小时</span></div>
+      </div>
+    </section>
+
+    <!-- ============ 今日计划 ============ -->
+    <section class="page" id="p-plan">
+      <div class="datebar">
+        <button class="icon-btn" aria-label="前一天"><svg class="ico"><use href="#i-left"/></svg></button>
+        <div class="mid">10月24日 周六</div>
+        <button class="icon-btn" aria-label="后一天"><svg class="ico"><use href="#i-right"/></svg></button>
+        <button class="today">今天</button>
+      </div>
+
+      <div class="sec-title">待安排</div>
+      <div class="card" style="padding:2px 14px">
+        <div class="titem">
+          <span class="cbox" style="margin-top:2px"></span>
+          <div class="body"><div class="t">交季度总结</div><div class="d">截止今天 18:00</div></div>
+        </div>
+        <div class="titem">
+          <span class="cbox" style="margin-top:2px"></span>
+          <div class="body"><div class="t">读完《给教师的建议》20 页</div></div>
+        </div>
+      </div>
+
+      <div class="sec-title">时间轴</div>
+      <div class="card" style="padding:2px 14px">
+        <div class="titem">
+          <div class="time">09:00</div>
+          <div class="body"><div class="t">备下午的课</div><div class="d">小班 · 二次函数</div></div>
+          <span class="cbox" style="margin-top:1px"></span>
+        </div>
+        <div class="titem">
+          <div class="time">14:00</div>
+          <div class="body"><div class="t">联系家长</div><div class="d">韩梅梅这周请假</div></div>
+          <span class="cbox" style="margin-top:1px"></span>
+        </div>
+        <div class="titem done">
+          <div class="time">20:00</div>
+          <div class="body"><div class="t">去超市买电池</div><div class="d">5 号电池</div></div>
+          <span class="cbox done" style="margin-top:1px"></span>
+        </div>
+      </div>
+
+      <div class="donegroup" id="doneGroup">
+        <div class="h" onclick="document.getElementById('doneGroup').classList.toggle('open')">
+          <span>已完成 · 4 项</span><svg class="ico"><use href="#i-down"/></svg>
+        </div>
+        <div class="list">
+          <div class="card" style="padding:2px 14px">
+            <div class="titem done"><div class="time">07:30</div><div class="body"><div class="t">起床、洗漱</div></div><span class="cbox done"></span></div>
+            <div class="titem done"><div class="time">08:00</div><div class="body"><div class="t">吃早饭</div></div><span class="cbox done"></span></div>
+            <div class="titem done"><div class="time">10:30</div><div class="body"><div class="t">改昨天学生的作业</div></div><span class="cbox done"></span></div>
+            <div class="titem done"><div class="time">12:00</div><div class="body"><div class="t">午饭</div></div><span class="cbox done"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 教培课表 ============ -->
+    <section class="page" id="p-schedule">
+      <div class="week-head">
+        <button class="icon-btn" aria-label="上周"><svg class="ico"><use href="#i-left"/></svg></button>
+        <div class="range">10/19 – 10/25</div>
+        <button class="icon-btn" aria-label="下周"><svg class="ico"><use href="#i-right"/></svg></button>
+        <a class="linkbtn" href="#/students">学生<svg class="ico"><use href="#i-right"/></svg></a>
+      </div>
+
+      <div class="daygroup">
+        <div class="dhead"><span class="dn">周一</span><span class="dd">10/19</span></div>
+        <a class="lesson onetoone" href="#/lesson">
+          <span class="lbar"></span>
+          <div class="lmain">
+            <div class="ltop"><span class="ltime">19:00–20:30</span><span class="type">一对一</span></div>
+            <div class="lname">王小明</div>
+            <div class="lsub">二次函数 · 已上</div>
+          </div>
+          <span class="dot done"></span>
+        </a>
+      </div>
+
+      <div class="daygroup">
+        <div class="dhead"><span class="dn">周三</span><span class="dd">10/21</span></div>
+        <a class="lesson small" href="#/lesson">
+          <span class="lbar"></span>
+          <div class="lmain">
+            <div class="ltop"><span class="ltime">16:00–17:30</span><span class="type">小班</span></div>
+            <div class="lname">李雷、韩梅梅</div>
+            <div class="lsub">韩梅梅请假 · 其余已上</div>
+          </div>
+          <span class="dot leave"></span>
+        </a>
+      </div>
+
+      <div class="daygroup">
+        <div class="dhead"><span class="dn">周六</span><span class="dd">10/24</span><span class="tn">今天</span></div>
+
+        <a class="lesson onetoone" href="#/lesson">
+          <span class="lbar"></span>
+          <div class="lmain">
+            <div class="ltop"><span class="ltime">09:00–10:30</span><span class="type">一对一</span></div>
+            <div class="lname">王小明</div>
+            <div class="lsub">待上 · 上次讲完顶点式</div>
+          </div>
+          <span class="dot"></span>
+        </a>
+
+        <a class="lesson small" href="#/lesson">
+          <span class="lbar"></span>
+          <div class="lmain">
+            <div class="ltop"><span class="ltime">14:00–15:30</span><span class="type">小班</span></div>
+            <div class="lname">李雷、韩梅梅、张三</div>
+            <div class="lsub">待上 · 3 人</div>
+          </div>
+          <span class="dot"></span>
+        </a>
+      </div>
+
+      <div class="daygroup">
+        <div class="dhead"><span class="dn">周日</span><span class="dd">10/25</span></div>
+        <div class="none">没有课</div>
+      </div>
+    </section>
+
+    <!-- ============ 课次详情 ============ -->
+    <section class="page" id="p-lesson">
+      <div class="dhead-big">
+        <div class="d1">10月24日 · 09:00–10:30</div>
+        <div class="d2">
+          <span class="badge teal">一对一</span>
+          <span class="selectish">未上<svg class="ico"><use href="#i-down"/></svg></span>
+          <span class="selectish">改时间<svg class="ico"><use href="#i-right"/></svg></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>学生</label>
+        <div class="card" style="padding:14px">
+          <div class="sturow">
+            <span class="stuname">王小明</span>
+            <span class="muted" style="font-size:12.5px">已上 12 节</span>
+          </div>
+          <div style="margin-top:12px">
+            <div class="tagset">
+              <span class="tag on">很好</span>
+              <span class="tag">正常</span>
+              <span class="tag warn">需加强</span>
+              <span class="tag">待观察</span>
+            </div>
+          </div>
+          <textarea class="textarea" style="margin-top:12px;min-height:64px;background:var(--card2);border-color:transparent"
+            placeholder="这个学生今天的状态，想记就记…">函数概念清楚多了，配方法自己就能推下来，速度有点慢。</textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>本节课主要内容</label>
+        <textarea class="textarea" placeholder="这节课讲了什么…">二次函数顶点式推导，配方法练了 8 道，重点讲了对称轴的判断。</textarea>
+      </div>
+
+      <div class="field">
+        <label>布置的作业</label>
+        <textarea class="textarea" style="min-height:64px" placeholder="留了什么作业…">练习册 P32–34，错的 3 道题重新做一遍，下次课先讲。</textarea>
+      </div>
+
+      <button class="bigbtn">标记已上课</button>
+      <button class="bigbtn ghost">这节课请假了</button>
+    </section>
+
+    <!-- ============ 学生列表 ============ -->
+    <section class="page" id="p-students">
+      <div class="card" style="padding:6px 14px">
+        <a class="stu-item" href="#/student" style="text-decoration:none;color:inherit">
+          <span class="avatar">王</span><span class="t">王小明</span><span class="c">已上 12 节</span>
+          <svg class="ico" style="color:var(--text3);width:16px;height:16px"><use href="#i-right"/></svg>
+        </a>
+        <a class="stu-item" href="#/student" style="text-decoration:none;color:inherit">
+          <span class="avatar" style="background:rgba(122,90,240,.12);color:#6247C9">李</span>
+          <span class="t">李雷</span><span class="c">已上 8 节</span>
+          <svg class="ico" style="color:var(--text3);width:16px;height:16px"><use href="#i-right"/></svg>
+        </a>
+        <a class="stu-item" href="#/student" style="text-decoration:none;color:inherit">
+          <span class="avatar" style="background:rgba(232,160,32,.14);color:#A97211">韩</span>
+          <span class="t">韩梅梅</span><span class="c">已上 3 节</span>
+          <svg class="ico" style="color:var(--text3);width:16px;height:16px"><use href="#i-right"/></svg>
+        </a>
+        <a class="stu-item" href="#/student" style="text-decoration:none;color:inherit">
+          <span class="avatar" style="background:rgba(59,111,224,.12);color:#2F5BC4">张</span>
+          <span class="t">张三</span><span class="c">已上 1 节</span>
+          <svg class="ico" style="color:var(--text3);width:16px;height:16px"><use href="#i-right"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ 学生档案 ============ -->
+    <section class="page" id="p-student">
+      <div class="statrow">
+        <div class="stat"><div class="n">12</div><div class="l">累计课次</div></div>
+        <div class="stat"><div class="n">10/24</div><div class="l">最近一次</div></div>
+        <div class="stat"><div class="n">很好</div><div class="l">最近状态</div></div>
+      </div>
+
+      <a class="history" href="#/lesson" style="text-decoration:none;color:inherit;display:block">
+        <div class="h1"><span>10/24 周六</span><span class="sep">·</span><span>一对一</span>
+          <span class="badge teal" style="margin-left:auto">已上</span></div>
+        <div class="h2"><b>内容</b>二次函数顶点式推导，配方法 8 道，对称轴判断。</div>
+        <div class="h3"><b>作业</b>练习册 P32–34，错题重做</div>
+      </a>
+
+      <a class="history" href="#/lesson" style="text-decoration:none;color:inherit;display:block">
+        <div class="h1"><span>10/19 周一</span><span class="sep">·</span><span>一对一</span>
+          <span class="badge teal" style="margin-left:auto">已上</span></div>
+        <div class="h2"><b>内容</b>一次函数复习，图像平移，做了 6 道综合题。</div>
+        <div class="h3"><b>作业</b>卷子第 2 页</div>
+      </a>
+
+      <a class="history" href="#/lesson" style="text-decoration:none;color:inherit;display:block">
+        <div class="h1"><span>10/12 周日</span><span class="sep">·</span><span>一对一</span>
+          <span class="badge amber" style="margin-left:auto">请假</span></div>
+        <div class="h2"><b>内容</b>学生发烧请假，顺延到 10/14 补上。</div>
+      </a>
+    </section>
+
+    <!-- ============ 游戏娱乐 ============ -->
+    <section class="page" id="p-fun">
+      <div class="seg" id="funSeg">
+        <button class="on" data-p="lib">游戏库</button>
+        <button data-p="act">活动</button>
+        <button data-p="watch">追更</button>
+        <button data-p="exp">体验</button>
+      </div>
+
+      <!-- 游戏库 -->
+      <div class="fpanel" id="fp-lib">
+        <div class="grouph">在玩 <span class="cnt">2</span></div>
+        <div class="gcard">
+          <div class="gt"><span class="gn">明日方舟</span><span class="badge blue">手机</span></div>
+          <div class="gd"><span class="stars">★★★★★</span> · 主线 14 章，最近在练棘刺</div>
+          <div class="ga"><button class="minibtn primary">通关了</button><button class="minibtn">写体验</button></div>
+        </div>
+        <div class="gcard">
+          <div class="gt"><span class="gn">星露谷物语</span><span class="badge blue">PC</span></div>
+          <div class="gd"><span class="stars">★★★★★</span> · 第三年冬，刚修好温室</div>
+          <div class="ga"><button class="minibtn primary">通关了</button><button class="minibtn">写体验</button></div>
+        </div>
+
+        <div class="grouph">想玩 <span class="cnt">1</span></div>
+        <div class="gcard">
+          <div class="gt"><span class="gn">空洞骑士：丝之歌</span><span class="badge blue">PC</span></div>
+          <div class="gd"><span class="stars" style="color:var(--text3)">★★★★★</span> · 等打折，先记着</div>
+          <div class="ga"><button class="minibtn primary">开始玩</button><button class="minibtn">写体验</button></div>
+        </div>
+
+        <div class="grouph">已通关 <span class="cnt">1</span></div>
+        <div class="gcard">
+          <div class="gt"><span class="gn">塞尔达传说：王国之泪</span><span class="badge blue">Switch</span></div>
+          <div class="gd"><span class="stars">★★★★☆</span> · 主线 + 空岛全清，约 90 小时</div>
+        </div>
+      </div>
+
+      <!-- 活动 -->
+      <div class="fpanel" id="fp-act" style="display:none">
+        <div class="grouph">即将到期</div>
+        <div class="acard">
+          <div class="amain"><div class="an">危机合约 · 第 12 赛季</div><div class="ag">明日方舟</div></div>
+          <div class="countdown urgent">还剩 1 天</div>
+        </div>
+        <div class="acard">
+          <div class="amain"><div class="an">秋日签到活动</div><div class="ag">无期迷途</div></div>
+          <div class="countdown">还剩 3 天</div>
+        </div>
+
+        <div class="grouph">进行中</div>
+        <div class="acard">
+          <div class="amain"><div class="an">复刻：孤星</div><div class="ag">明日方舟 · 10/21 起</div></div>
+          <div class="countdown">还剩 9 天</div>
+        </div>
+        <div class="acard">
+          <div class="amain"><div class="an">万圣节限时副本</div><div class="ag">暖雪 · 每天可打 3 次</div></div>
+          <div class="countdown">还剩 6 天</div>
+        </div>
+
+        <div class="grouph">已结束</div>
+        <div class="acard">
+          <div class="amain"><div class="an">周年庆登录礼</div><div class="ag">明日方舟</div></div>
+          <div class="countdown over">已结束</div>
+        </div>
+      </div>
+
+      <!-- 追更 -->
+      <div class="fpanel" id="fp-watch" style="display:none">
+        <div class="card" style="padding:2px 14px">
+          <div class="trow">
+            <div class="tmain">
+              <div class="tn">葬送的芙莉莲 <span class="today-mark">今天</span></div>
+              <div class="td">每天 23:00 更新 · 看到第 8 集 / 共 28</div>
+            </div>
+            <button class="plusep">+1 集</button>
+          </div>
+          <div class="trow">
+            <div class="tmain">
+              <div class="tn">迷宫饭</div>
+              <div class="td">周四更新 · 看到第 19 集 / 共 24</div>
+            </div>
+            <button class="plusep">+1 集</button>
+          </div>
+          <div class="trow">
+            <div class="tmain">
+              <div class="tn">中国奇谭 第二季</div>
+              <div class="td">周日更新 · 看到第 3 集</div>
+            </div>
+            <button class="plusep">+1 集</button>
+          </div>
+        </div>
+        <div class="grouph">已看完</div>
+        <div class="trow">
+          <div class="tmain">
+            <div class="tn" style="color:var(--text3)">孤独摇滚</div>
+            <div class="td">12 集全部看完</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 体验 -->
+      <div class="fpanel" id="fp-exp" style="display:none">
+        <div class="ecard">
+          <div class="eh"><span class="en">星露谷物语</span><span class="badge purple">游戏</span></div>
+          <div class="eb">一百二十小时之后终于把温室修起来了。最好玩的不是赚钱，是每天早上去看一遍作物长没长。冬天种的那些东西，夏天才想起来忘收了。</div>
+          <div class="ef"><span class="stars">★★★★★</span><span>10月20日</span><span>·</span><span>已通关</span></div>
+        </div>
+        <div class="ecard">
+          <div class="eh"><span class="en">葬送的芙莉莲</span><span class="badge amber">番</span></div>
+          <div class="eb">第八集，勇者死后五十年那个镜头，一句话没说，比整季的台词都重。这种节奏现在很少见了。</div>
+          <div class="ef"><span class="stars">★★★★★</span><span>10月18日</span><span>·</span><span>看到第 8 集</span></div>
+        </div>
+        <div class="ecard">
+          <div class="eh"><span class="en">沙丘 2</span><span class="badge teal">电影</span></div>
+          <div class="eb">IMAX 看的，声音大得椅子在震。剧情其实很直，但那种压迫感值回票价。</div>
+          <div class="ef"><span class="stars">★★★★☆</span><span>10月11日</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 快速备忘 ============ -->
+    <section class="page" id="p-memo">
+      <div class="memo-entry">
+        <textarea class="textarea" placeholder="写点什么…记完就走，不用管格式"></textarea>
+        <button class="savebtn">存</button>
+      </div>
+
+      <div class="masonry">
+        <div class="note y">
+          <div class="nt">买电池（遥控器那种 5 号）</div>
+          <div class="nw"><span class="pinmark"></span>置顶 · 10 分钟前</div>
+        </div>
+        <div class="note b">
+          <div class="nt">问一下周四小班调课，韩梅梅家长说那天有事</div>
+          <div class="nw">1 小时前</div>
+        </div>
+        <div class="note g">
+          <div class="nt">备用钥匙在门口抽屉第二层</div>
+          <div class="nw">昨天 21:40</div>
+        </div>
+        <div class="note p">
+          <div class="nt">学生说想学导数，下学期可以提前备一下</div>
+          <div class="nw">周三 19:12</div>
+        </div>
+        <div class="note y">
+          <div class="nt">换季了，把厚被子拿出来晒</div>
+          <div class="nw">周三 08:30</div>
+        </div>
+        <div class="note b">
+          <div class="nt">网课平台账号密码记在手机备忘录里了……又忘了哪个</div>
+          <div class="nw">周一 16:05</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 数据与设置 ============ -->
+    <section class="page" id="p-settings">
+      <div class="statrow">
+        <div class="stat"><div class="n">12</div><div class="l">课次</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">学生</div></div>
+        <div class="stat"><div class="n">6</div><div class="l">便签</div></div>
+      </div>
+
+      <div class="sgroup">
+        <div class="sgt">备份</div>
+        <div class="srow"><span class="sl">导出备份文件</span><svg class="ico"><use href="#i-right"/></svg></div>
+        <div class="srow"><span class="sl">从文件导入</span><svg class="ico"><use href="#i-right"/></svg></div>
+      </div>
+
+      <div class="sgroup">
+        <div class="sgt">自动快照</div>
+        <div class="srow"><span class="sl">10月24日 08:12</span><span class="sv">恢复</span><svg class="ico"><use href="#i-right"/></svg></div>
+        <div class="srow"><span class="sl">10月23日 08:05</span><span class="sv">恢复</span><svg class="ico"><use href="#i-right"/></svg></div>
+        <div class="srow"><span class="sl">最近 7 天 · 全部</span><svg class="ico"><use href="#i-right"/></svg></div>
+      </div>
+
+      <div class="sgroup">
+        <div class="sgt">外观</div>
+        <div class="srow">
+          <span class="sl">主题</span>
+          <div class="seg-inline" id="themeSeg">
+            <button data-t="light" class="on">浅色</button>
+            <button data-t="dark">深色</button>
+            <button data-t="auto">跟随</button>
+          </div>
+        </div>
+        <div class="srow">
+          <span class="sl">一周从哪天开始</span>
+          <div class="seg-inline" id="weekSeg">
+            <button class="on">周一</button>
+            <button>周日</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sgroup">
+        <div class="srow danger"><span class="sl">清空所有数据</span><svg class="ico"><use href="#i-right"/></svg></div>
+      </div>
+
+      <div class="proto-note">
+        这是可点击原型 · v0.1 —— 界面和交互都能点，但数据不保存，关掉就回到初始状态。<br />
+        真机上使用：浏览器菜单 →「添加到主屏幕」。
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 底部标签栏 -->
+  <nav class="tabbar" id="tabbar">
+    <a class="tab on" data-act="home" href="#/home"><svg class="ico"><use href="#i-home"/></svg>首页</a>
+    <a class="tab" data-act="plan" href="#/plan"><svg class="ico"><use href="#i-plan"/></svg>计划</a>
+    <a class="tab" data-act="schedule" href="#/schedule"><svg class="ico"><use href="#i-cal"/></svg>课表</a>
+    <a class="tab" data-act="fun" href="#/fun"><svg class="ico"><use href="#i-game"/></svg>娱乐</a>
+    <a class="tab" data-act="memo" href="#/memo"><svg class="ico"><use href="#i-note"/></svg>备忘</a>
+  </nav>
+
+  <!-- 悬浮新增 -->
+  <button class="fab hidden" id="fab" aria-label="新增"><svg class="ico"><use href="#i-plus"/></svg></button>
+</div>
+
+<script>
+(function(){
+  var routes = {
+    home:     {title:'景臣', sub:'',                  main:true,  action:'gear'},
+    plan:     {title:'今日计划', sub:'',               main:true,  action:'plus'},
+    schedule: {title:'教培课表', sub:'',               main:true,  action:'students'},
+    fun:      {title:'游戏娱乐', sub:'',               main:true,  action:'plus'},
+    memo:     {title:'快速备忘', sub:'',               main:true,  action:'search'},
+    lesson:   {title:'课次详情', sub:'10月24日 09:00–10:30', back:true},
+    students: {title:'学生', sub:'4 人',                back:true},
+    student:  {title:'王小明', sub:'累计 12 节',         back:true},
+    settings: {title:'数据与设置', sub:'',              back:true}
+  };
+
+  var tabbar  = document.getElementById('tabbar');
+  var btnBack = document.getElementById('btnBack');
+  var fab     = document.getElementById('fab');
+  var btnGear = document.getElementById('btnGear');
+  var btnStu  = document.getElementById('btnStu');
+  var btnPlus = document.getElementById('btnPlus');
+  var btnSearch = document.getElementById('btnSearch');
+  var titleEl = document.getElementById('pageTitle');
+  var subEl   = document.getElementById('pageSub');
+
+  function currentId(){
+    var h = location.hash.replace(/^#\/?/, '');
+    return routes[h] ? h : 'home';
+  }
+
+  function render(){
+    var id = currentId(), r = routes[id];
+    document.querySelectorAll('.page').forEach(function(p){
+      p.classList.toggle('active', p.id === 'p-' + id);
+    });
+    titleEl.textContent = r.title || '';
+    subEl.textContent = r.sub || '';
+    subEl.style.display = r.sub ? '' : 'none';
+
+    // 顶栏按钮
+    btnBack.classList.toggle('hidden', !r.back);
+    btnGear.classList.toggle('hidden', r.action !== 'gear');
+    btnStu.classList.toggle('hidden', r.action !== 'students');
+    btnPlus.classList.toggle('hidden', r.action !== 'plus');
+    btnSearch.classList.toggle('hidden', r.action !== 'search');
+
+    // 底部导航 / FAB
+    tabbar.classList.toggle('hidden', !!r.back);
+    fab.classList.toggle('hidden', !(id === 'plan' || id === 'schedule' || id === 'fun'));
+    document.querySelectorAll('.tab').forEach(function(t){
+      t.classList.toggle('on', t.dataset.act === id);
+    });
+
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', render);
+  if (!location.hash) location.replace('#/home');
+  render();
+
+  btnBack.addEventListener('click', function(){
+    if (history.length > 1) history.back(); else location.hash = '#/home';
+  });
+
+  // 首页快速记一条
+  var qi = document.getElementById('homeQuick');
+  function quickSave(){
+    var v = qi.value.trim(); if (!v) { qi.focus(); return; }
+    var card = qi.closest('.card');
+    var line = document.createElement('div');
+    line.className = 'note-line';
+    line.innerHTML = '<span class="t"></span><span class="when">刚刚</span>';
+    line.querySelector('.t').textContent = v;
+    card.insertBefore(line, card.querySelector('.quick-add'));
+    qi.value = '';
+    qi.focus();
+  }
+  qi.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); quickSave(); } });
+  qi.nextElementSibling.addEventListener('click', quickSave);
+
+  // 娱乐分区切换
+  var seg = document.getElementById('funSeg');
+  seg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    seg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    ['lib','act','watch','exp'].forEach(function(k){
+      document.getElementById('fp-' + k).style.display = (k === b.dataset.p) ? '' : 'none';
+    });
+  });
+
+  // 主题
+  function setTheme(t){
+    var dark = t === 'dark' || (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#14161A' : '#F4F5F7');
+    document.querySelectorAll('#themeSeg button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.t === t);
+    });
+  }
+  document.getElementById('themeSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (b) setTheme(b.dataset.t);
+  });
+  document.getElementById('weekSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+  });
+
+  // 直接以深色打开：在地址后面加 ?theme=dark
+  if (location.search.indexOf('theme=dark') > -1) setTheme('dark');
+
+  // 视觉用的勾选
+  document.addEventListener('click', function(e){
+    var c = e.target.closest('.cbox');
+    if (c) { c.classList.toggle('done'); var row = c.closest('.titem,.row'); if (row) row.classList.toggle('done'); }
+    var tag = e.target.closest('.tag');
+    if (tag) { tag.parentNode.querySelectorAll('.tag').forEach(function(x){ x.classList.remove('on'); }); tag.classList.add('on'); }
+  });
+
+  // 备忘录存一条（视觉）
+  var saveBtn = document.querySelector('.memo-entry .savebtn');
+  if (saveBtn) saveBtn.addEventListener('click', function(){
+    var ta = document.querySelector('.memo-entry .textarea');
+    var v = ta.value.trim(); if (!v) return;
+    var n = document.createElement('div');
+    n.className = 'note y';
+    n.innerHTML = '<div class="nt"></div><div class="nw">刚刚</div>';
+    n.querySelector('.nt').textContent = v;
+    document.querySelector('.masonry').prepend(n);
+    ta.value = '';
+  });
+})();
+</script>
+</body>
+</html>

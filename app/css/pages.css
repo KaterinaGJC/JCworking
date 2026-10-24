@@ -1,0 +1,265 @@
+/* ---------- 首页 ---------- */
+.home-card{display:block; color:inherit}
+.hero{padding:6px 2px 18px}
+.hero .date{font-size:24px; font-weight:700; letter-spacing:-.4px}
+.hero .sum{margin-top:6px; font-size:14px; color:var(--text2)}
+.hero .sum b{color:var(--text); font-weight:600}
+.mini-list{margin:10px 0 0}
+.mini-list li{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
+.mini-list li .when{color:var(--text3); font-size:13px; width:46px; flex:0 0 auto;
+  font-variant-numeric:tabular-nums}
+.mini-list li .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.mini-list li .t.done{color:var(--text3); text-decoration:line-through}
+.note-line{display:flex; align-items:baseline; gap:10px; padding:7px 0; font-size:14.5px}
+.note-line .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.note-line .when{font-size:12px; color:var(--text3); flex:0 0 auto}
+.quick-add{display:flex; gap:8px; align-items:center; margin-top:8px;
+  background:var(--card2); border-radius:12px; padding:6px 6px 6px 14px}
+.quick-add input{
+  flex:1; border:0; background:transparent; font-size:15px; color:var(--text);
+  padding:8px 0; outline:none;
+}
+.quick-add input::placeholder{color:var(--text3)}
+.quick-add .go{
+  border:0; background:var(--blue); color:#fff; width:34px; height:34px;
+  border-radius:10px; display:grid; place-items:center; cursor:pointer; flex:0 0 auto;
+}
+.quick-add .go .ico{width:18px; height:18px}
+.fun-row{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
+.fun-row .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* ---------- 今日计划 ---------- */
+.datebar{display:flex; align-items:center; gap:4px; padding:2px 0 12px}
+.datebar .mid{flex:1; text-align:center; font-size:15px; font-weight:600;
+  font-variant-numeric:tabular-nums; background:transparent; border:0; cursor:pointer; color:inherit}
+.datebar .today{
+  font-size:12px; color:var(--blue); background:rgba(59,111,224,.1);
+  padding:6px 11px; border-radius:999px; font-weight:600; border:0; cursor:pointer;
+}
+.titem{display:flex; gap:12px; align-items:flex-start; padding:12px 0}
+.titem + .titem{border-top:1px solid var(--line)}
+.titem .time{
+  width:48px; flex:0 0 auto; font-size:13px; color:var(--text2); font-weight:600;
+  font-variant-numeric:tabular-nums; padding-top:2px;
+}
+.titem .body{flex:1; min-width:0; cursor:pointer}
+.titem .body .t{font-size:15.5px; font-weight:500; word-break:break-word}
+.titem .body .d{font-size:12.5px; color:var(--text3); margin-top:2px}
+.titem.done .body .t{color:var(--text3); text-decoration:line-through}
+.titem.dragging{opacity:.6}
+.titem.sortable{position:relative}
+.donegroup{margin-top:6px}
+.donegroup .h{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text3);
+  padding:10px 2px; cursor:pointer; background:transparent; border:0; width:100%; text-align:left}
+.donegroup .h .ico{width:16px; height:16px; transition:transform .2s}
+.donegroup.open .h .ico{transform:rotate(180deg)}
+.donegroup .list{display:none}
+.donegroup.open .list{display:block}
+
+/* 月历 */
+.calendar{padding:2px 2px 6px}
+.calendar .cbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.calendar .cbar .cm{font-size:15px; font-weight:650; font-variant-numeric:tabular-nums}
+.calendar .cgrid{display:grid; grid-template-columns:repeat(7,1fr); gap:2px}
+.calendar .cw{font-size:11.5px; color:var(--text3); text-align:center; padding:6px 0; font-weight:600}
+.calendar .cd{
+  border:0; background:transparent; border-radius:10px; padding:9px 0; font-size:13.5px;
+  cursor:pointer; color:var(--text); font-variant-numeric:tabular-nums; position:relative;
+}
+.calendar .cd.dim{color:var(--text3); opacity:.45}
+.calendar .cd.sel{background:var(--blue); color:#fff; font-weight:700}
+.calendar .cd.today-mark::after{
+  content:""; position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%; background:var(--blue);
+}
+.calendar .cd.sel.today-mark::after{background:#fff}
+
+/* ---------- 教培课表 ---------- */
+.week-head{display:flex; align-items:center; gap:4px; padding:2px 0 14px}
+.week-head .range{flex:1; text-align:center; font-size:14px; font-weight:600;
+  font-variant-numeric:tabular-nums; letter-spacing:.2px; background:transparent; border:0;
+  cursor:pointer; color:inherit}
+.linkbtn{border:0; background:transparent; color:var(--blue); font-size:13.5px;
+  font-weight:600; cursor:pointer; padding:6px 4px; display:flex; align-items:center; gap:1px}
+.linkbtn .ico{width:15px; height:15px}
+.daygroup{margin-bottom:16px}
+.daygroup .dhead{display:flex; align-items:baseline; gap:8px; margin:0 4px 8px}
+.daygroup .dhead .dn{font-size:14.5px; font-weight:650}
+.daygroup .dhead .dd{font-size:12.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+.daygroup .dhead .tn{font-size:11.5px; color:var(--blue); background:rgba(59,111,224,.1);
+  padding:2px 7px; border-radius:999px; font-weight:600}
+.daygroup .none{font-size:13.5px; color:var(--text3); padding:2px 4px 0}
+.lesson{
+  background:var(--card); border-radius:14px; padding:12px 14px; margin-bottom:8px;
+  box-shadow:var(--shadow); display:flex; gap:12px; align-items:center;
+  cursor:pointer; transition:transform .12s; color:inherit;
+}
+.lesson:active{transform:scale(.985)}
+.lesson .lbar{width:3px; align-self:stretch; border-radius:3px; background:var(--teal); flex:0 0 auto}
+.lesson.small .lbar{background:var(--purple)}
+.lesson .lmain{flex:1; min-width:0}
+.lesson .ltop{display:flex; align-items:center; gap:8px}
+.lesson .ltime{font-size:13.5px; font-weight:650; font-variant-numeric:tabular-nums;
+  color:var(--text2); letter-spacing:.2px}
+.lesson .type{font-size:11px; color:var(--text3); background:var(--card2);
+  padding:2px 6px; border-radius:6px}
+.lesson .lname{font-size:15.5px; font-weight:600; margin-top:4px; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+.lesson .lsub{font-size:12.5px; color:var(--text3); margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* ---------- 课次详情 ---------- */
+.dhead-big{padding:4px 2px 16px}
+.dhead-big .d1{font-size:20px; font-weight:700; letter-spacing:-.2px;
+  font-variant-numeric:tabular-nums}
+.dhead-big .d2{margin-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.selectish{
+  display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:600;
+  background:var(--card); border-radius:999px; padding:6px 12px; box-shadow:var(--shadow);
+  cursor:pointer; color:var(--text); border:0;
+}
+.selectish .ico{width:14px; height:14px; color:var(--text3)}
+.sturow{display:flex; gap:10px; align-items:center}
+.sturow + .sturow{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+.stuname{font-size:15.5px; font-weight:600; flex:1; min-width:0}
+.member-block{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+.member-block:first-of-type{margin-top:0; padding-top:0; border-top:0}
+
+/* ---------- 学生 ---------- */
+.statrow{display:flex; gap:10px; margin-bottom:14px}
+.stat{flex:1; background:var(--card); border-radius:14px; padding:12px; box-shadow:var(--shadow)}
+.stat .n{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.stat .l{font-size:12px; color:var(--text3); margin-top:2px}
+.stu-item{display:flex; align-items:center; gap:10px; padding:14px 2px; cursor:pointer; color:inherit}
+.stu-item + .stu-item{border-top:1px solid var(--line)}
+.avatar{width:38px; height:38px; border-radius:50%; background:rgba(31,157,139,.12);
+  color:#12796C; display:grid; place-items:center; font-weight:650; font-size:15px; flex:0 0 auto}
+.stu-item .t{flex:1; font-size:15.5px; font-weight:600}
+.stu-item .c{font-size:12.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+.history{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:10px;
+  box-shadow:var(--shadow); display:block; color:inherit}
+.history .h1{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2);
+  font-variant-numeric:tabular-nums; margin-bottom:8px}
+.history .h1 .sep{color:var(--text3)}
+.history .h2{font-size:14.5px; line-height:1.6; margin-bottom:6px; word-break:break-word}
+.history .h2 b{color:var(--text3); font-weight:600; font-size:12.5px; margin-right:6px}
+.history .h3{font-size:13px; color:var(--text2); line-height:1.55; word-break:break-word}
+.history .h3 b{color:var(--text3); font-weight:600; font-size:12.5px; margin-right:6px}
+
+/* ---------- 游戏娱乐 ---------- */
+.grouph{font-size:12.5px; color:var(--text3); font-weight:650; margin:14px 4px 8px;
+  display:flex; align-items:center; gap:6px; letter-spacing:.3px}
+.grouph .cnt{color:var(--text3); font-weight:500}
+.grouph:first-child{margin-top:0}
+.gcard{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:9px;
+  box-shadow:var(--shadow)}
+.gcard .gt{display:flex; align-items:center; gap:8px}
+.gcard .gn{font-size:15.5px; font-weight:650; flex:1; min-width:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+.stars{font-size:13px; color:var(--amber); letter-spacing:1px}
+.stars.off{color:var(--line-strong)}
+.gcard .gd{font-size:13px; color:var(--text2); margin-top:6px; line-height:1.55;
+  word-break:break-word}
+.gcard .ga{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+.acard{background:var(--card); border-radius:14px; padding:13px 14px; margin-bottom:9px;
+  box-shadow:var(--shadow); display:flex; gap:12px; align-items:flex-start}
+.acard .amain{flex:1; min-width:0}
+.acard .an{font-size:15px; font-weight:600; word-break:break-word}
+.acard .ag{font-size:12.5px; color:var(--text3); margin-top:3px}
+.countdown{font-size:12.5px; font-weight:700; color:var(--amber);
+  font-variant-numeric:tabular-nums; flex:0 0 auto; padding-top:1px; white-space:nowrap}
+.countdown.urgent{color:var(--red)}
+.countdown.over{color:var(--text3); font-weight:500}
+.trow{display:flex; align-items:center; gap:10px; padding:13px 2px}
+.trow + .trow{border-top:1px solid var(--line)}
+.trow .tmain{flex:1; min-width:0}
+.trow .tn{font-size:15px; font-weight:600; display:flex; align-items:center; gap:7px;
+  flex-wrap:wrap}
+.trow .td{font-size:12.5px; color:var(--text3); margin-top:3px}
+.plusep{border:0; background:var(--card2); color:var(--text); font-size:13px; font-weight:650;
+  border-radius:9px; padding:8px 12px; cursor:pointer; font-variant-numeric:tabular-nums;
+  flex:0 0 auto}
+.plusep:active{transform:scale(.95)}
+.today-mark{font-size:10.5px; color:#fff; background:var(--red); padding:2px 6px;
+  border-radius:5px; font-weight:650; letter-spacing:.2px}
+.ecard{background:var(--card); border-radius:14px; padding:14px; margin-bottom:10px;
+  box-shadow:var(--shadow); cursor:pointer}
+.ecard .eh{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+.ecard .en{font-size:16px; font-weight:650; flex:1; min-width:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap}
+.ecard .eb{font-size:14px; color:var(--text2); line-height:1.65;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  white-space:pre-wrap; word-break:break-word}
+.ecard .ef{font-size:12px; color:var(--text3); margin-top:10px;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+
+/* ---------- 快速备忘 ---------- */
+.memo-entry{display:flex; gap:8px; align-items:stretch; margin-bottom:16px}
+.memo-entry .textarea{flex:1; min-height:76px; background:var(--card)}
+.memo-entry .savebtn{
+  width:52px; border:0; border-radius:14px; background:var(--amber);
+  color:#4A3606; font-size:14px; font-weight:700; cursor:pointer; flex:0 0 auto;
+}
+.masonry{column-count:2; column-gap:10px}
+.note{
+  break-inside:avoid; margin:0 0 10px; padding:12px; border-radius:14px;
+  font-size:14px; line-height:1.55; position:relative; box-shadow:0 1px 2px rgba(16,24,40,.05);
+  cursor:pointer;
+}
+.note .nt{word-break:break-word; white-space:pre-wrap}
+.note .nw{font-size:11.5px; opacity:.55; margin-top:9px; display:flex;
+  align-items:center; gap:5px}
+.pinmark{width:5px; height:5px; border-radius:50%; background:currentColor;
+  display:inline-block; opacity:.8}
+.note.y{background:#FFF7DE; color:#5B4A16}
+.note.b{background:#E9F1FF; color:#22406E}
+.note.g{background:#E7F7EF; color:#1B4F3B}
+.note.p{background:#FBEBF3; color:#6B2A47}
+[data-theme="dark"] .note.y{background:#332C18; color:#EBDFB4}
+[data-theme="dark"] .note.b{background:#1D2A40; color:#BFCFEC}
+[data-theme="dark"] .note.g{background:#17302A; color:#B6E0CB}
+[data-theme="dark"] .note.p{background:#31202B; color:#EBC6D8}
+.colordots{display:flex; gap:10px; margin-top:4px}
+.colordot{width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer}
+.colordot.on{border-color:var(--text)}
+.colordot.y{background:#FFF0BE}
+.colordot.b{background:#D8E6FF}
+.colordot.g{background:#D5F2E4}
+.colordot.p{background:#F9DCEA}
+
+/* ---------- 设置 ---------- */
+.sgroup{background:var(--card); border-radius:14px; margin-bottom:12px;
+  box-shadow:var(--shadow); overflow:hidden}
+.sgroup .sgt{font-size:12.5px; color:var(--text3); font-weight:650; padding:14px 16px 0;
+  letter-spacing:.3px}
+.srow{display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer;
+  border:0; background:transparent; width:100%; text-align:left; color:inherit; font-size:15px}
+.srow + .srow{border-top:1px solid var(--line)}
+.srow .sl{flex:1; font-size:15px}
+.srow .sv{font-size:13.5px; color:var(--text3)}
+.srow .ico{width:16px; height:16px; color:var(--text3)}
+.srow.danger .sl{color:var(--red)}
+.seg-inline{display:flex; gap:2px; background:var(--card2); border-radius:9px; padding:2px}
+.seg-inline button{border:0; background:transparent; font-size:12.5px;
+  color:var(--text2); padding:6px 10px; border-radius:7px; cursor:pointer; font-weight:600}
+.seg-inline button.on{background:var(--card); color:var(--text);
+  box-shadow:0 1px 2px rgba(16,24,40,.1)}
+.proto-note{font-size:12.5px; color:var(--text3); line-height:1.7; padding:6px 6px 20px}
+.protolink{color:var(--blue)}
+
+/* 长文编辑（体验记录） */
+.fullscreen-editor{
+  position:fixed; inset:0; z-index:65; background:var(--bg); display:flex; flex-direction:column;
+  animation:fadein .16s ease;
+}
+.fullscreen-editor .fe-head{
+  display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top) + 12px) 16px 10px;
+  border-bottom:1px solid var(--line);
+}
+.fullscreen-editor .fe-head .grow{flex:1; font-size:16px; font-weight:650}
+.fullscreen-editor .fe-body{flex:1; padding:14px 16px; overflow-y:auto}
+.fullscreen-editor textarea{
+  width:100%; height:100%; min-height:50vh; border:0; background:transparent; outline:none;
+  font-size:16px; line-height:1.75; resize:none;
+}
