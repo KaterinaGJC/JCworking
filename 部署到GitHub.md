@@ -160,7 +160,7 @@ git push
 | `remote: Permission to … denied` / `403` | 登录的账号不是仓库所有者，或旧凭据残留 | 控制面板 → 凭据管理器 → Windows 凭据 → 删掉所有 `git:https://github.com` → 重新 `git push` |
 | `Authentication failed` | 用了账号密码（GitHub 早就不支持） | 改用 Token（见第 3 步下方） |
 | `! [rejected] main -> main (fetch first)` | 建仓库时勾了 README 之类，远端已有内容 | 先 `git pull --rebase origin main`，再 `git push` |
-| `fatal: not a git repository` | 当前不在项目目录 | 先执行 `cd /d F:\景臣的课表app` |
+| `fatal: not a git repository` | 当前不在项目目录 | 先执行 `cd "F:\景臣的课表app"` |
 | `src refspec main does not match any` | 还没提交 | 先执行 `git commit -m "..."` |
 | `remote: Support for password authentication was removed` | 同 Authentication failed | 用 Token 或让弹窗登录 |
 | 页面打开是 **404** | Pages 没构建完，或地址少了 `app/index.html` | 等 2 分钟；确认地址是 `…/仓库名/app/index.html` |
