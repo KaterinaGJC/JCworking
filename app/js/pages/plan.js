@@ -134,7 +134,7 @@ export async function render(root) {
           : `<div class="titem"><div class="body muted" style="font-size:13.5px">加了时间的事会排在这里</div></div>`}
       </div>
 
-      <div class="donegroup" id="doneGroup">
+      <div class="donegroup open" id="doneGroup">
         <button class="h" data-act="toggleDone">
           <span>已完成 · ${done.length} 项</span>
           <svg class="ico"><use href="#i-down"/></svg>
