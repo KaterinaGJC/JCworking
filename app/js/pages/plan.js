@@ -203,8 +203,11 @@ function bind(box, root, carry) {
     if (t) openEditor(root, t);
   });
 
-  // FAB
-  $('#fab').onclick = () => openEditor(root, null);
+  // FAB 与顶栏＋都用来新增
+  const addOne = () => openEditor(root, null);
+  $('#fab').onclick = addOne;
+  const plusBtn = $('#btnPlus');
+  if (plusBtn) plusBtn.onclick = addOne;
 
   enableDragSort(box, root);
 }

@@ -91,6 +91,9 @@ function updateChrome(id, mod) {
   const fab = $('#fab');
   fab.hidden = !(id === 'plan' || id === 'fun');
   fab.onclick = null;
+  // 顶栏那枚 ＋ 每次换页清空，由页面自己绑，避免上个页面的处理器残留
+  const plusBtn = $('#btnPlus');
+  if (plusBtn) plusBtn.onclick = null;
 }
 
 export async function renderRoute() {

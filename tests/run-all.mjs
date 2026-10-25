@@ -1,5 +1,12 @@
-// 一键跑全部测试：单元 + 每个里程碑 + 全量验收 + 子目录部署
+// 一键跑全部测试：单元 + 每个里程碑 + 全量验收 + 子目录部署 + v2 的逐项修复测试
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// v2 目录下每修一个问题就多一个测试文件，自动纳入全量运行
+const v2Files = fs.existsSync('tests/v2')
+  ? fs.readdirSync('tests/v2').filter((f) => f.endsWith('.test.mjs')).sort()
+  : [];
 
 const SUITES = [
   ['单元测试（日期/重复/摘要/备份）', ['--test', 'tests/unit/core.test.mjs']],
@@ -13,6 +20,7 @@ const SUITES = [
   ['M7 打磨与性能', ['tests/m7.test.mjs']],
   ['全量验收 A–I', ['tests/acceptance.test.mjs']],
   ['子目录部署（GitHub Pages 形态）', ['tests/subpath.test.mjs']],
+  ...v2Files.map((f) => [`v2 · ${path.basename(f, '.test.mjs')}`, [`tests/v2/${f}`]]),
 ];
 
 const results = [];

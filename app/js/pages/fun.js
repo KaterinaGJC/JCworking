@@ -159,13 +159,16 @@ function bind(box, root) {
     await render(root);
   });
 
-  // FAB：按分区新增
-  $('#fab').onclick = () => {
+  // FAB 与顶栏＋都按当前分区新增
+  const addOne = () => {
     if (tab === 'lib') openGameForm(root, null);
     else if (tab === 'act') openActivityForm(root, null);
     else if (tab === 'watch') openShowForm(root, null);
     else openExperienceEditor(root, null);
   };
+  $('#fab').onclick = addOne;
+  const plusBtn = $('#btnPlus');
+  if (plusBtn) plusBtn.onclick = addOne;
 
   box.addEventListener('click', async (ev) => {
     const t = ev.target;
