@@ -15,9 +15,8 @@ try {
   await page.waitFor(`document.querySelector('.home-body') !== null`);
   ok('首页不显示返回按钮', (await backVisible(page)) === false);
 
-  // 四个板块一级界面：都有返回按钮，点了都回首页
+  // 三个板块一级界面：都有返回按钮，点了都回首页
   const tabs = [
-    ['#/plan', '.plan-body', '今日计划'],
     ['#/schedule', '.schedule-body', '教培课表'],
     ['#/fun', '.fun-body', '游戏娱乐'],
     ['#/memo', '.memo-body', '快速备忘'],
@@ -57,9 +56,9 @@ try {
   // 手机返回键仍按浏览器历史走，不能被 App 的'回首页'逻辑劫持（保证正常切页不受影响）
   await goto(page, '#/fun');
   await page.waitFor(`document.querySelector('.fun-body') !== null`);
-  await goto(page, '#/plan');
-  await page.waitFor(`document.querySelector('.plan-body') !== null`);
-  eq('正常切页不会被劫持到首页', await page.eval(`location.hash`), '#/plan');
+  await goto(page, '#/schedule');
+  await page.waitFor(`document.querySelector('.schedule-body') !== null`);
+  eq('正常切页不会被劫持到首页', await page.eval(`location.hash`), '#/schedule');
 
   await page.eval(`history.back()`);
   await new Promise((r) => setTimeout(r, 600));

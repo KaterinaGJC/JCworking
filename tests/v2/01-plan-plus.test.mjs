@@ -7,29 +7,30 @@ try {
   await bootApp();
   const page = await freshPage();
 
-  await goto(page, '#/plan');
-  await page.waitFor(`document.querySelector('.plan-body') !== null`, { message: '计划页渲染' });
+  // v3 起「今日计划」并入首页，新增入口是计划卡头部的 ＋（不再是顶栏 ＋ / 悬浮按钮）
+  await goto(page, '#/home');
+  await page.waitFor(`document.querySelector('[data-card="plan"] .plan-body') !== null`,
+    { message: '首页计划区渲染' });
 
-  // 顶栏 ＋ 必须可见
-  ok('计划页顶栏 ＋ 可见', await page.eval(
-    `!document.querySelector('#btnPlus').classList.contains('hidden')`));
+  // 卡片头 ＋ 必须可见
+  ok('首页计划卡新增按钮可见', await page.eval(
+    `document.querySelector('[data-card="plan"] [data-plan-add]') !== null`));
 
   // 点它要能打开新增面板
-  await page.click('#btnPlus');
+  await page.click('[data-card="plan"] [data-plan-add]');
   const opened = await page.eval(`document.querySelector('#f-title') !== null`);
-  ok('点顶栏 ＋ 能打开新增面板', opened);
+  ok('点新增按钮能打开面板', opened);
 
   // 保存后应该出现在今天
   await page.type('#f-title', '顶栏加的事');
   await page.click('.sheet .row .btn[data-i="1"]');
   await new Promise((r) => setTimeout(r, 450));
-  ok('通过顶栏 ＋ 新建的条目出现在列表', await page.eval(
+  ok('通过新增按钮新建的条目出现在列表', await page.eval(
     `[...document.querySelectorAll('.titem .t')].some(e => e.textContent.includes('顶栏加的事'))`));
 
-  // 右下角悬浮按钮仍然可用
-  await page.click('#fab');
-  ok('悬浮按钮功能未受影响', await page.eval(`document.querySelector('#f-title') !== null`));
+  // 首页不该有全局悬浮新增按钮（新增走卡片头 ＋）
   await page.eval(`document.querySelector('.sheet-mask')?.remove()`);
+  ok('首页无全局悬浮按钮', await page.eval(`document.querySelector('#fab').hidden === true`));
 
   // 娱乐页的顶栏 ＋ 也要能用（同一类问题）
   await goto(page, '#/fun');

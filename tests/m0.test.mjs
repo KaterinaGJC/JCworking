@@ -7,14 +7,13 @@ try {
   const page = await freshPage();
 
   // --- 基本骨架 ---
-  ok('底部 5 个标签都在', (await page.eval(`document.querySelectorAll('#tabbar .tab').length`)) === 5);
+  ok('底部 4 个标签都在', (await page.eval(`document.querySelectorAll('#tabbar .tab').length`)) === 4);
   ok('首页已渲染', (await page.eval(`document.querySelector('#view .page') !== null`)));
   eq('首页标题', await page.eval(`document.querySelector('#pageTitle').textContent`), '景臣');
   ok('顶部设置按钮可见', (await page.eval(`!document.querySelector('#btnGear').classList.contains('hidden')`)));
 
-  // --- 五个标签可切换 ---
+  // --- 四个标签可切换 ---
   const tabs = [
-    ['plan', '今日计划'],
     ['schedule', '教培课表'],
     ['fun', '游戏娱乐'],
     ['memo', '快速备忘'],
@@ -70,9 +69,9 @@ try {
   await page.waitFor(`document.querySelector('#view .page') !== null`, { message: '离线后页面仍渲染' });
   ok('离线状态下首页可渲染', await page.eval(`document.querySelector('#pageTitle').textContent === '景臣'`));
   const offlineNav = await page.eval(`(async () => {
-    location.hash = '#/plan';
+    location.hash = '#/schedule';
     await new Promise(r => setTimeout(r, 300));
-    return document.querySelector('[data-page="plan"]') !== null;
+    return document.querySelector('[data-page="schedule"]') !== null;
   })()`);
   ok('离线状态下可切模块', offlineNav === true);
   await setOffline(page, false);

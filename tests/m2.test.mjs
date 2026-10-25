@@ -23,11 +23,12 @@ const taskTitles = (page) => page.eval(
   `[...document.querySelectorAll('.titem [data-open] .t')].map(e => e.textContent.trim())`,
 );
 
-/** 直接写库后强制重渲染：绕一圈回到计划页 */
+/** 直接写库后强制重渲染：绕一圈回到首页计划区 */
 const rerenderPlan = async (page) => {
+  await goto(page, '#/schedule');
   await goto(page, '#/home');
-  await goto(page, '#/plan');
-  await new Promise((r) => setTimeout(r, 300));
+  await page.waitFor(`document.querySelector('.plan-body') !== null`, { message: '计划区渲染' });
+  await new Promise((r) => setTimeout(r, 200));
 };
 
 try {
@@ -40,7 +41,7 @@ try {
   ok('空状态提示存在', await page.eval(`document.querySelector('.empty') !== null`));
 
   // --- 新增（无时间）---
-  await page.click('#fab');
+  await page.click('[data-card="plan"] [data-plan-add]');
   await page.waitFor(`document.querySelector('#f-title') !== null`, { message: '新增面板' });
   await page.type('#f-title', '交季度总结');
   await page.click('.sheet .row .btn[data-i="1"]');
@@ -49,7 +50,7 @@ try {
   ok('无时间待办进入「待安排」（D-01）', true);
 
   // --- 新增（有时间）---
-  await page.click('#fab');
+  await page.click('[data-card="plan"] [data-plan-add]');
   await page.waitFor(`document.querySelector('#f-title') !== null`);
   await page.type('#f-title', '联系家长');
   await page.type('#f-time', '14:00');

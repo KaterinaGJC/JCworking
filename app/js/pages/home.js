@@ -1,12 +1,11 @@
-// 首页总览：只读聚合（今日计划 / 快速备忘 / 游戏娱乐）。不展示教培课表。
+// 首页总览：今日计划（完整管理区）+ 快速备忘 + 游戏娱乐。不展示教培课表。
+// v3 起底部「计划」标签已删除，今日计划只在这里存在，由 plan.js 以组件形式渲染进卡片。
 import * as store from '../store.js';
 import { buildSummary } from '../core/summary.js';
-import {
-  $, esc, uid, todayStr, fmtFullCN, addDays, diffDays, weekdayIndex1, relativeCN,
-} from '../util.js';
+import { $, esc, uid, todayStr, fmtFullCN, diffDays, weekdayIndex1, relativeCN } from '../util.js';
 import { toast } from '../ui.js';
 import { tipHtml } from '../tips.js';
-import { checkCarryover, carryToToday } from './plan.js';
+import { renderPlan, resetPlan, openTaskEditor } from './plan.js';
 
 function todayTasks() {
   const today = todayStr();
@@ -48,21 +47,12 @@ export async function render(root, ctx = {}) {
     (a, b) => (b.updatedAt ?? b.createdAt ?? 0) - (a.updatedAt ?? a.createdAt ?? 0),
   );
 
-  const carry = await checkCarryover();
-
   const summary = buildSummary({
     pendingTasks: pending.length,
     dueToday: todayDue.length,
     dueTomorrow: tomorrowDue.length,
     showsToday: shows.length,
   });
-
-  const topThree = pending.slice().sort((a, b) => {
-    if (a.time && b.time) return a.time < b.time ? -1 : 1;
-    if (a.time && !b.time) return -1;
-    if (!a.time && b.time) return 1;
-    return (a.sort ?? 0) - (b.sort ?? 0);
-  }).slice(0, 3);
 
   const box = document.createElement('div');
   box.className = 'home-body';
@@ -74,32 +64,19 @@ export async function render(root, ctx = {}) {
 
     ${await tipHtml('home')}
 
-    ${carry.length ? `<div class="tipcard">
-      <button class="x" data-carry="dismiss" aria-label="关闭">×</button>
-      昨天有 <b>${carry.length} 项</b>没做完
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="btn primary" data-carry="move">转到今天</button>
-        <button class="btn" data-carry="dismiss">不用了</button>
-      </div>
-    </div>` : ''}
-
-    <a class="card home-card" href="#/plan" data-card="plan">
+    <div class="card" data-card="plan">
       <div class="card-head">
         <div class="card-title">
           <svg class="ico" style="color:var(--blue)"><use href="#i-plan"/></svg>今日计划
         </div>
-        <div class="card-meta"><span class="frac">${doneCount}/${tasks.length}</span>
-          <svg class="ico"><use href="#i-right"/></svg></div>
+        <div class="card-meta">
+          <span class="frac">${doneCount}/${tasks.length}</span>
+          <button class="mini-add" data-plan-add aria-label="加一件事" title="加一件事">
+            <svg class="ico"><use href="#i-plus"/></svg></button>
+        </div>
       </div>
-      ${topThree.length ? `<ul class="mini-list">
-        ${topThree.map((t) => `<li>
-          <span class="cbox" data-home-toggle="${t.id}" role="checkbox" aria-checked="false"></span>
-          ${t.time ? `<span class="when">${esc(t.time)}</span>` : '<span class="when"></span>'}
-          <span class="t">${esc(t.title)}</span>
-        </li>`).join('')}
-      </ul>` : `<div class="muted" style="font-size:13.5px;padding:8px 0 4px">
-        ${tasks.length ? '今天的事都做完了' : '今天还没有安排'}</div>`}
-    </a>
+      <div class="plan-slot"></div>
+    </div>
 
     <div class="card" data-card="memo">
       <div class="card-head">
@@ -150,40 +127,35 @@ export async function render(root, ctx = {}) {
       })()}
     </a>
   `;
+  // 先把首页主体插进文档，再填充计划区：
+  // 首屏可见性优先，避免"整页等 IndexedDB 往返才出现"拖慢启动（I-01）
   root.replaceChildren(box);
-  bind(box, root, carry);
+  bind(box, root, ctx);
+
+  // 计划管理区渐进填充；失败只影响这一块，备忘/娱乐卡照常可用
+  const slot = $('.plan-slot', box);
+  if (slot) {
+    try {
+      await renderPlan(slot, { rerender: () => render(root, ctx) });
+    } catch (err) {
+      console.error('[home] 计划区渲染失败', err);
+      slot.innerHTML = `<div class="empty">计划区没能加载出来<br>
+        <button class="act" data-plan-retry>再试一次</button></div>`;
+      $('[data-plan-retry]', slot)?.addEventListener('click', () => render(root, ctx));
+    }
+  }
 }
 
-function bind(box, root, carry) {
+function bind(box, root, ctx) {
   $('#btnGear').onclick = () => { location.hash = '#/settings'; };
 
-  // 首页直接勾选（计划页同款数据）
-  box.addEventListener('click', async (ev) => {
-    const c = ev.target.closest('[data-home-toggle]');
-    if (c) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      const t = store.state.tasks.find((x) => x.id === c.dataset.homeToggle);
-      if (!t) return;
-      await store.saveRecord('tasks', { ...t, done: true, doneAt: Date.now() });
-      toast('做完了');
-      await render(root);
-      return;
-    }
-
-    const carryBtn = ev.target.closest('[data-carry]');
-    if (carryBtn) {
-      ev.preventDefault();
-      if (carryBtn.dataset.carry === 'move') {
-        const n = carry.length ? await carryToToday(carry) : 0;
-        toast(n ? `已把 ${n} 项转到今天` : '没有要转的');
-      } else {
-        toast('好的，不动它们');
-      }
-      await render(root);
-    }
+  // 卡片头的 ＋：就地新增一条计划（不占用全局悬浮按钮）
+  $('[data-plan-add]', box)?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    openTaskEditor();
   });
 
+  // 首页直接记便签
   const input = $('#homeQuick', box);
   const save = async () => {
     const content = input.value.trim();
@@ -192,14 +164,17 @@ function bind(box, root, carry) {
       id: uid(), content, color: 'y', pinned: false, createdAt: Date.now(),
     });
     toast('记下了');
-    await render(root);
+    await render(root, ctx);
   };
   input?.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') { ev.preventDefault(); save(); }
   });
   $('#homeQuickSave', box)?.addEventListener('click', save);
+}
 
-  void addDays;
+/** 重新进入首页：计划区回到今天、结转提示重新判定 */
+export function reset() {
+  resetPlan();
 }
 
 export function title() { return '景臣'; }

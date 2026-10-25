@@ -7,10 +7,10 @@ try {
   await bootApp();
   const page = await freshPage();
 
-  // ---------- 1. 计划页：打开新增面板后按返回，应关面板、留在计划页 ----------
+  // ---------- 1. 首页计划区：打开新增面板后按返回，应关面板、留在首页 ----------
   await goto(page, '#/plan');
   await page.waitFor(`document.querySelector('.plan-body') !== null`);
-  await page.click('#btnPlus');
+  await page.click('[data-card="plan"] [data-plan-add]');
   await page.waitFor(`document.querySelector('#f-title') !== null`, { message: '面板打开' });
 
   await page.eval(`history.back()`);

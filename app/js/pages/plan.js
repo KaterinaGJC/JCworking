@@ -1,14 +1,21 @@
 // 今日计划：待安排 + 时间轴 + 已完成；重复规则惰性生成；昨日结转
+// 注意：本模块不再是独立页面（v3 起底部「计划」标签已删除），
+//       它作为**组件**嵌进首页那张「今日计划」卡里，由 home.js 调用 renderPlan()。
+//       重渲染统一走 rerender()：有宿主提供的整页重绘就用它（首页摘要也要跟着变），
+//       否则只重绘计划区自己。
 import * as store from '../store.js';
 import { shouldGenerate, repeatLabel, normalizeRepeat } from '../core/repeat.js';
 import { $, $$, esc, uid, todayStr, fmtFullCN, addDays, monthMatrix } from '../util.js';
 import { sheet, confirmBox, toast, emptyState } from '../ui.js';
-import { tipHtml } from '../tips.js';
 
 let viewDate = null;
 let pendingCarry = null;
 let carryHandled = false;
 let suppressClickUntil = 0;
+
+/** 当前宿主容器与上下文（由 renderPlan 写入），供内部交互后重渲染用 */
+let curHost = null;
+let curCtx = null;
 
 const DAY_CN = ['', '一', '二', '三', '四', '五', '六', '日'];
 
@@ -83,7 +90,20 @@ function itemHtml(t, withTime) {
   </div>`;
 }
 
-export async function render(root) {
+/** 计划区改动后重绘：优先让宿主整页重绘（首页摘要/进度要跟着变） */
+async function rerender() {
+  if (curCtx?.rerender) { await curCtx.rerender(); return; }
+  if (curHost) await renderPlan(curHost, curCtx);
+}
+
+/**
+ * 把「今日计划」渲染进宿主容器。
+ * @param {HTMLElement} host 计划区的挂载点（首页卡片里的 .plan-slot）
+ * @param {object} ctx { rerender?: () => Promise<void>, onAdd?: () => void }
+ */
+export async function renderPlan(host, ctx = {}) {
+  curHost = host;
+  curCtx = ctx;
   if (!viewDate) viewDate = todayStr();
   await ensureGenerated(viewDate);
 
@@ -106,8 +126,6 @@ export async function render(root) {
       <button class="today" data-act="today">今天</button>
     </div>
 
-    ${await tipHtml('plan')}
-
     ${carry.length ? `<div class="tipcard">
       <button class="x" data-carry="dismiss" aria-label="关闭">×</button>
       昨天有 <b>${carry.length} 项</b>没做完
@@ -118,7 +136,7 @@ export async function render(root) {
     </div>` : ''}
 
     ${!all.length ? emptyState({
-      text: '这一天还没有安排',
+      text: viewDate === todayStr() ? '今天还没有安排' : '这一天还没有安排',
       actionLabel: '加一条',
       extra: '<div class="small" style="margin-top:6px">想先记下来也行，不用填时间</div>',
     }) : `
@@ -148,25 +166,30 @@ export async function render(root) {
       </div>
     `}
   `;
-  root.replaceChildren(box);
-  bind(box, root, carry);
+  host.replaceChildren(box);
+
+  // 卡片头上的进度数字（首页摘要之外的那一枚）跟着刷新
+  const frac = host.closest('[data-card="plan"]')?.querySelector('.frac');
+  if (frac) frac.textContent = `${done.length}/${all.length}`;
+
+  bind(box, carry);
 }
 
-function bind(box, root, carry) {
+function bind(box, carry) {
   // 日期切换 / 今天 / 月历 / 已完成折叠
   box.addEventListener('click', async (ev) => {
     const nav = ev.target.closest('[data-nav]');
     if (nav) {
       viewDate = addDays(viewDate, Number(nav.dataset.nav));
-      await render(root);
+      await rerender();
       return;
     }
     const act = ev.target.closest('[data-act]')?.dataset.act;
-    if (act === 'today') { viewDate = todayStr(); await render(root); return; }
-    if (act === 'calendar') { openCalendar(root); return; }
+    if (act === 'today') { viewDate = todayStr(); await rerender(); return; }
+    if (act === 'calendar') { openCalendar(); return; }
     if (act === 'toggleDone') { $('#doneGroup', box)?.classList.toggle('open'); return; }
     const emptyBtn = ev.target.closest('[data-empty-act]');
-    if (emptyBtn) openEditor(root, null);
+    if (emptyBtn) openEditor(null);
   });
 
   // 结转
@@ -180,7 +203,7 @@ function bind(box, root, carry) {
     } else {
       toast('好的，不动它们');
     }
-    await render(root);
+    await rerender();
   });
 
   // 勾选
@@ -191,7 +214,7 @@ function bind(box, root, carry) {
     const t = store.state.tasks.find((x) => x.id === c.dataset.toggle);
     if (!t) return;
     await store.saveRecord('tasks', { ...t, done: !t.done, doneAt: !t.done ? Date.now() : null });
-    await render(root);
+    await rerender();
   });
 
   // 打开编辑
@@ -200,19 +223,13 @@ function bind(box, root, carry) {
     const open = ev.target.closest('[data-open]');
     if (!open) return;
     const t = store.state.tasks.find((x) => x.id === open.dataset.open);
-    if (t) openEditor(root, t);
+    if (t) openEditor(t);
   });
 
-  // FAB 与顶栏＋都用来新增
-  const addOne = () => openEditor(root, null);
-  $('#fab').onclick = addOne;
-  const plusBtn = $('#btnPlus');
-  if (plusBtn) plusBtn.onclick = addOne;
-
-  enableDragSort(box, root);
+  enableDragSort(box);
 }
 
-function enableDragSort(box, root) {
+function enableDragSort(box) {
   const list = $('#noTimeList', box);
   if (!list) return;
   let dragEl = null;
@@ -253,7 +270,7 @@ function enableDragSort(box, root) {
     if (updates.length) {
       await store.saveMany('tasks', updates);
       toast('顺序已保存');
-      await render(root);
+      await rerender();
     }
   };
 
@@ -264,7 +281,7 @@ function enableDragSort(box, root) {
 }
 
 /* ---------------- 编辑面板 ---------------- */
-function openEditor(root, task) {
+function openEditor(task) {
   const isNew = !task;
   const draft = {
     repeat: normalizeRepeat(task?.repeat),
@@ -354,7 +371,7 @@ function openEditor(root, task) {
         };
         await store.saveRecord('tasks', rec);
         toast(isNew ? '加好了' : '已保存');
-        await render(root);
+        await rerender();
       };
 
       titleEl.addEventListener('keydown', (ev) => {
@@ -365,14 +382,14 @@ function openEditor(root, task) {
       if (del) {
         del.addEventListener('click', async () => {
           close();
-          await removeTask(root, task);
+          await removeTask(task);
         });
       }
     },
   });
 }
 
-async function removeTask(root, task) {
+async function removeTask(task) {
   const yes = await confirmBox({
     title: '删掉这一条？',
     desc: esc(task.title),
@@ -381,18 +398,18 @@ async function removeTask(root, task) {
   });
   if (!yes) return;
   await store.removeRecord('tasks', task.id);
-  await render(root);
+  await rerender();
   toast('已删除', {
     actionLabel: '撤销',
     onAction: async () => {
       await store.saveRecord('tasks', task);
-      await render(root);
+      await rerender();
     },
   });
 }
 
 /* ---------------- 月历 ---------------- */
-function openCalendar(root) {
+function openCalendar() {
   let cursor = viewDate.slice(0, 7);
 
   const draw = () => {
@@ -432,18 +449,21 @@ function openCalendar(root) {
         if (day?.dataset.day) {
           viewDate = day.dataset.day;
           handle.close();
-          await render(root);
+          await rerender();
         }
       });
     },
   });
 }
 
-export function reset() {
+/** 回到「今天」并清掉结转提示的已处理标记（重进首页时由宿主调用） */
+export function resetPlan() {
   viewDate = null;
   pendingCarry = null;
   carryHandled = false;
 }
 
-export function title() { return '今日计划'; }
-export function subtitle() { return ''; }
+/** 供首页卡片头的 ＋ 调用：就地新增/编辑一条计划（复用同一套面板与落库逻辑） */
+export function openTaskEditor(task = null) {
+  openEditor(task);
+}

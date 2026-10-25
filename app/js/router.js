@@ -3,7 +3,6 @@ import { hasOverlay, closeOverlayAndHistory } from './ui.js';
 
 export const ROUTES = {
   home:     { title: '景臣',     action: 'gear',     tab: 'home' },
-  plan:     { title: '今日计划', action: 'plus',     tab: 'plan' },
   schedule: { title: '教培课表', action: 'students', tab: 'schedule' },
   fun:      { title: '游戏娱乐', action: 'plus',     tab: 'fun' },
   memo:     { title: '快速备忘', action: 'search',   tab: 'memo' },
@@ -117,7 +116,7 @@ function updateChrome(id, mod) {
   document.title = title ? `${title} · 景臣的工作生活` : '景臣的工作生活';
 
   const fab = $('#fab');
-  fab.hidden = !(id === 'plan' || id === 'fun' || id === 'schedule');
+  fab.hidden = !(id === 'fun' || id === 'schedule');
   fab.onclick = null;
   fab.setAttribute('aria-label', id === 'schedule' ? '新加一节课' : '新增');
   // 顶栏那枚 ＋ 每次换页清空，由页面自己绑，避免上个页面的处理器残留

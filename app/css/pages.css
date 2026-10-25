@@ -29,6 +29,19 @@
 .fun-row{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
 .fun-row .t{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 
+/* 首页计划卡：卡片头的新增按钮 + 内嵌的计划管理区 */
+.mini-add{
+  border:0; background:var(--card2); color:var(--text2); width:28px; height:28px;
+  border-radius:9px; display:grid; place-items:center; cursor:pointer; flex:0 0 auto;
+  transition:transform .1s;
+}
+.mini-add:active{transform:scale(.92)}
+.mini-add .ico{width:16px; height:16px}
+.plan-slot{margin-top:2px}
+.plan-slot .datebar{padding:6px 0 10px}
+.plan-slot .sec-title{margin:14px 2px 6px}
+.plan-slot .card.tight{background:var(--card2); box-shadow:none}
+
 /* ---------- 今日计划 ---------- */
 .datebar{display:flex; align-items:center; gap:4px; padding:2px 0 12px}
 .datebar .mid{flex:1; text-align:center; font-size:15px; font-weight:600;

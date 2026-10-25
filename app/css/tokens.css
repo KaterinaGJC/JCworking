@@ -106,7 +106,7 @@ body.detail main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .tab .ico{width:23px; height:23px; stroke-width:1.7}
 .tab.on{color:var(--text)}
 .tab.on .ico{stroke-width:2.1}
-.tab[data-act="home"].on,.tab[data-act="plan"].on{color:var(--blue)}
+.tab[data-act="home"].on{color:var(--blue)}
 .tab[data-act="schedule"].on{color:var(--teal)}
 .tab[data-act="fun"].on{color:var(--purple)}
 .tab[data-act="memo"].on{color:var(--amber)}

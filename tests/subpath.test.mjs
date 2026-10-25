@@ -36,8 +36,8 @@ try {
   ok('SW 作用域落在子目录内', sw.scope.includes('/app/'), sw.scope);
   ok('SW 已接管页面', sw.controlled);
 
-  // 各页面模块的相对动态导入也要能加载
-  for (const [hash, sel] of [['#/plan', '.plan-body'], ['#/schedule', '.schedule-body'],
+  // 各页面模块的相对动态导入也要能加载（计划已并入首页，plan.js 由 home.js 动态引入）
+  for (const [hash, sel] of [['#/home', '.plan-body'], ['#/schedule', '.schedule-body'],
     ['#/fun', '.fun-body'], ['#/memo', '.memo-body'], ['#/settings', '.sgroup']]) {
     await page.eval(`location.hash = ${JSON.stringify(hash)}`);
     await page.waitFor(`document.querySelector(${JSON.stringify(sel)}) !== null`, { message: hash });

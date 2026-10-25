@@ -40,12 +40,14 @@ try {
   await goto(page, '#/plan');
   await new Promise((r) => setTimeout(r, 300));
   await goto(page, '#/home');
-  await page.waitFor(`document.querySelector('[data-card="plan"] .frac') !== null`);
+  // 等计划区真正填充完（.frac 是同步渲染的，等它会读到还没填充的 .titem）
+  await page.waitFor(`document.querySelector('[data-card="plan"] .plan-body') !== null`);
 
   const frac = await page.eval(`document.querySelector('[data-card="plan"] .frac').textContent`);
   eq('进度数字正确（C-02）', frac, '1/6');
-  eq('只列前 3 条未完成（C-02）', await page.eval(
-    `document.querySelectorAll('[data-card="plan"] .mini-list li').length`), 3);
+  // v3 起首页卡片就是完整的计划管理区，不再是"前 3 条预览"，当天待办应全部可见
+  eq('计划卡完整展示当天待办（C-02）', await page.eval(
+    `document.querySelectorAll('[data-card="plan"] .titem .cbox:not(.done)').length`), 5);
   ok('摘要写明未完成件数（C-02）', (await page.eval(
     `document.querySelector('#homeSummary').textContent`)).includes('5 件事'));
 
