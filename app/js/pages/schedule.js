@@ -380,6 +380,10 @@ export function openLessonForm(root, lesson, defaultDate, onSaved) {
   });
 }
 
+export function reset() {
+  viewAnchor = null;
+}
+
 export function title() { return '教培课表'; }
 
 export function subtitle() {

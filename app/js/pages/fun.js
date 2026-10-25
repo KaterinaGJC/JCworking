@@ -543,6 +543,10 @@ function openExperienceEditor(root, exp, preset = {}) {
   });
 }
 
+export function reset() {
+  tab = 'lib';
+}
+
 export function title() { return '游戏娱乐'; }
 export function subtitle() { return ''; }
 

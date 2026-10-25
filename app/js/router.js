@@ -126,11 +126,24 @@ function updateChrome(id, mod) {
 
 export async function renderRoute() {
   const { id, params } = parseHash();
+  const prev = currentId;
   currentId = id;
   currentParams = params;
   lastHash = location.hash || '#/home';
 
   const mod = await loadPage(id);
+
+  /**
+   * 「重新进入某个板块」时要回到该板块的初始一级界面：
+   * - 上一个页面是别的一级页面（底部标签切换）→ 重置
+   * - 上一个页面是它自己的详情页（返回）→ 保留，否则从课次返回会丢掉刚才看的周
+   */
+  const isTabRoot = !!ROUTES[id]?.tab;
+  const prevIsDetail = !!(prev && ROUTES[prev]?.back);
+  if (isTabRoot && prev && prev !== id && !prevIsDetail) {
+    try { mod.reset?.(); } catch (err) { console.warn('[router] reset', err); }
+  }
+
   try { mounted?.unmount?.(); } catch { /* ignore */ }
   mounted = null;
 
@@ -148,6 +161,19 @@ export async function renderRoute() {
 
 export function startRouter() {
   window.addEventListener('hashchange', () => { renderRoute().catch(onError); });
+
+  // 再次点击当前所在的标签：也回到该板块的初始界面
+  document.querySelectorAll('.tab').forEach((tabEl) => {
+    tabEl.addEventListener('click', async (ev) => {
+      if (!tabEl.classList.contains('on')) return;
+      ev.preventDefault();
+      const id = tabEl.dataset.act;
+      const mod = await loadPage(id);
+      try { mod.reset?.(); } catch { /* ignore */ }
+      await renderRoute();
+    });
+  });
+
   if (!location.hash) location.replace('#/home');
   return renderRoute();
 }

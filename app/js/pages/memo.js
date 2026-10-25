@@ -280,5 +280,10 @@ function enableSwipe(box, root) {
   });
 }
 
+export function reset() {
+  searchOn = false;
+  keyword = '';
+}
+
 export function title() { return '快速备忘'; }
 export function subtitle() { return ''; }

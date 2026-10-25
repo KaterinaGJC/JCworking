@@ -439,5 +439,11 @@ function openCalendar(root) {
   });
 }
 
+export function reset() {
+  viewDate = null;
+  pendingCarry = null;
+  carryHandled = false;
+}
+
 export function title() { return '今日计划'; }
 export function subtitle() { return ''; }
