@@ -24,7 +24,7 @@ try {
 
   await goto(page, '#/schedule');
   await page.waitFor(`document.querySelector('.schedule-body') !== null`, { message: '课表渲染' });
-  ok('周视图有 7 个日期分组', (await page.eval(`document.querySelectorAll('.daygroup').length`)) === 7);
+  ok('周视图有 7 个日期列（网格表头）', (await page.eval(`document.querySelectorAll('.tt-day').length`)) === 7);
 
   // --- E-01 新建一对一 ---
   await openNewLesson(page);
@@ -35,8 +35,8 @@ try {
   ok('周视图出现该学生（E-01）', await page.eval(
     `[...document.querySelectorAll('.lesson .lname')].some(e => e.textContent.includes('王小明'))`));
   eq('一对一卡片类型标注正确', await page.eval(
-    `[...document.querySelectorAll('.lesson')].find(l => l.textContent.includes('王小明')).querySelector('.type').textContent`),
-  '一对一');
+    `[...document.querySelectorAll('.lesson')].find(l => l.textContent.includes('王小明')).dataset.type`),
+  'one');
   ok('新课时状态点为未上（灰）', await page.eval(
     `!document.querySelector('.lesson .dot').classList.contains('done')`));
 
@@ -50,10 +50,10 @@ try {
 
   const smallCard = await page.eval(`(() => {
     const l = [...document.querySelectorAll('.lesson')].find(x => x.textContent.includes('李雷'));
-    return l ? { name: l.querySelector('.lname').textContent, type: l.querySelector('.type').textContent } : null;
+    return l ? { name: l.querySelector('.lname').textContent, type: l.dataset.type } : null;
   })()`);
   eq('小班卡片人数溢出显示 +1（E-02）', smallCard?.name, '李雷、韩梅梅 +1');
-  eq('小班类型标注正确（E-02）', smallCard?.type, '小班');
+  eq('小班类型标注正确（E-02）', smallCard?.type, 'small');
 
   // --- 打开小班课详情，检查每人一行 ---
   await page.eval(`[...document.querySelectorAll('.lesson')]

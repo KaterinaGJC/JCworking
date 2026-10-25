@@ -4,6 +4,7 @@ import { applyTheme, currentTheme } from '../theme.js';
 import { $, esc, todayStr, pad2 } from '../util.js';
 import { toast, confirmBox, sheet, promptBox } from '../ui.js';
 import { seedTestData } from '../dev.js';
+import { getSlots, makeSlot } from '../core/slots.js';
 
 export const VERSION = '1.0.0';
 
@@ -101,6 +102,13 @@ export async function render(root) {
       ${snapshotRows(snaps.slice(0, 3))}
       <button class="srow" data-act="allSnaps"><span class="sl">全部快照</span>
         <span class="sv">${snaps.length} 份</span>
+        <svg class="ico"><use href="#i-right"/></svg></button>
+    </div>
+
+    <div class="sgroup">
+      <div class="sgt">课表</div>
+      <button class="srow" data-act="slots"><span class="sl">课表时间段</span>
+        <span class="sv">${getSlots(store.state.settings).length} 节</span>
         <svg class="ico"><use href="#i-right"/></svg></button>
     </div>
 
@@ -238,6 +246,11 @@ export async function render(root) {
       return;
     }
 
+    if (act === 'slots') {
+      openSlotsEditor();
+      return;
+    }
+
     if (act === 'install') {
       sheet({
         title: '怎么添加到桌面',
@@ -281,6 +294,101 @@ export async function render(root) {
       await render(root);
       return;
     }
+  });
+}
+
+/* ---------------- 课表时间段管理 ---------------- */
+function openSlotsEditor() {
+  const slots = getSlots(store.state.settings).map((s) => ({ ...s }));
+
+  const persist = async () => {
+    await store.saveSettings({ timeSlots: slots.map((s) => ({ ...s })) });
+  };
+
+  const rowsHtml = () => slots.length
+    ? slots.map((s, i) => `<button class="srow" data-slot-edit="${i}">
+        <span class="sl">${esc(s.label)}</span>
+        <span class="sv">${esc(s.start)}–${esc(s.end)}</span>
+        <svg class="ico"><use href="#i-right"/></svg>
+      </button>`).join('')
+    : '<div class="empty" style="padding:18px 0">还没有时间段，点下面的「加一节」</div>';
+
+  sheet({
+    title: '课表时间段',
+    body: `<div class="sgroup" style="margin:0" id="slotList">${rowsHtml()}</div>
+      <div class="small muted" style="margin-top:10px;line-height:1.7">
+        点一节可以改名称和起止时间。改完立刻生效，已经排好的课不会丢。
+      </div>
+      <button class="btn" id="slotReset" style="width:100%;margin-top:12px">恢复默认的 8 节课</button>`,
+    actions: [
+      { label: '加一节', onClick: () => { slots.push(makeSlot(slots)); persist().then(() => openSlotsEditor()); } },
+      { label: '完成', kind: 'solid', onClick: (close) => close() },
+    ],
+    onMount: (el) => {
+      el.addEventListener('click', (ev) => {
+        const b = ev.target.closest('[data-slot-edit]');
+        if (!b) return;
+        openSlotForm(slots, Number(b.dataset.slotEdit), async () => {
+          await persist();
+          openSlotsEditor();
+        });
+      });
+      $('#slotReset', el).addEventListener('click', () => {
+        slots.splice(0, slots.length, ...getSlots({}));
+        persist().then(() => openSlotsEditor());
+      });
+    },
+  });
+}
+
+function openSlotForm(slots, index, onDone) {
+  const isNew = index < 0 || !slots[index];
+  const cur = isNew ? makeSlot(slots) : { ...slots[index] };
+  let saveFn = () => {};
+  sheet({
+    title: isNew ? '加一节' : '改这一节',
+    body: `
+      <div class="field"><label>名称</label>
+        <input class="input" id="s-label" value="${esc(cur.label)}" placeholder="例如 第1节 / 早读" /></div>
+      <div style="display:flex;gap:10px">
+        <div class="field" style="flex:1"><label>开始</label>
+          <input class="input" id="s-start" type="time" value="${esc(cur.start)}" /></div>
+        <div class="field" style="flex:1"><label>结束</label>
+          <input class="input" id="s-end" type="time" value="${esc(cur.end)}" /></div>
+      </div>
+      ${isNew ? '' : '<button class="btn danger" id="s-del" style="width:100%">删掉这一节</button>'}
+    `,
+    actions: [
+      { label: '取消', onClick: (close) => close() },
+      { label: '保存', kind: 'blue', onClick: (close) => { close(); saveFn(); } },
+    ],
+    onMount: (el, close) => {
+      const labelEl = $('#s-label', el);
+      labelEl.focus();
+      labelEl.setSelectionRange(labelEl.value.length, labelEl.value.length);
+
+      const collect = () => ({
+        id: cur.id,
+        label: labelEl.value.trim() || cur.label,
+        start: $('#s-start', el).value || cur.start,
+        end: $('#s-end', el).value || cur.end,
+      });
+
+      saveFn = async () => {
+        const next = collect();
+        if (isNew) slots.push(next);
+        else slots[index] = next;
+        toast(isNew ? '加好了' : '已保存');
+        await onDone();
+      };
+
+      $('#s-del', el)?.addEventListener('click', async () => {
+        close();
+        slots.splice(index, 1);
+        toast('这一节已删除');
+        await onDone();
+      });
+    },
   });
 }
 

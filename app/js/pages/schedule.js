@@ -1,6 +1,7 @@
-// 教培课表：周视图 + 新建课 + 重复课惰性生成
+// 教培课表：节次网格（像中学课表）+ 新建课 + 重复课惰性生成
 import * as store from '../store.js';
 import { shouldGenerate } from '../core/repeat.js';
+import { getSlots, slotForLesson, slotById, slotDuration } from '../core/slots.js';
 import {
   $, esc, uid, todayStr, addDays, startOfWeek, weekDates, fmtMD, weekdayCN,
   endTimeHM, uid as newId,
@@ -109,6 +110,31 @@ export async function render(root) {
 
   const range = `${fmtMD(dates[0])} – ${fmtMD(dates[6])}`;
   const today = todayStr();
+  const slots = getSlots(store.state.settings);
+  const lessonsOfDay = (d) => store.state.lessons.filter((l) => l.date === d);
+
+  // 网格：行 = 节次，列 = 星期；落不到任何节次的课单独列在下方
+  const gridRows = slots.map((slot) => {
+    const cells = dates.map((d) => {
+      const cellLessons = lessonsOfDay(d).filter((l) => slotForLesson(slots, l)?.id === slot.id);
+      if (cellLessons.length) {
+        return `<div class="tt-cell has-lesson" data-day="${d}" data-slot="${slot.id}">
+          ${cellLessons.map((l) => lessonCell(l)).join('')}
+          <button class="tt-add small" data-add-day="${d}" data-add-slot="${slot.id}"
+            aria-label="这一节再加一门课">＋</button>
+        </div>`;
+      }
+      return `<div class="tt-cell" data-day="${d}" data-slot="${slot.id}">
+        <button class="tt-add" data-add-day="${d}" data-add-slot="${slot.id}" aria-label="在这节课加一门课">＋</button>
+      </div>`;
+    }).join('');
+    return `<div class="tt-slot">
+        <b>${esc(slot.label)}</b>
+        <span>${esc(slot.start)}</span>
+      </div>${cells}`;
+  }).join('');
+
+  const unplaced = store.state.lessons.filter((l) => !slotForLesson(slots, l));
 
   const box = document.createElement('div');
   box.className = 'schedule-body';
@@ -120,37 +146,44 @@ export async function render(root) {
       <button class="linkbtn" data-act="students">学生<svg class="ico"><use href="#i-right"/></svg></button>
     </div>
     ${await tipHtml('schedule')}
-    ${dates.map((d) => {
-      const list = store.state.lessons
-        .filter((l) => l.date === d)
-        .sort((a, b) => (a.start < b.start ? -1 : 1));
-      const isToday = d === today;
-      return `<div class="daygroup">
-        <div class="dhead">
-          <span class="dn">${weekdayCN(d)}</span>
-          <span class="dd">${fmtMD(d)}</span>
-          ${isToday ? '<span class="tn">今天</span>' : ''}
-        </div>
-        ${list.length ? list.map((l) => `
-          <a class="lesson ${l.type === 'small' ? 'small' : 'one'}" href="#/lesson?id=${l.id}">
-            <span class="lbar"></span>
-            <div class="lmain">
-              <div class="ltop">
-                <span class="ltime">${esc(timeRange(l))}</span>
-                <span class="type">${l.type === 'small' ? '小班' : '一对一'}</span>
+    <div class="timetable-wrap">
+      <div class="timetable">
+        <div class="tt-corner"></div>
+        ${dates.map((d) => `<div class="tt-day${d === today ? ' today' : ''}" data-day="${d}">
+            <span class="d1">${weekdayCN(d)}</span>
+            <span class="d2">${fmtMD(d)}</span>
+          </div>`).join('')}
+        ${gridRows}
+      </div>
+    </div>
+
+    ${unplaced.length ? `<div class="grouph">其它时间 <span class="cnt">${unplaced.length}</span></div>
+      <div class="card tight">
+        ${unplaced.slice().sort((a, b) => (a.date + a.start < b.date + b.start ? -1 : 1))
+          .map((l) => `<a class="lesson ${l.type === 'small' ? 'small' : 'one'}" href="#/lesson?id=${l.id}">
+              <span class="lbar"></span>
+              <div class="lmain">
+                <div class="ltop"><span class="ltime">${esc(fmtMD(l.date))} ${esc(timeRange(l))}</span>
+                  <span class="type">${l.type === 'small' ? '小班' : '一对一'}</span></div>
+                <div class="lname">${esc(nameSummary(l))}</div>
+                <div class="lsub">${esc(STATUS[l.status]?.label || '未上')}</div>
               </div>
-              <div class="lname">${esc(nameSummary(l))}</div>
-              <div class="lsub">${esc(STATUS[l.status]?.label || '未上')}${
-                l.content ? ' · ' + esc(l.content.slice(0, 14)) : ''}</div>
-            </div>
-            <span class="dot ${STATUS[l.status]?.cls || ''}"></span>
-          </a>`).join('')
-        : '<div class="none">没有课</div>'}
-      </div>`;
-    }).join('')}
+              <span class="dot ${STATUS[l.status]?.cls || ''}"></span>
+            </a>`).join('')}
+      </div>` : ''}
   `;
   root.replaceChildren(box);
   bind(box, root);
+}
+
+/** 网格单元格里的紧凑卡片 */
+function lessonCell(l) {
+  const kind = l.type === 'small' ? 'small' : 'one';
+  return `<a class="lesson cell ${kind}" data-type="${kind}" href="#/lesson?id=${l.id}">
+    <span class="lname">${esc(nameSummary(l, 2))}</span>
+    <span class="lsub">${esc(STATUS[l.status]?.label || '未上')}</span>
+    <span class="dot ${STATUS[l.status]?.cls || ''}"></span>
+  </a>`;
 }
 
 function bind(box, root) {
@@ -173,6 +206,13 @@ function bind(box, root) {
 
   $('#fab').onclick = () => openLessonForm(root, null, viewDatesDefault());
   $('#btnStu').onclick = () => { location.hash = '#/students'; };
+
+  // 点网格里的空格子 → 直接新建该天该节次的课
+  box.addEventListener('click', (ev) => {
+    const add = ev.target.closest('[data-add-day]');
+    if (!add) return;
+    openLessonForm(root, null, add.dataset.addDay, null, add.dataset.addSlot);
+  });
 }
 
 function viewDatesDefault() {
@@ -207,13 +247,17 @@ function openWeekPicker(root) {
 }
 
 /* ---------- 新建 / 编辑课 ---------- */
-export function openLessonForm(root, lesson, defaultDate, onSaved) {
+export function openLessonForm(root, lesson, defaultDate, onSaved, defaultSlotId) {
   const isNew = !lesson;
+  const slots = getSlots(store.state.settings);
+  const currentSlot = lesson ? slotForLesson(slots, lesson) : slotById(slots, defaultSlotId) || slots[0];
   const draft = {
     type: lesson?.type ?? 'one',
     date: lesson?.date ?? defaultDate ?? todayStr(),
-    start: lesson?.start ?? '19:00',
-    duration: lesson?.duration ?? 90,
+    start: lesson?.start ?? currentSlot?.start ?? '19:00',
+    duration: lesson?.duration ?? (currentSlot ? slotDuration(currentSlot) : 90),
+    slotId: currentSlot?.id ?? null,
+    customTime: !!lesson && !slotForLesson(slots, lesson),
     place: lesson?.place ?? '',
     repeatType: lesson?.repeat?.type ?? 'none',
     weekdays: lesson?.repeat?.weekdays?.length
@@ -222,6 +266,11 @@ export function openLessonForm(root, lesson, defaultDate, onSaved) {
     names: lesson ? (lesson.members || []).map((m) => m.name) : [''],
     members: lesson?.members ?? null,
   };
+
+  const slotOptions = slots.map((s) =>
+    `<option value="${esc(s.id)}" ${draft.slotId === s.id && !draft.customTime ? 'selected' : ''}>${
+      esc(s.label)} ${esc(s.start)}–${esc(s.end)}</option>`).join('')
+    + `<option value="custom" ${draft.customTime ? 'selected' : ''}>自定义时间</option>`;
 
   const dayChips = ['一', '二', '三', '四', '五', '六', '日'].map((n, i) => {
     const w = i + 1;
@@ -257,14 +306,18 @@ export function openLessonForm(root, lesson, defaultDate, onSaved) {
       <div style="display:flex;gap:10px">
         <div class="field" style="flex:1.3"><label>日期</label>
           <input class="input" id="l-date" type="date" value="${esc(draft.date)}" /></div>
+        <div class="field" style="flex:1"><label>第几节</label>
+          <select class="input" id="l-slot">${slotOptions}</select></div>
+      </div>
+      <div style="display:flex;gap:10px;${draft.customTime ? '' : 'display:none'}" id="l-custom-row">
         <div class="field" style="flex:1"><label>开始</label>
           <input class="input" id="l-start" type="time" value="${esc(draft.start)}" /></div>
-      </div>
-      <div style="display:flex;gap:10px">
         <div class="field" style="flex:1"><label>时长（分钟）</label>
           <input class="input" id="l-duration" type="number" min="15" step="15" value="${draft.duration}" /></div>
-        <div class="field" style="flex:1"><label>地点（可不填）</label>
-          <input class="input" id="l-place" placeholder="教室" value="${esc(draft.place)}" /></div>
+      </div>
+      <div class="field">
+        <label>地点（可不填）</label>
+        <input class="input" id="l-place" placeholder="教室" value="${esc(draft.place)}" />
       </div>
       <div class="field">
         <label>重复</label>
@@ -282,6 +335,23 @@ export function openLessonForm(root, lesson, defaultDate, onSaved) {
     onMount: (el, close) => {
       const namesBox = $('#l-names', el);
       const readNames = () => [...el.querySelectorAll('[data-name]')].map((i) => i.value.trim());
+
+      // 节次选择：选「自定义时间」才显示开始/时长
+      const slotSelect = $('#l-slot', el);
+      const customRow = $('#l-custom-row', el);
+      slotSelect.addEventListener('change', () => {
+        const isCustom = slotSelect.value === 'custom';
+        customRow.style.display = isCustom ? '' : 'none';
+        draft.customTime = isCustom;
+        if (!isCustom) {
+          const slot = slotById(slots, slotSelect.value);
+          draft.slotId = slot?.id ?? null;
+          draft.start = slot?.start ?? draft.start;
+          draft.duration = slot ? slotDuration(slot) : draft.duration;
+        } else {
+          draft.slotId = null;
+        }
+      });
 
       $('#l-type', el).addEventListener('click', (ev) => {
         const b = ev.target.closest('[data-type]');
@@ -349,11 +419,13 @@ export function openLessonForm(root, lesson, defaultDate, onSaved) {
             attendance: prev?.attendance ?? 'todo',
           });
         }
+        const chosenSlot = draft.customTime ? null : slotById(slots, slotSelect.value);
         const rec = {
           id: lesson?.id ?? uid(),
           date,
-          start: $('#l-start', el).value || '19:00',
-          duration: Number($('#l-duration', el).value) || 90,
+          start: chosenSlot ? chosenSlot.start : ($('#l-start', el).value || '19:00'),
+          duration: chosenSlot ? slotDuration(chosenSlot) : (Number($('#l-duration', el).value) || 90),
+          slotId: chosenSlot ? chosenSlot.id : null,
           type: members.length > 1 ? 'small' : (draft.type === 'small' ? 'small' : 'one'),
           place: $('#l-place', el).value.trim(),
           status: lesson?.status ?? 'todo',

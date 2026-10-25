@@ -456,7 +456,7 @@ try {
   await goto(page, '#/schedule');
   await new Promise((r) => setTimeout(r, 400));
   ok('H-08 周起始日设置为周日生效', await page.eval(`(() => {
-    const d = document.querySelector('.daygroup .dn').textContent;
+    const d = document.querySelector('.tt-day .d1')?.textContent;
     return d === '周日';
   })()`));
 

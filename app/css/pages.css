@@ -108,6 +108,56 @@
 .lesson .lsub{font-size:12.5px; color:var(--text3); margin-top:2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
+/* ---------- 课表网格（像中学课表：行=节次，列=星期） ---------- */
+.timetable-wrap{
+  overflow-x:auto; overflow-y:hidden; margin:0 -16px; padding:0 16px 8px;
+  -webkit-overflow-scrolling:touch;
+}
+.timetable{
+  display:grid;
+  grid-template-columns:56px repeat(7, minmax(94px, 1fr));
+  gap:4px; min-width:max-content;
+}
+.tt-corner{position:sticky; left:0; z-index:3; background:var(--bg)}
+.tt-day{
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  padding:6px 0 8px; border-radius:10px; background:var(--card2);
+}
+.tt-day .d1{font-size:12.5px; font-weight:650; color:var(--text)}
+.tt-day .d2{font-size:11px; color:var(--text3); font-variant-numeric:tabular-nums}
+.tt-day.today{background:rgba(59,111,224,.12)}
+.tt-day.today .d1{color:var(--blue)}
+.tt-slot{
+  position:sticky; left:0; z-index:2; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; padding:4px 0; border-radius:9px;
+}
+.tt-slot b{font-size:11.5px; font-weight:650; color:var(--text2); white-space:nowrap}
+.tt-slot span{font-size:10.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+.tt-cell{
+  min-height:64px; border-radius:11px; background:var(--card2);
+  display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start;
+  gap:4px; padding:2px; position:relative;
+}
+.tt-cell.has-lesson{background:transparent}
+.tt-add{
+  width:100%; height:100%; min-height:64px; border:0; background:transparent;
+  color:var(--text3); font-size:17px; opacity:.35; cursor:pointer; border-radius:11px;
+}
+.tt-add:active{background:var(--line); opacity:.7}
+.tt-add.small{min-height:22px; height:22px; font-size:13px; opacity:.3}
+/* 网格里的课程卡片：竖排、紧凑 */
+.lesson.cell{
+  width:100%; min-height:64px; margin:0; padding:7px 8px; border-radius:11px;
+  flex-direction:column; align-items:flex-start; justify-content:center; gap:2px;
+  position:relative; overflow:hidden;
+}
+.lesson.cell .lname{font-size:12.5px; font-weight:650; margin:0; width:100%;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  white-space:normal; overflow:hidden; line-height:1.35}
+.lesson.cell .lsub{font-size:10.5px; margin:0}
+.lesson.cell .dot{position:absolute; top:6px; right:6px}
+
 /* ---------- 课次详情 ---------- */
 .dhead-big{padding:4px 2px 16px}
 .dhead-big .d1{font-size:20px; font-weight:700; letter-spacing:-.2px;
