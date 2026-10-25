@@ -63,12 +63,14 @@ export function replaceTo(id, params = {}) {
  * 返回的优先级：
  * 1) 有弹层 → 先收弹层（不退出页面）
  * 2) 详情页 → 回到它的上一级页面
- * 3) 其它 → 走浏览器历史
+ * 3) 各板块一级界面 → 回首页
+ * 4) 首页 → 走浏览器历史（退出应用）
  */
 export function back() {
   if (hasOverlay()) { closeOverlayAndHistory(); return Promise.resolve(); }
   const route = ROUTES[currentId];
   if (route?.parent) return replaceTo(route.parent);
+  if (route?.tab && route.tab !== 'home') return replaceTo('home');
   if (history.length > 1) history.back();
   else location.hash = '#/home';
   return Promise.resolve();
@@ -89,8 +91,10 @@ async function loadPage(id) {
 function updateChrome(id, mod) {
   const r = ROUTES[id];
   const isDetail = !!r.back;
+  // 一级界面（除首页）也给一个返回入口，点了直接回首页
+  const showBack = isDetail || (r.tab && r.tab !== 'home');
 
-  $('#btnBack').classList.toggle('hidden', !isDetail);
+  $('#btnBack').classList.toggle('hidden', !showBack);
   $('#btnGear').classList.toggle('hidden', r.action !== 'gear');
   $('#btnStu').classList.toggle('hidden', r.action !== 'students');
   $('#btnPlus').classList.toggle('hidden', r.action !== 'plus');

@@ -1,16 +1,16 @@
 import { initTheme, applyTheme } from './theme.js';
-import { startRouter, back, go } from './router.js';
+import { startRouter, back, go, currentHash } from './router.js';
 import { loadAll, state as storeState } from './store.js';
 import { maybeDailySnapshot } from './backup.js';
 import { $ } from './util.js';
 import { hasOverlay, closeTopOverlay } from './ui.js';
-import { currentHash } from './router.js';
 
 initTheme();
 
 $('#btnBack').addEventListener('click', () => back());
 
-// 手机上的实体/手势返回键：还有弹层时先收弹层，并把地址恢复回去（等于取消这次返回）
+// 手机上的实体/手势返回键：还有弹层时先收弹层，并把地址恢复回去（等于取消这次返回）。
+// 注意：不要在这里改判页面层级——hash 变化的时机不可靠，会把正常切页也当成"返回"。
 window.addEventListener('popstate', () => {
   if (!hasOverlay()) return;
   closeTopOverlay();
