@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -70,8 +70,16 @@ export async function launchBrowser({ port = 0 } = {}) {
       return connect(target.webSocketDebuggerUrl);
     },
     async close() {
-      try { child.kill(); } catch { /* ignore */ }
-      await new Promise((r) => setTimeout(r, 200));
+      // Windows 下无头 Chrome 会派生子进程，child.kill() 只结束主进程，
+      // 残留子进程会锁住 user-data-dir（表现为下一个套件 EBUSY）。这里杀整棵进程树。
+      try {
+        if (process.platform === 'win32' && child.pid != null) {
+          spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+        } else {
+          child.kill();
+        }
+      } catch { /* ignore */ }
+      await new Promise((r) => setTimeout(r, 300));
       try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch { /* ignore */ }
     },
   };
