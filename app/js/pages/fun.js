@@ -104,7 +104,7 @@ function watchRows() {
   const all = store.state.shows;
   if (!all.length) return emptyState({ text: '还没有在追的番', actionLabel: '加一部' });
   const todayW = weekdayIndex1(todayStr());
-  const finished = (s) => s.total && s.current >= s.total;
+  const finished = (s) => !!s.ended || (s.total && s.current >= s.total);
   const active = all.filter((s) => !finished(s)).sort((a, b) => {
     const da = a.weekday === todayW ? -1 : ((a.weekday - todayW + 7) % 7);
     const db = b.weekday === todayW ? -1 : ((b.weekday - todayW + 7) % 7);
@@ -118,16 +118,22 @@ function watchRows() {
           ${s.weekday === todayW && !finished(s) ? '<span class="today-mark">今天</span>' : ''}
         </div>
         <div class="td">${s.weekday ? `每周${WEEK_CN[s.weekday]}更新 · ` : ''}看到第 ${s.current || 0} 集${
-          s.total ? ` / 共 ${s.total}` : ''}</div>
+          s.total ? ` / 共 ${s.total}` : ''}${s.ended ? ' · 已手动标记完结' : ''}</div>
       </div>
       ${finished(s) ? '' : `<button class="plusep" data-plus="${s.id}">+1 集</button>`}
+      ${finished(s)
+        ? `<button class="btn" data-unend-show="${s.id}" style="padding:6px 8px;font-size:12px">恢复连载</button>`
+        : `<button class="btn" data-end-show="${s.id}" style="padding:6px 8px;font-size:12px">完结</button>`}
       <button class="btn" data-edit-show="${s.id}" style="padding:6px 8px;font-size:12px">改</button>
     </div>`;
 
   const html = [];
-  if (active.length) html.push(`<div class="card tight">${active.map(row).join('')}</div>`);
+  html.push(`<div class="grouph">正在连载 <span class="cnt">${active.length}</span></div>`);
+  html.push(active.length
+    ? `<div class="card tight">${active.map(row).join('')}</div>`
+    : '<div class="muted" style="font-size:13px;padding:2px 4px 6px">暂时没有在追的番</div>');
   if (doneList.length) {
-    html.push(`<div class="grouph">已看完 <span class="cnt">${doneList.length}</span></div>
+    html.push(`<div class="grouph">已完结 <span class="cnt">${doneList.length}</span></div>
       <div class="card tight">${doneList.map(row).join('')}</div>`);
   }
   return html.join('');
@@ -244,6 +250,28 @@ function bind(box, root) {
 
     const es = t.closest('[data-edit-show]');
     if (es) { openShowForm(root, store.state.shows.find((x) => x.id === es.dataset.editShow)); return; }
+
+    const endBtn = t.closest('[data-end-show]');
+    if (endBtn) {
+      const s = store.state.shows.find((x) => x.id === endBtn.dataset.endShow);
+      if (s) {
+        await store.saveRecord('shows', { ...s, ended: true });
+        toast('已标记完结');
+        await render(root);
+      }
+      return;
+    }
+
+    const unendBtn = t.closest('[data-unend-show]');
+    if (unendBtn) {
+      const s = store.state.shows.find((x) => x.id === unendBtn.dataset.unendShow);
+      if (s) {
+        await store.saveRecord('shows', { ...s, ended: false });
+        toast('已恢复为连载中');
+        await render(root);
+      }
+      return;
+    }
 
     const ex = t.closest('[data-exp]');
     if (ex) {
@@ -489,6 +517,7 @@ function openShowForm(root, show) {
           current: Number($('#s-current', el).value) || 0,
           total: Number($('#s-total', el).value) || null,
           kind: show?.kind ?? 'anime',
+          ended: show?.ended ?? false,
         });
         toast(isNew ? '加好了' : '已保存');
         await render(root);

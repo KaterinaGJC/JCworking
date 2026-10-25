@@ -16,7 +16,7 @@ function todayTasks() {
 function showsDueToday() {
   const w = weekdayIndex1(todayStr());
   return store.state.shows.filter((s) => {
-    const finished = s.total && (s.current || 0) >= s.total;
+    const finished = !!s.ended || (s.total && (s.current || 0) >= s.total);
     return !finished && s.weekday === w;
   });
 }
