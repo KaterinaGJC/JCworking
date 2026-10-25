@@ -17,10 +17,10 @@ try {
   await goto(page, '#/fun');
   await page.waitFor(`document.querySelector('.fun-body') !== null`, { message: '娱乐页渲染' });
 
-  // --- 四个分区都在 ---
-  eq('四个分区都在', await page.eval(
+  // --- 三个分区都在（体验并入条目详情）---
+  eq('三个分区都在', await page.eval(
     `[...document.querySelectorAll('#funSeg button')].map(b => b.textContent)`),
-  ['游戏库', '活动', '追更', '体验']);
+  ['游戏库', '活动', '追更']);
 
   // --- F-01 游戏库：新增 + 状态流转 ---
   await page.click('#fab');
@@ -134,10 +134,12 @@ try {
     return st.state.shows[0]?.current;
   })()`), 9);
 
-  // --- F-05 体验记录长文 ---
-  await page.click('#funSeg [data-tab="exp"]');
+  // --- F-05 体验记录长文（v2.1：体验写在具体条目下）---
+  await page.click('#funSeg [data-tab="lib"]');
   await new Promise((r) => setTimeout(r, 300));
-  await page.click('#fab');
+  await page.click('.gcard .gcover');
+  await page.waitFor(`document.querySelector('#item-detail') !== null`, { message: '条目详情' });
+  await page.click('.sheet .row .btn[data-i="2"]'); // 写体验
   await page.waitFor(`document.querySelector('.fullscreen-editor') !== null`, { message: '全屏编辑器' });
   await page.type('#fe-title', '星露谷物语');
   await page.click('#fe-type [data-t="game"]');
@@ -171,11 +173,14 @@ try {
   await new Promise((r) => setTimeout(r, 200));
 
   // --- 空状态（C-06 的娱乐侧）---
+  await page.click('.sheet .row .btn[data-i="0"]'); // 关闭详情面板
+  await new Promise((r) => setTimeout(r, 300));
   await page.eval(`(async () => {
     const st = await import('/js/store.js');
     for (const g of [...st.state.games]) await st.removeRecord('games', g.id);
   })()`);
-  await page.click('#funSeg [data-tab="lib"]');
+  await goto(page, '#/home');
+  await goto(page, '#/fun');
   await new Promise((r) => setTimeout(r, 350));
   ok('清空后显示空状态', await page.eval(`document.querySelector('.empty') !== null`));
 

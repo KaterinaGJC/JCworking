@@ -329,9 +329,9 @@ try {
   eq('F-03 追更 +1 集生效', await page.eval(
     `(async () => (await import('/js/store.js')).state.shows[0]?.current)()`), 4);
 
-  await page.click('#funSeg [data-tab="exp"]');
-  await new Promise((r) => setTimeout(r, 300));
-  await page.click('#fab');
+  await page.click('.trow .tmain');
+  await page.waitFor(`document.querySelector('#item-detail') !== null`, { message: '条目详情' });
+  await page.click('.sheet .row .btn[data-i="2"]'); // 写体验
   await page.waitFor(`document.querySelector('.fullscreen-editor') !== null`);
   await page.type('#fe-title', 'F5 长文');
   const body = '这是一段很长的体验正文。'.repeat(60);
@@ -341,6 +341,8 @@ try {
   eq('F-05 长文体验完整保存', await page.eval(
     `(async () => (await import('/js/store.js')).state.experiences.find(e => e.title === 'F5 长文')?.body.length)()`),
   body.length);
+  await page.click('.sheet .row .btn[data-i="0"]'); // 关闭条目详情
+  await new Promise((r) => setTimeout(r, 300));
 
   /* ================= G. 快速备忘 ================= */
   await goto(page, '#/memo');

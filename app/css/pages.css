@@ -223,6 +223,7 @@
 .gcard .ga{margin-top:auto; display:flex; gap:6px; flex-wrap:wrap}
 .gcard .ga .btn{padding:6px 9px; font-size:12px}
 .cover-edit{display:flex; gap:12px; align-items:center}
+.id-meta{font-size:13.5px; color:var(--text2); line-height:1.6}
 .cover-edit .cover-prev{width:120px; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
   background:var(--card2); display:grid; place-items:center; flex:0 0 auto}
 .cover-edit .cover-prev img{width:100%; height:100%; object-fit:cover}

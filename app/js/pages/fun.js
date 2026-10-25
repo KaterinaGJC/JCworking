@@ -44,7 +44,6 @@ function gameCardHtml(g) {
           ${g.status === 'playing' ? `<button class="btn primary" data-move="${g.id}" data-to="cleared">通关了</button>` : ''}
           ${g.status === 'cleared' ? `<button class="btn" data-move="${g.id}" data-to="playing">改回在玩</button>` : ''}
           <button class="btn" data-edit-game="${g.id}">编辑</button>
-          <button class="btn" data-exp-from="${g.id}">写体验</button>
         </div>
       </div>
     </div>`;
@@ -139,11 +138,12 @@ function watchRows() {
   return html.join('');
 }
 
-/* ---------------- 体验 ---------------- */
-function expRows() {
-  const all = [...store.state.experiences].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-  if (!all.length) return emptyState({ text: '还没有写过的体验', actionLabel: '写一条' });
-  return all.map((e) => `<div class="ecard" data-exp="${e.id}">
+/* ---------------- 条目详情（体验挂在这里） ---------------- */
+const STORE_OF = { game: 'games', activity: 'activities', show: 'shows' };
+const EXP_TYPE_OF = { game: 'game', activity: 'game', show: 'anime' };
+
+function expCardHtml(e) {
+  return `<div class="ecard" data-exp="${e.id}">
       <div class="eh">
         <span class="en">${esc(e.title)}</span>
         <span class="badge purple">${esc(typeLabel(e.type))}</span>
@@ -154,12 +154,77 @@ function expRows() {
         <span>${esc(e.date || '')}</span>
         ${e.progress ? `<span>·</span><span>${esc(e.progress)}</span>` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+function itemExps(sourceType, sourceId, name) {
+  return [...store.state.experiences]
+    .filter((e) => (e.sourceType === sourceType && e.sourceId === sourceId)
+      || (!e.sourceType && !e.sourceId && name && e.title === name))
+    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+}
+
+function itemMetaHtml(sourceType, rec) {
+  if (sourceType === 'game') {
+    return `<div class="id-meta">${rec.platform ? `<span class="badge blue">${esc(rec.platform)}</span> ` : ''}${
+      rec.rating ? starsHtml(rec.rating) : ''}${rec.note ? '<div class="muted" style="margin-top:6px">' + esc(rec.note) + '</div>' : ''}</div>`;
+  }
+  if (sourceType === 'activity') {
+    return `<div class="id-meta">${esc(rec.game || '')}${rec.due ? ' · ' + fmtMD(rec.due) + ' 截止' : ''}${
+      rec.note ? '<div class="muted" style="margin-top:6px">' + esc(rec.note) + '</div>' : ''}</div>`;
+  }
+  return `<div class="id-meta">${rec.weekday ? `每周${WEEK_CN[rec.weekday]}更新 · ` : ''}看到第 ${
+    rec.current || 0} 集${rec.total ? ` / 共 ${rec.total}` : ''}</div>`;
+}
+
+function openItemDetail(root, sourceType, sourceId) {
+  const list = store.state[STORE_OF[sourceType]] || [];
+  const rec = list.find((x) => x.id === sourceId);
+  if (!rec) return;
+  const name = rec.name || rec.title || '';
+  const exps = itemExps(sourceType, sourceId, name);
+  const reopen = () => openItemDetail(root, sourceType, sourceId);
+
+  sheet({
+    title: name,
+    body: `<div id="item-detail">
+      ${itemMetaHtml(sourceType, rec)}
+      <div class="grouph" style="margin-top:14px">体验 / 感受 <span class="cnt">${exps.length}</span></div>
+      ${exps.length ? exps.map(expCardHtml).join('')
+        : '<div class="muted" style="font-size:13px;padding:4px 2px">还没有写过体验，点下面「写体验」</div>'}
+    </div>`,
+    actions: [
+      { label: '关闭', onClick: (close) => close() },
+      { label: '编辑', onClick: (close) => {
+          close();
+          if (sourceType === 'game') openGameForm(root, rec);
+          else if (sourceType === 'activity') openActivityForm(root, rec);
+          else openShowForm(root, rec);
+        } },
+      { label: '写体验', kind: 'blue', onClick: (close) => {
+          close();
+          openExperienceEditor(root, null, {
+            title: name, type: EXP_TYPE_OF[sourceType] || 'game',
+            sourceType, sourceId, onSaved: reopen,
+          });
+        } },
+    ],
+    onMount: (el) => {
+      el.addEventListener('click', (ev) => {
+        const c = ev.target.closest('[data-exp]');
+        if (!c) return;
+        const exp = store.state.experiences.find((x) => x.id === c.dataset.exp);
+        if (exp) {
+          openExperienceEditor(root, exp, { sourceType, sourceId, onSaved: reopen });
+        }
+      });
+    },
+  });
 }
 
 /* ---------------- 页面 ---------------- */
 export async function render(root) {
-  const tabs = [['lib', '游戏库'], ['act', '活动'], ['watch', '追更'], ['exp', '体验']];
+  const tabs = [['lib', '游戏库'], ['act', '活动'], ['watch', '追更']];
   const box = document.createElement('div');
   box.className = 'fun-body';
   box.innerHTML = `
@@ -168,7 +233,7 @@ export async function render(root) {
     </div>
     ${await tipHtml('fun')}
     <div id="funPanel">
-      ${tab === 'lib' ? gamesPanel() : tab === 'act' ? activityRows() : tab === 'watch' ? watchRows() : expRows()}
+      ${tab === 'lib' ? gamesPanel() : tab === 'act' ? activityRows() : watchRows()}
     </div>
   `;
   root.replaceChildren(box);
@@ -187,8 +252,7 @@ function bind(box, root) {
   const addOne = () => {
     if (tab === 'lib') openGameForm(root, null);
     else if (tab === 'act') openActivityForm(root, null);
-    else if (tab === 'watch') openShowForm(root, null);
-    else openExperienceEditor(root, null);
+    else openShowForm(root, null);
   };
   $('#fab').onclick = addOne;
   const plusBtn = $('#btnPlus');
@@ -214,13 +278,6 @@ function bind(box, root) {
     const eg = t.closest('[data-edit-game]');
     if (eg) { openGameForm(root, store.state.games.find((x) => x.id === eg.dataset.editGame)); return; }
 
-    const ef = t.closest('[data-exp-from]');
-    if (ef) {
-      const g = store.state.games.find((x) => x.id === ef.dataset.expFrom);
-      openExperienceEditor(root, null, { title: g?.name || '', type: 'game' });
-      return;
-    }
-
     const fa = t.closest('[data-finish-act]');
     if (fa) {
       const a = store.state.activities.find((x) => x.id === fa.dataset.finishAct);
@@ -228,13 +285,6 @@ function bind(box, root) {
         await store.saveRecord('activities', { ...a, done: !a.done });
         await render(root);
       }
-      return;
-    }
-
-    const act = t.closest('[data-act-id]');
-    if (act && !t.closest('button')) {
-      const a = store.state.activities.find((x) => x.id === act.dataset.actId);
-      if (a) openActivityForm(root, a);
       return;
     }
 
@@ -273,10 +323,15 @@ function bind(box, root) {
       return;
     }
 
-    const ex = t.closest('[data-exp]');
-    if (ex) {
-      openExperienceEditor(root, store.state.experiences.find((x) => x.id === ex.dataset.exp));
-    }
+    // 点击具体条目 → 打开详情（体验写在这里）
+    const gc = t.closest('.gcard[data-game]');
+    if (gc) { openItemDetail(root, 'game', gc.dataset.game); return; }
+
+    const ac = t.closest('[data-act-id]');
+    if (ac && !t.closest('button')) { openItemDetail(root, 'activity', ac.dataset.actId); return; }
+
+    const sc = t.closest('.trow[data-show]');
+    if (sc && !t.closest('button')) { openItemDetail(root, 'show', sc.dataset.show); }
   });
 }
 
@@ -592,6 +647,13 @@ function openExperienceEditor(root, exp, preset = {}) {
       x.classList.toggle('on', Number(x.dataset.r) <= draft.rating));
   });
 
+  const sourceType = exp?.sourceType ?? preset.sourceType ?? null;
+  const sourceId = exp?.sourceId ?? preset.sourceId ?? null;
+  const afterSave = async () => {
+    if (preset.onSaved) await preset.onSaved();
+    else await render(root);
+  };
+
   $('#fe-save', layer).addEventListener('click', async () => {
     const title = titleEl.value.trim();
     if (!title) { toast('先写作品名'); titleEl.focus(); return; }
@@ -604,19 +666,21 @@ function openExperienceEditor(root, exp, preset = {}) {
       progress: $('#fe-progress', layer).value.trim(),
       date: exp?.date ?? todayStr(),
       createdAt: exp?.createdAt ?? Date.now(),
+      sourceType,
+      sourceId,
     });
     close();
     toast(isNew ? '写好了' : '已保存');
-    await render(root);
+    await afterSave();
   });
 
   $('#fe-del', layer)?.addEventListener('click', async () => {
     close();
     await store.removeRecord('experiences', exp.id);
-    await render(root);
+    await afterSave();
     toast('已删除', {
       actionLabel: '撤销',
-      onAction: async () => { await store.saveRecord('experiences', exp); await render(root); },
+      onAction: async () => { await store.saveRecord('experiences', exp); await afterSave(); },
     });
   });
 }
