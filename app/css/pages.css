@@ -1,8 +1,9 @@
 /* ---------- 首页 ---------- */
 .home-card{display:block; color:inherit}
-.hero{padding:6px 2px 18px}
-.hero .date{font-size:24px; font-weight:700; letter-spacing:-.4px}
-.hero .sum{margin-top:6px; font-size:14px; color:var(--text2)}
+.hero{padding:2px 2px 10px}
+.hero .date{font-size:20px; font-weight:700; letter-spacing:-.4px}
+.hero .sum{margin-top:2px; font-size:13px; color:var(--text2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .hero .sum b{color:var(--text); font-weight:600}
 .mini-list{margin:10px 0 0}
 .mini-list li{display:flex; gap:10px; align-items:center; padding:7px 0; font-size:14.5px}
