@@ -3,6 +3,7 @@ import * as store from '../store.js';
 import { $, esc, uid, todayStr, diffDays, weekdayIndex1, relativeCN, fmtMD } from '../util.js';
 import { sheet, confirmBox, toast, emptyState, starsHtml } from '../ui.js';
 import { tipHtml } from '../tips.js';
+import { addImageFromPicker, imageUrl } from '../image.js';
 
 let tab = 'lib';
 
@@ -18,6 +19,37 @@ const GAME_GROUPS = [
   ['cleared', '已通关'],
 ];
 
+function coverStyle(g) {
+  const url = g.coverId ? imageUrl(g.coverId) : '';
+  if (url) return ` style="background-image:url(${url})"`;
+  let h = 0;
+  for (const ch of String(g.name || '')) h = (h * 31 + ch.codePointAt(0)) % 360;
+  return ` style="background:linear-gradient(135deg,hsl(${h} 55% 42%),hsl(${(h + 45) % 360} 60% 30%))"`;
+}
+
+function gameCardHtml(g) {
+  const cover = !!g.coverId && !!imageUrl(g.coverId);
+  const initial = esc(String(g.name || '?').trim().charAt(0) || '?');
+  return `
+    <div class="gcard" data-game="${g.id}">
+      <div class="gcover${cover ? '' : ' ph'}"${coverStyle(g)}>${cover ? '' : initial}</div>
+      <div class="gbody">
+        <div class="gt">
+          <span class="gn">${esc(g.name)}</span>
+          ${g.platform ? `<span class="badge blue">${esc(g.platform)}</span>` : ''}
+        </div>
+        <div class="gd">${g.rating ? starsHtml(g.rating) : ''}${g.note ? ' ' + esc(g.note) : ''}</div>
+        <div class="ga">
+          ${g.status === 'wish' ? `<button class="btn primary" data-move="${g.id}" data-to="playing">开始玩</button>` : ''}
+          ${g.status === 'playing' ? `<button class="btn primary" data-move="${g.id}" data-to="cleared">通关了</button>` : ''}
+          ${g.status === 'cleared' ? `<button class="btn" data-move="${g.id}" data-to="playing">改回在玩</button>` : ''}
+          <button class="btn" data-edit-game="${g.id}">编辑</button>
+          <button class="btn" data-exp-from="${g.id}">写体验</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function gamesPanel() {
   const all = store.state.games;
   if (!all.length) {
@@ -27,21 +59,7 @@ function gamesPanel() {
     const rows = all.filter((g) => g.status === status);
     if (!rows.length) return '';
     return `<div class="grouph">${label} <span class="cnt">${rows.length}</span></div>
-      ${rows.map((g) => `
-        <div class="gcard" data-game="${g.id}">
-          <div class="gt">
-            <span class="gn">${esc(g.name)}</span>
-            ${g.platform ? `<span class="badge blue">${esc(g.platform)}</span>` : ''}
-          </div>
-          <div class="gd">${g.rating ? starsHtml(g.rating) + ' · ' : ''}${esc(g.note || '')}</div>
-          <div class="ga">
-            ${status === 'wish' ? `<button class="btn primary" data-move="${g.id}" data-to="playing">开始玩</button>` : ''}
-            ${status === 'playing' ? `<button class="btn primary" data-move="${g.id}" data-to="cleared">通关了</button>` : ''}
-            ${status === 'cleared' ? `<button class="btn" data-move="${g.id}" data-to="playing">改回在玩</button>` : ''}
-            <button class="btn" data-edit-game="${g.id}">编辑</button>
-            <button class="btn" data-exp-from="${g.id}">写体验</button>
-          </div>
-        </div>`).join('')}`;
+      <div class="gcards">${rows.map(gameCardHtml).join('')}</div>`;
   }).join('');
 }
 
@@ -243,8 +261,14 @@ function openGameForm(root, game) {
     status: game?.status ?? 'playing',
     rating: game?.rating ?? 0,
     note: game?.note ?? '',
+    coverId: game?.coverId ?? '',
   };
   let saveFn = () => {};
+
+  const coverPrevHtml = () => {
+    const url = draft.coverId ? imageUrl(draft.coverId) : '';
+    return url ? `<img src="${url}" alt="封面预览" />` : '<span class="muted">未设置（显示首字占位）</span>';
+  };
 
   sheet({
     title: isNew ? '加一款游戏' : '改一下',
@@ -261,6 +285,15 @@ function openGameForm(root, game) {
       <div class="field"><label>评分</label>
         <div class="tagset" id="g-rating">${[1, 2, 3, 4, 5].map((i) =>
           `<button class="tag ${draft.rating >= i ? 'on' : ''}" data-r="${i}">${'★'.repeat(i)}</button>`).join('')}</div>
+      </div>
+      <div class="field"><label>卡片封面（底图）</label>
+        <div class="cover-edit">
+          <div class="cover-prev" id="g-cover-prev">${coverPrevHtml()}</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn" id="g-cover">换封面</button>
+            ${draft.coverId ? '<button class="btn" id="g-cover-clear">移除</button>' : ''}
+          </div>
+        </div>
       </div>
       <div class="field"><label>备注</label>
         <textarea class="textarea" id="g-note" rows="2" placeholder="进度、想说的话">${esc(draft.note)}</textarea>
@@ -293,6 +326,19 @@ function openGameForm(root, game) {
       pick('#g-status', 'status', 'data-s');
       pick('#g-rating', 'rating', 'data-r');
 
+      const refreshCoverPrev = () => {
+        $('#g-cover-prev', el).innerHTML = coverPrevHtml();
+      };
+      $('#g-cover', el)?.addEventListener('click', async () => {
+        const id = await addImageFromPicker();
+        if (id) { draft.coverId = id; refreshCoverPrev(); toast('封面选好了，记得保存'); }
+      });
+      $('#g-cover-clear', el)?.addEventListener('click', () => {
+        draft.coverId = '';
+        refreshCoverPrev();
+        $('#g-cover-clear', el)?.remove();
+      });
+
       $('#g-del', el)?.addEventListener('click', async () => {
         close();
         await removeGame(root, game);
@@ -301,13 +347,16 @@ function openGameForm(root, game) {
       saveFn = async () => {
         const name = nameEl.value.trim();
         if (!name) { toast('先写游戏名'); return; }
+        const base = isNew ? {} : (store.state.games.find((x) => x.id === game.id) || game);
         await store.saveRecord('games', {
+          ...base,
           id: game?.id ?? uid(),
           name,
           platform: draft.platform,
           status: draft.status,
           rating: Number(draft.rating) || 0,
           note: $('#g-note', el).value.trim(),
+          coverId: draft.coverId || null,
           updatedAt: Date.now(),
         });
         toast(isNew ? '加好了' : '已保存');
