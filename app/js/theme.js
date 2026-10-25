@@ -3,6 +3,18 @@ export const THEMES = ['light', 'dark', 'auto'];
 let current = 'auto';
 const mq = () => window.matchMedia('(prefers-color-scheme: dark)');
 
+/** 设置/清除全局背景底图（传 dataURL，传空即关闭） */
+export function applyBackground(dataUrl) {
+  const root = document.documentElement;
+  if (dataUrl) {
+    root.classList.add('has-bg');
+    root.style.setProperty('--bg-image', `url("${dataUrl}")`);
+  } else {
+    root.classList.remove('has-bg');
+    root.style.removeProperty('--bg-image');
+  }
+}
+
 export function resolveTheme(t) {
   if (t === 'dark') return 'dark';
   if (t === 'light') return 'light';

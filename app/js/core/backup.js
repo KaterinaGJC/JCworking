@@ -7,6 +7,7 @@ export const SCHEMA_VERSION = 1;
 export const DATA_STORES = [
   'tasks', 'lessons', 'students', 'notes',
   'games', 'activities', 'shows', 'experiences',
+  'blobs', // 图片：导出/导入/快照都要带上，否则换机后图片全丢
 ];
 
 export const DEFAULT_SETTINGS = { theme: 'auto', weekStart: 1 };

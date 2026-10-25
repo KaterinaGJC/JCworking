@@ -3,6 +3,16 @@ import * as store from '../store.js';
 import { $, $$, esc, uid, relativeCN, todayStr } from '../util.js';
 import { sheet, confirmBox, toast, emptyState } from '../ui.js';
 import { tipHtml } from '../tips.js';
+import { addImageFromPicker, removeImage, previewImage, imageUrl } from '../image.js';
+
+/** 便签菜单里的图片缩略图（可删） */
+function imagesHtml(ids) {
+  return (ids || []).filter((id) => imageUrl(id)).map((id) => `
+    <div class="img-thumb-wrap">
+      <img class="img-thumb" src="${imageUrl(id)}" alt="图片" data-preview="${esc(id)}" />
+      <button class="img-del" data-del="${esc(id)}" aria-label="删除这张图">×</button>
+    </div>`).join('');
+}
 
 let searchOn = false;
 let keyword = '';
@@ -28,8 +38,11 @@ function visibleNotes() {
 }
 
 function noteHtml(n) {
+  const imgs = (n.images || []).filter((id) => imageUrl(id));
   return `<div class="note ${esc(n.color || 'y')}" data-note="${n.id}">
     <div class="nt">${esc(n.content)}</div>
+    ${imgs.length ? `<div class="note-imgs">${imgs.map((id) =>
+      `<img src="${imageUrl(id)}" alt="图片" data-img="${esc(id)}" />`).join('')}</div>` : ''}
     <div class="nw">${n.pinned ? '<span class="pinmark"></span>' : ''}${
       n.pinned ? '置顶 · ' : ''}${esc(relativeCN(n.updatedAt ?? n.createdAt ?? Date.now()))}</div>
   </div>`;
@@ -124,9 +137,18 @@ function bind(box, root) {
     }
   });
 
+  // 点便签里的图片 → 看大图（不打开菜单）
+  box.addEventListener('click', (ev) => {
+    const img = ev.target.closest('[data-img]');
+    if (!img) return;
+    ev.stopPropagation();
+    previewImage(img.dataset.img);
+  }, true);
+
   // 点便签 → 菜单
   box.addEventListener('click', async (ev) => {
     if (Date.now() < suppressClickUntil) return;
+    if (ev.target.closest('[data-img]')) return;
     const note = ev.target.closest('[data-note]');
     if (!note) return;
     const rec = store.state.notes.find((n) => n.id === note.dataset.note);
@@ -149,6 +171,11 @@ function openMenu(root, rec) {
         <div class="colordots" id="n-colors">
           ${COLORS.map(([c]) => `<button class="colordot ${c}${draft.color === c ? ' on' : ''}" data-color="${c}" aria-label="${c}"></button>`).join('')}
         </div>
+      </div>
+      <div class="field">
+        <label>图片</label>
+        <div class="imgs" id="n-imgs">${imagesHtml(rec.images || [])}</div>
+        <button class="btn" id="n-addimg" style="margin-top:8px">＋ 加图片</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
         <button class="btn" id="n-pin">${draft.pinned ? '取消置顶' : '置顶'}</button>
@@ -175,6 +202,36 @@ function openMenu(root, rec) {
       $('#n-pin', el).addEventListener('click', () => {
         draft.pinned = !draft.pinned;
         $('#n-pin', el).textContent = draft.pinned ? '取消置顶' : '置顶';
+      });
+
+      // 加图片：立刻落库（不用等「保存」），避免误点取消丢图
+      $('#n-addimg', el).addEventListener('click', async () => {
+        try {
+          const id = await addImageFromPicker();
+          if (!id) return;
+          const cur = store.state.notes.find((n) => n.id === rec.id) || rec;
+          const images = [...(cur.images || []), id];
+          await store.saveRecord('notes', { ...cur, images });
+          $('#n-imgs', el).innerHTML = imagesHtml(images);
+          toast('图片已加入');
+        } catch (err) {
+          toast(err?.message || '这张图片加不进来');
+        }
+      });
+
+      $('#n-imgs', el).addEventListener('click', async (ev) => {
+        const del = ev.target.closest('[data-del]');
+        if (del) {
+          const cur = store.state.notes.find((n) => n.id === rec.id) || rec;
+          const images = (cur.images || []).filter((id) => id !== del.dataset.del);
+          await store.saveRecord('notes', { ...cur, images });
+          await removeImage(del.dataset.del);
+          $('#n-imgs', el).innerHTML = imagesHtml(images);
+          toast('图片已删除');
+          return;
+        }
+        const thumb = ev.target.closest('[data-preview]');
+        if (thumb) previewImage(thumb.dataset.preview);
       });
 
       $('#n-toPlan', el).addEventListener('click', async () => {
@@ -204,7 +261,9 @@ function openMenu(root, rec) {
       saveFn = async () => {
         const content = ta.value.trim();
         if (!content) { toast('内容不能为空'); return; }
-        await store.saveRecord('notes', { ...rec, ...draft, content });
+        // 以库里最新那份为基准，避免把菜单打开期间新加的图片覆盖掉
+        const cur = store.state.notes.find((n) => n.id === rec.id) || rec;
+        await store.saveRecord('notes', { ...cur, ...draft, content });
         await render(root);
       };
     },

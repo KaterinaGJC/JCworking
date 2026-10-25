@@ -5,6 +5,16 @@ import {
 } from '../util.js';
 import { sheet, toast, confirmBox } from '../ui.js';
 import { STATUS, ensureStudent, renameStudent } from './schedule.js';
+import { addImageFromPicker, removeImage, previewImage, imageUrl } from '../image.js';
+
+/** 课次图片缩略图（可删） */
+function lessonImagesHtml(ids) {
+  return (ids || []).filter((id) => imageUrl(id)).map((id) => `
+    <div class="img-thumb-wrap">
+      <img class="img-thumb" src="${imageUrl(id)}" alt="图片" data-lpreview="${esc(id)}" />
+      <button class="img-del" data-ldel="${esc(id)}" aria-label="删除这张图">×</button>
+    </div>`).join('');
+}
 
 const STATE_TAGS = [
   ['great', '很好', ''],
@@ -66,6 +76,12 @@ export async function render(root, ctx = {}) {
       <label>布置的作业</label>
       <textarea class="textarea autogrow" id="l-homework" rows="2"
         placeholder="留了什么作业…">${esc(lesson.homework || '')}</textarea>
+    </div>
+
+    <div class="field">
+      <label>图片（板书、作业、学生作品…）</label>
+      <div class="imgs" id="l-imgs">${lessonImagesHtml(lesson.images || [])}</div>
+      <button class="btn" id="addLessonImg" style="margin-top:8px">＋ 加图片</button>
     </div>
 
     <button class="bigbtn" id="markDone">${lesson.status === 'done' ? '已上课 ✓' : '标记已上课'}</button>
@@ -207,6 +223,34 @@ export async function render(root, ctx = {}) {
   });
 
   // 请假
+  // 图片：加 / 删 / 看大图
+  $('#addLessonImg', box).addEventListener('click', async () => {
+    try {
+      const blobId = await addImageFromPicker();
+      if (!blobId) return;
+      const base = store.state.lessons.find((l) => l.id === id) || lesson;
+      await patch({ images: [...(base.images || []), blobId] });
+      toast('图片已加入');
+      await rerender(root, id);
+    } catch (err) {
+      toast(err?.message || '这张图片加不进来');
+    }
+  });
+
+  $('#l-imgs', box).addEventListener('click', async (ev) => {
+    const del = ev.target.closest('[data-ldel]');
+    if (del) {
+      const base = store.state.lessons.find((l) => l.id === id) || lesson;
+      await patch({ images: (base.images || []).filter((x) => x !== del.dataset.ldel) });
+      await removeImage(del.dataset.ldel);
+      toast('图片已删除');
+      await rerender(root, id);
+      return;
+    }
+    const thumb = ev.target.closest('[data-lpreview]');
+    if (thumb) previewImage(thumb.dataset.lpreview);
+  });
+
   $('#markLeave', box).addEventListener('click', async () => {
     const next = lesson.status === 'leave' ? 'todo' : 'leave';
     await patch({ status: next });

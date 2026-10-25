@@ -1,9 +1,10 @@
-import { initTheme, applyTheme } from './theme.js';
+import { initTheme, applyTheme, applyBackground } from './theme.js';
 import { startRouter, back, go, currentHash } from './router.js';
 import { loadAll, state as storeState } from './store.js';
 import { maybeDailySnapshot } from './backup.js';
 import { $ } from './util.js';
 import { hasOverlay, closeTopOverlay } from './ui.js';
+import { imageUrl } from './image.js';
 
 initTheme();
 
@@ -27,6 +28,7 @@ async function boot() {
   try {
     await loadAll();
     applyTheme(storeState.settings.theme);
+    applyBackground(imageUrl(storeState.settings.backgroundId));
   } catch (err) {
     console.error('[boot] 数据加载失败', err);
   }

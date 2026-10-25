@@ -179,14 +179,22 @@ async function connect(wsUrl) {
       });
       await new Promise((r) => setTimeout(r, 120));
     },
+    /** 给隐藏的 input[type=file] 选一个本地文件（会自动触发 change） */
+    async setFileInput(selector, filePath) {
+      await page.send('DOM.enable').catch(() => {});
+      const { root } = await page.send('DOM.getDocument', { depth: -1, pierce: true });
+      const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+      if (!nodeId) throw new Error(`setFileInput: not found ${selector}`);
+      await page.send('DOM.setFileInputFiles', { files: [filePath], nodeId });
+      await new Promise((r) => setTimeout(r, 150));
+    },
     async type(selector, text) {
       const ok = await page.eval(`(() => {
         const el = document.querySelector(${JSON.stringify(selector)});
         if (!el) return false;
         el.focus();
         const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
-        const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
-        setter.call(el, ${JSON.stringify(text)});
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;        setter.call(el, ${JSON.stringify(text)});
         el.dispatchEvent(new Event('input', {bubbles:true}));
         el.dispatchEvent(new Event('change', {bubbles:true}));
         return true;

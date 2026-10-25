@@ -46,6 +46,18 @@ ul,ol{list-style:none}
 }
 [data-theme="dark"] body{background:var(--bg)}
 
+/* ---------- 自定义背景底图（v2） ---------- */
+html.has-bg body::before{
+  content:""; position:fixed; inset:0; z-index:0;
+  background-image:var(--bg-image);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+}
+html.has-bg .app{
+  position:relative; z-index:1;
+  background:color-mix(in srgb, var(--bg) 84%, transparent);
+}
+html.has-bg .topbar{background:color-mix(in srgb, var(--bg) 76%, transparent)}
+
 main{flex:1; padding:0 16px calc(96px + env(safe-area-inset-bottom)); min-height:0}
 body.detail main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 

@@ -1,10 +1,11 @@
 import * as store from '../store.js';
 import * as backup from '../backup.js';
-import { applyTheme, currentTheme } from '../theme.js';
+import { applyTheme, currentTheme, applyBackground } from '../theme.js';
 import { $, esc, todayStr, pad2 } from '../util.js';
 import { toast, confirmBox, sheet, promptBox } from '../ui.js';
 import { seedTestData } from '../dev.js';
 import { getSlots, makeSlot } from '../core/slots.js';
+import { addImageFromPicker, imageUrl } from '../image.js';
 
 export const VERSION = '1.0.0';
 
@@ -129,6 +130,11 @@ export async function render(root) {
           <button data-week-val="7" class="${weekStart === 7 ? 'on' : ''}">周日</button>
         </div>
       </div>
+      <button class="srow" data-act="background">
+        <span class="sl">背景底图</span>
+        <span class="sv">${store.state.settings.backgroundId ? '已设置' : '未设置'}</span>
+        <svg class="ico"><use href="#i-right"/></svg>
+      </button>
     </div>
 
     <div class="sgroup">
@@ -280,6 +286,43 @@ export async function render(root) {
       return;
     }
 
+    if (act === 'background') {
+      const bgId = store.state.settings.backgroundId;
+      const bgUrl = imageUrl(bgId);
+      sheet({
+        title: '背景底图',
+        body: `<div class="small muted" style="line-height:1.8">
+            选一张图片做整个应用的底图。卡片会变成半透明，文字仍然清楚。
+          </div>
+          ${bgUrl ? `<div class="imgs" style="margin-top:12px">
+            <div class="img-thumb-wrap"><img class="img-thumb" src="${bgUrl}" alt="当前背景" /></div>
+          </div>` : '<div class="empty" style="padding:16px 0">还没有设置底图</div>'}`,
+        actions: [
+          { label: '移除', onClick: async (close) => {
+            close();
+            await store.saveSettings({ backgroundId: null });
+            applyBackground('');
+            toast('背景已移除');
+            await render(root);
+          } },
+          { label: '选图片', kind: 'blue', onClick: async (close) => {
+            close();
+            try {
+              const id = await addImageFromPicker();
+              if (!id) return;
+              await store.saveSettings({ backgroundId: id });
+              applyBackground(imageUrl(id));
+              toast('背景已设置');
+              await render(root);
+            } catch (err) {
+              toast(err?.message || '这张图片用不了');
+            }
+          } },
+        ],
+      });
+      return;
+    }
+
     if (act === 'clear') {
       const v = await promptBox({
         title: '清空所有数据',
@@ -290,6 +333,7 @@ export async function render(root) {
       if (v !== '清空') { toast('没有清空（需要输入「清空」）'); return; }
       await backup.clearAll();
       applyTheme('auto');
+      applyBackground('');
       toast('数据已清空');
       await render(root);
       return;
