@@ -492,7 +492,10 @@ function openExperienceEditor(root, exp, preset = {}) {
   `;
   document.getElementById('overlay').appendChild(layer);
 
-  const close = () => layer.remove();
+  const close = () => {
+    if (!layer.parentNode) return;
+    layer.remove();
+  };
   const titleEl = $('#fe-title', layer);
   titleEl.focus();
 

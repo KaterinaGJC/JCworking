@@ -1,4 +1,5 @@
 import { $ } from './util.js';
+import { hasOverlay, closeOverlayAndHistory } from './ui.js';
 
 export const ROUTES = {
   home:     { title: '景臣',     action: 'gear',     tab: 'home' },
@@ -6,16 +7,22 @@ export const ROUTES = {
   schedule: { title: '教培课表', action: 'students', tab: 'schedule' },
   fun:      { title: '游戏娱乐', action: 'plus',     tab: 'fun' },
   memo:     { title: '快速备忘', action: 'search',   tab: 'memo' },
-  lesson:   { title: '课次详情', back: true },
-  students: { title: '学生',     back: true },
-  student:  { title: '学生档案', back: true },
-  settings: { title: '数据与设置', back: true },
+  lesson:   { title: '课次详情', back: true, parent: 'schedule' },
+  students: { title: '学生',     back: true, parent: 'schedule' },
+  student:  { title: '学生档案', back: true, parent: 'students' },
+  settings: { title: '数据与设置', back: true, parent: 'home' },
 };
 
 const pageCache = new Map();
 let currentId = null;
 let currentParams = {};
 let mounted = null;
+let lastHash = location.hash || '#/home';
+
+/** 最近一次真正渲染出来的页面地址（用于返回键"取消导航"时恢复） */
+export function currentHash() {
+  return lastHash;
+}
 
 function stubModule(id) {
   return {
@@ -45,9 +52,26 @@ export function go(id, params = {}) {
   location.hash = `#/${id}${qs ? '?' + qs : ''}`;
 }
 
+/** 用替换的方式跳到某个页面，不往历史里堆新记录 */
+export function replaceTo(id, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  history.replaceState(null, '', `#/${id}${qs ? '?' + qs : ''}`);
+  return renderRoute();
+}
+
+/**
+ * 返回的优先级：
+ * 1) 有弹层 → 先收弹层（不退出页面）
+ * 2) 详情页 → 回到它的上一级页面
+ * 3) 其它 → 走浏览器历史
+ */
 export function back() {
+  if (hasOverlay()) { closeOverlayAndHistory(); return Promise.resolve(); }
+  const route = ROUTES[currentId];
+  if (route?.parent) return replaceTo(route.parent);
   if (history.length > 1) history.back();
   else location.hash = '#/home';
+  return Promise.resolve();
 }
 
 async function loadPage(id) {
@@ -100,6 +124,7 @@ export async function renderRoute() {
   const { id, params } = parseHash();
   currentId = id;
   currentParams = params;
+  lastHash = location.hash || '#/home';
 
   const mod = await loadPage(id);
   try { mounted?.unmount?.(); } catch { /* ignore */ }

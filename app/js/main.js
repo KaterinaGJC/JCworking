@@ -3,10 +3,22 @@ import { startRouter, back, go } from './router.js';
 import { loadAll, state as storeState } from './store.js';
 import { maybeDailySnapshot } from './backup.js';
 import { $ } from './util.js';
+import { hasOverlay, closeTopOverlay } from './ui.js';
+import { currentHash } from './router.js';
 
 initTheme();
 
 $('#btnBack').addEventListener('click', () => back());
+
+// 手机上的实体/手势返回键：还有弹层时先收弹层，并把地址恢复回去（等于取消这次返回）
+window.addEventListener('popstate', () => {
+  if (!hasOverlay()) return;
+  closeTopOverlay();
+  const restore = currentHash();
+  try {
+    if (restore && location.hash !== restore) history.pushState(null, '', restore);
+  } catch { /* ignore */ }
+});
 
 window.addEventListener('error', (e) => console.error('[app error]', e.error || e.message));
 window.addEventListener('unhandledrejection', (e) => console.error('[app rejection]', e.reason));

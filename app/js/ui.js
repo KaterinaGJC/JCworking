@@ -8,6 +8,30 @@ export function closeAll() {
   if (o) o.innerHTML = '';
 }
 
+/* ---------- 弹层与返回键 ----------
+ * 弹层本身**不碰浏览历史**（历史里只留页面），
+ * 手机上的返回键由 main.js 统一拦截：如果还有弹层，就关掉弹层并把地址恢复回去，
+ * 相当于"这次返回被取消"。
+ * 这样就不会出现「关面板的异步回退把新弹出来的确认框一起关掉」这类竞态。
+ */
+export function hasOverlay() {
+  const o = overlay();
+  return !!o && o.children.length > 0;
+}
+
+/** 只清 DOM */
+export function closeTopOverlay() {
+  const o = overlay();
+  if (!o || !o.children.length) return false;
+  o.innerHTML = '';
+  return true;
+}
+
+/** 供 App 内返回按钮用（语义化别名） */
+export function closeOverlayAndHistory() {
+  return closeTopOverlay();
+}
+
 /** 底部弹出面板 */
 export function sheet({ title = '', body = '', actions = [], onMount } = {}) {
   const o = overlay();
@@ -25,7 +49,10 @@ export function sheet({ title = '', body = '', actions = [], onMount } = {}) {
   o.innerHTML = '';
   o.appendChild(mask);
 
-  const close = () => { if (mask.parentNode) mask.remove(); };
+  const close = () => {
+    if (!mask.parentNode) return;
+    mask.remove();
+  };
   mask.addEventListener('click', (ev) => {
     if (ev.target === mask) close();
   });
