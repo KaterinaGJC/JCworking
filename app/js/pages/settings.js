@@ -40,6 +40,8 @@ function counts() {
     shows: store.state.shows.length,
     experiences: store.state.experiences.length,
     notes: store.state.notes.length,
+    posts: store.state.posts.length,
+    comments: store.state.posts.reduce((n, p) => n + ((p.comments || []).length), 0),
   };
   return c;
 }
@@ -86,6 +88,7 @@ export async function render(root) {
       <button class="srow" data-act="none"><span class="sl">追更</span><span class="sv">${c.shows} 部</span></button>
       <button class="srow" data-act="none"><span class="sl">体验记录</span><span class="sv">${c.experiences} 条</span></button>
       <button class="srow" data-act="none"><span class="sl">便签</span><span class="sv">${c.notes} 条</span></button>
+      <button class="srow" data-act="none"><span class="sl">记录</span><span class="sv">${c.posts} 条（含 ${c.comments} 条评论）</span></button>
     </div>
 
     <div class="sgroup">

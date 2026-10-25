@@ -1,4 +1,6 @@
 // M0 · 骨架与可安装
+import fs from 'node:fs';
+import path from 'node:path';
 import { bootApp, shutdownApp, freshPage, goto, setOffline, ok, eq, report } from './lib.mjs';
 
 let exitCode = 1;
@@ -7,16 +9,17 @@ try {
   const page = await freshPage();
 
   // --- 基本骨架 ---
-  ok('底部 4 个标签都在', (await page.eval(`document.querySelectorAll('#tabbar .tab').length`)) === 4);
+  ok('底部 5 个标签都在', (await page.eval(`document.querySelectorAll('#tabbar .tab').length`)) === 5);
   ok('首页已渲染', (await page.eval(`document.querySelector('#view .page') !== null`)));
   eq('首页标题', await page.eval(`document.querySelector('#pageTitle').textContent`), '景臣');
   ok('顶部设置按钮可见', (await page.eval(`!document.querySelector('#btnGear').classList.contains('hidden')`)));
 
-  // --- 四个标签可切换 ---
+  // --- 五个标签可切换 ---
   const tabs = [
     ['schedule', '教培课表'],
     ['fun', '游戏娱乐'],
     ['memo', '快速备忘'],
+    ['post', '记录'],
     ['home', '景臣'],
   ];
   for (const [key, title] of tabs) {
@@ -77,6 +80,35 @@ try {
   await setOffline(page, false);
   await page.reload();
   await page.waitFor(`document.querySelector('#view .page') !== null`, { message: '恢复在线' });
+
+  // --- 预缓存清单必须覆盖所有 JS 模块（漏一个，装完直接开飞行模式就会白屏） ---
+  // 这条是"守卫测试"：以后新增页面/模块却忘了登记到 sw.js，这里会立刻红灯
+  const swSrc = fs.readFileSync(path.join('app', 'sw.js'), 'utf8');
+  const coreBlock = swSrc.match(/const CORE = \[([\s\S]*?)\];/);
+  ok('sw.js 里有 CORE 预缓存清单', !!coreBlock);
+  const precached = new Set(
+    (coreBlock ? [...coreBlock[1].matchAll(/'([^']+)'/g)].map((m) => m[1]) : [])
+      .map((u) => u.replace(/^\.\//, '').replace(/\//g, path.sep)),
+  );
+
+  const jsFiles = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (e.name.endsWith('.js')) jsFiles.push(path.relative('app', full));
+    }
+  };
+  walk(path.join('app', 'js'));
+
+  const missing = jsFiles.filter((f) => !precached.has(f));
+  ok('确实扫到了 JS 模块（守卫不是空转）', jsFiles.length >= 10, `扫到 ${jsFiles.length} 个`);
+  eq('所有 JS 模块都在预缓存清单里（断网可用）', missing, []);
+  ok('预缓存清单还覆盖了 index.html 与三个 css',
+    ['index.html', path.join('css', 'tokens.css'), path.join('css', 'base.css'), path.join('css', 'pages.css')]
+      .every((f) => precached.has(f)), [...precached].join(' | '));
+  ok('预缓存清单覆盖了 manifest 与图标',
+    ['manifest.webmanifest', path.join('icons', 'icon-192.png')].every((f) => precached.has(f)));
 
   await page.close();
   exitCode = report('M0');

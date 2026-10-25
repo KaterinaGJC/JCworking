@@ -110,6 +110,7 @@ body.detail main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 .tab[data-act="schedule"].on{color:var(--teal)}
 .tab[data-act="fun"].on{color:var(--purple)}
 .tab[data-act="memo"].on{color:var(--amber)}
+.tab[data-act="post"].on{color:var(--teal)}
 
 .fab{
   position:fixed; z-index:35; right:max(18px, calc(50vw - 215px + 18px));

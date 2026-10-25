@@ -38,7 +38,8 @@ try {
 
   // 各页面模块的相对动态导入也要能加载（计划已并入首页，plan.js 由 home.js 动态引入）
   for (const [hash, sel] of [['#/home', '.plan-body'], ['#/schedule', '.schedule-body'],
-    ['#/fun', '.fun-body'], ['#/memo', '.memo-body'], ['#/settings', '.sgroup']]) {
+    ['#/fun', '.fun-body'], ['#/memo', '.memo-body'], ['#/post', '.post-body'],
+    ['#/settings', '.sgroup']]) {
     await page.eval(`location.hash = ${JSON.stringify(hash)}`);
     await page.waitFor(`document.querySelector(${JSON.stringify(sel)}) !== null`, { message: hash });
     ok(`子目录下可打开 ${hash}`, true);

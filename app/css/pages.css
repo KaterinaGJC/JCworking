@@ -382,3 +382,103 @@
   width:100%; height:100%; min-height:50vh; border:0; background:transparent; outline:none;
   font-size:16px; line-height:1.75; resize:none;
 }
+
+/* ---------- 记录（博客式时间线） ---------- */
+.post-compose{
+  background:var(--card); border-radius:var(--r); padding:12px 14px 10px;
+  box-shadow:var(--shadow); margin-bottom:14px;
+}
+.post-compose .textarea{background:var(--card2); border-color:transparent; font-size:15px}
+.post-draft-imgs{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.post-draft-imgs:empty{display:none}
+.compose-actions{display:flex; align-items:center; gap:8px; margin-top:10px}
+.compose-actions #postAddImg{
+  display:flex; align-items:center; gap:5px; padding:8px 12px; font-size:13px;
+}
+.compose-actions #postSave{margin-left:auto; padding:9px 22px; font-size:14px}
+
+.post-card{
+  background:var(--card); border-radius:var(--r); padding:13px 14px 9px;
+  box-shadow:var(--shadow); margin-bottom:12px;
+}
+.post-card .post-text{
+  font-size:15px; line-height:1.65; word-break:break-word; cursor:pointer;
+  white-space:pre-wrap;
+}
+.post-imgs{margin-top:9px; display:grid; grid-template-columns:repeat(3, 1fr); gap:5px}
+.post-imgs img{
+  width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px;
+  cursor:pointer; display:block; background:var(--card2);
+}
+.post-foot{
+  display:flex; align-items:center; gap:10px; margin-top:10px;
+  padding-top:8px; border-top:1px solid var(--line);
+}
+.post-when{font-size:12px; color:var(--text3)}
+.post-stats{font-size:12px; color:var(--text3)}
+.post-del{
+  margin-left:auto; border:0; background:transparent; color:var(--text3);
+  font-size:12px; cursor:pointer; padding:6px 4px; flex:0 0 auto;
+}
+.post-del:active{color:var(--red)}
+
+/* 点赞按钮：列表里小、详情里大 */
+.like-btn{
+  border:0; background:transparent; color:var(--text3); cursor:pointer;
+  display:flex; align-items:center; gap:4px; padding:5px 4px; flex:0 0 auto;
+  font-size:12px; font-weight:600; transition:color var(--dur), transform .12s;
+}
+.like-btn .ico{width:17px; height:17px}
+.like-btn:active{transform:scale(1.18)}
+.like-btn.on{color:var(--red)}
+.like-btn.on .ico{fill:currentColor}
+.like-btn.big{
+  margin-top:12px; padding:9px 18px; border-radius:999px;
+  background:var(--card2); font-size:14px; gap:7px;
+}
+.like-btn.big .ico{width:20px; height:20px}
+.like-btn.big.on{background:rgba(225,75,75,.12)}
+
+/* 详情：正文 + 详细时间 */
+.pd-main{
+  background:var(--card); border-radius:var(--r); padding:16px;
+  box-shadow:var(--shadow); margin-bottom:6px;
+}
+.pd-text{font-size:16.5px; line-height:1.75; word-break:break-word; white-space:pre-wrap}
+.pd-imgs{margin-top:12px; display:flex; flex-direction:column; gap:7px}
+.pd-imgs img{
+  width:100%; max-height:340px; object-fit:cover; border-radius:11px;
+  cursor:pointer; display:block; background:var(--card2);
+}
+.pd-time{
+  margin-top:14px; padding-top:10px; border-top:1px solid var(--line);
+  display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;
+}
+.pd-stamp{font-size:12.5px; color:var(--text2); font-variant-numeric:tabular-nums}
+.pd-rel{font-size:12px; color:var(--text3)}
+
+/* 盖楼评论 */
+.cmt-list{margin-bottom:12px}
+.cmt-item{
+  background:var(--card); border-radius:14px; padding:11px 13px;
+  box-shadow:var(--shadow); margin-bottom:9px;
+}
+.cmt-head{display:flex; align-items:center; gap:8px; margin-bottom:5px}
+.cmt-floor{
+  font-size:11.5px; font-weight:700; color:var(--text3); flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+.cmt-stamp{font-size:11.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+.cmt-del{
+  margin-left:auto; border:0; background:transparent; color:var(--text3);
+  font-size:16px; line-height:1; cursor:pointer; padding:2px 4px; flex:0 0 auto;
+}
+.cmt-del:active{color:var(--red)}
+.cmt-text{font-size:14.5px; line-height:1.6; word-break:break-word; white-space:pre-wrap}
+
+.cmt-compose{
+  display:flex; align-items:flex-end; gap:8px; background:var(--card);
+  border-radius:var(--r); padding:10px 12px; box-shadow:var(--shadow);
+}
+.cmt-compose .textarea{flex:1; background:var(--card2); border-color:transparent; font-size:14.5px}
+.cmt-compose #cmtSave{padding:10px 16px; font-size:14px; flex:0 0 auto}

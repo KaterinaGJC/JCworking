@@ -6,6 +6,8 @@ export const ROUTES = {
   schedule: { title: '教培课表', action: 'students', tab: 'schedule' },
   fun:      { title: '游戏娱乐', action: 'plus',     tab: 'fun' },
   memo:     { title: '快速备忘', action: 'search',   tab: 'memo' },
+  post:     { title: '记录',     tab: 'post' },
+  postdetail: { title: '记录详情', back: true, parent: 'post' },
   lesson:   { title: '课次详情', back: true, parent: 'schedule' },
   students: { title: '学生',     back: true, parent: 'schedule' },
   student:  { title: '学生档案', back: true, parent: 'students' },

@@ -121,6 +121,21 @@ export function relativeCN(ts, now = Date.now()) {
   return `${dt.getMonth() + 1}/${dt.getDate()}`;
 }
 
+/**
+ * 精确到秒的完整时间戳：`2026年10月25日 周六 14:30:05`（本地时区，不做 UTC 转换）
+ * ts 非法时返回空串——不编造时间，宁可空着也不显示一个假的时间点。
+ * 注意：Number(null) 是 0，会被当成 1970-01-01，所以先显式挡掉 null / '' / undefined。
+ */
+export function fullStampCN(ts) {
+  if (ts === null || ts === undefined || ts === '') return '';
+  const n = Number(ts);
+  if (!Number.isFinite(n)) return '';
+  const d = new Date(n);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${WEEK_CN[d.getDay()]} `
+    + `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
 export function daysLeftCN(dueStr, today = todayStr()) {
   const n = diffDays(dueStr, today);
   if (n < 0) return { text: '已结束', cls: 'over' };

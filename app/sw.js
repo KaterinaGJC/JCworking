@@ -1,5 +1,7 @@
 /* Service Worker：预缓存 + 运行时缓存，保证飞行模式下也能打开 */
-const CACHE = 'jc-cache-v1';
+// 缓存名一变，浏览器就会装新 SW、删掉旧缓存、立即接管 —— 保证手机上所有文件同代更新。
+// 本次升 v2：DB_VERSION 3→4（新增 posts 表），新旧文件混用会读到没有该表的库而启动失败。
+const CACHE = 'jc-cache-v2';
 
 const CORE = [
   './index.html',
@@ -15,10 +17,14 @@ const CORE = [
   './js/db.js',
   './js/store.js',
   './js/backup.js',
+  './js/image.js',
+  './js/tips.js',
+  './js/dev.js',
   './js/core/dates.js',
   './js/core/repeat.js',
   './js/core/summary.js',
   './js/core/backup.js',
+  './js/core/slots.js',
   './js/pages/home.js',
   './js/pages/plan.js',
   './js/pages/schedule.js',
@@ -27,6 +33,8 @@ const CORE = [
   './js/pages/student.js',
   './js/pages/fun.js',
   './js/pages/memo.js',
+  './js/pages/post.js',
+  './js/pages/postdetail.js',
   './js/pages/settings.js',
   './icons/icon-192.png',
 ];

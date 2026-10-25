@@ -15,7 +15,7 @@ try {
   await page.click('[data-tip-close]');
   ok('可以关闭说明卡', await page.eval(`document.querySelector('.tipcard') === null`));
 
-  for (const [hash, key] of [['#/schedule', 'schedule'], ['#/fun', 'fun'], ['#/memo', 'memo']]) {
+  for (const [hash, key] of [['#/schedule', 'schedule'], ['#/fun', 'fun'], ['#/memo', 'memo'], ['#/post', 'post']]) {
     await goto(page, hash);
     await new Promise((r) => setTimeout(r, 350));
     ok(`「${key}」首次进入有说明卡`, await page.eval(

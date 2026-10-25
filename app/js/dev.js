@@ -7,10 +7,10 @@ const WORDS = ['买电池', '交总结', '回消息', '备课', '洗衣服', '�
 
 export async function seedTestData({
   notes = 100, tasks = 30, lessons = 8, games = 6, activities = 5,
-  shows = 4, experiences = 3, clearFirst = false,
+  shows = 4, experiences = 3, posts = 4, clearFirst = false,
 } = {}) {
   if (clearFirst) {
-    for (const kind of ['notes', 'tasks', 'lessons', 'games', 'activities', 'shows', 'experiences']) {
+    for (const kind of ['notes', 'tasks', 'lessons', 'games', 'activities', 'shows', 'experiences', 'posts']) {
       for (const r of [...store.state[kind]]) await store.removeRecord(kind, r.id);
     }
   }
@@ -136,6 +136,26 @@ export async function seedTestData({
     await store.saveMany('experiences', rows);
   }
 
+  if (posts) {
+    const POST_TEXTS = [
+      '今天把课表改成网格了，一眼能看完整周，比之前顺多了。',
+      '带了三个学生，小班那种节奏还是得再磨一磨。',
+      '下班路上听了一张老专辑，突然很想写点什么。',
+      '把备份导出来存了一份，心里踏实不少。',
+    ];
+    const rows = Array.from({ length: posts }, (_, i) => ({
+      id: uid(),
+      text: POST_TEXTS[i % POST_TEXTS.length],
+      images: [],
+      liked: i % 3 === 0,
+      comments: i % 2 === 0 ? [
+        { id: uid(), text: '自己给自己盖个楼，记一下当时的想法。', createdAt: now - i * 60000 + 30000 },
+      ] : [],
+      createdAt: now - i * 3600 * 1000,
+    }));
+    await store.saveMany('posts', rows);
+  }
+
   return {
     notes: store.state.notes.length,
     tasks: store.state.tasks.length,
@@ -144,5 +164,6 @@ export async function seedTestData({
     activities: store.state.activities.length,
     shows: store.state.shows.length,
     experiences: store.state.experiences.length,
+    posts: store.state.posts.length,
   };
 }

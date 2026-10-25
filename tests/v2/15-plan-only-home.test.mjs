@@ -22,12 +22,11 @@ try {
   await goto(page, '#/home');
   await page.waitFor(`document.querySelector('.home-body') !== null`, { message: '首页渲染' });
   const tabs = await page.eval(`[...document.querySelectorAll('#tabbar .tab')].map(t => t.dataset.act)`);
-  eq('底部标签只剩 4 个', tabs.length, 4);
   ok('底部没有「计划」标签', !tabs.includes('plan'), JSON.stringify(tabs));
   ok('底栏文案里找不到「计划」', await page.eval(
     `!document.querySelector('#tabbar').textContent.includes('计划')`));
-  ok('其余四个标签都还在', ['home', 'schedule', 'fun', 'memo'].every((k) => tabs.includes(k)),
-    JSON.stringify(tabs));
+  ok('首页/课表/娱乐/备忘四个标签都在',
+    ['home', 'schedule', 'fun', 'memo'].every((k) => tabs.includes(k)), JSON.stringify(tabs));
 
   // ---------- 2. 老地址 #/plan 回落到首页，不再是独立页面 ----------
   await goto(page, '#/plan');

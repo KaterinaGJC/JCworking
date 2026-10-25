@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   addDays, diffDays, startOfWeek, weekDates, weekdayIndex1, weekdayCN,
   monthMatrix, ymd, parseYmd, endTimeHM, hmFromMinutes, minutesOf, todayStr, fmtFullCN,
+  fullStampCN,
 } from '../../app/js/core/dates.js';
 import { shouldGenerate, matchesRepeat, normalizeRepeat, repeatLabel } from '../../app/js/core/repeat.js';
 import { buildSummary } from '../../app/js/core/summary.js';
@@ -52,6 +53,31 @@ test('日期：今天字符串格式正确', () => {
   assert.match(todayStr(), /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(ymd(parseYmd('2026-03-05')), '2026-03-05');
   assert.equal(fmtFullCN('2026-10-24'), '10月24日 周六');
+});
+
+/* ---------------- 精确时间戳（记录板块用） ---------------- */
+test('精确时间：格式到秒且带星期', () => {
+  // 本地时区，不做 UTC 转换；2026-10-25 是周日、10-24 是周六
+  assert.equal(fullStampCN(new Date(2026, 9, 25, 14, 30, 5).getTime()),
+    '2026年10月25日 周日 14:30:05');
+  assert.equal(fullStampCN(new Date(2026, 9, 24, 8, 0, 0).getTime()),
+    '2026年10月24日 周六 08:00:00');
+  assert.equal(fullStampCN(new Date(2026, 0, 5, 9, 7, 3).getTime()),
+    '2026年1月5日 周一 09:07:03');
+});
+
+test('精确时间：个位数补零、跨年边界', () => {
+  assert.equal(fullStampCN(new Date(2026, 11, 31, 0, 0, 0).getTime()),
+    '2026年12月31日 周四 00:00:00');
+  assert.equal(fullStampCN(new Date(2027, 0, 1, 23, 59, 59).getTime()),
+    '2027年1月1日 周五 23:59:59');
+});
+
+test('精确时间：非法值返回空串（不编造时间）', () => {
+  assert.equal(fullStampCN(NaN), '');
+  assert.equal(fullStampCN(undefined), '');
+  assert.equal(fullStampCN(null), '');
+  assert.equal(fullStampCN('not-a-number'), '');
 });
 
 /* ---------------- 重复规则 ---------------- */

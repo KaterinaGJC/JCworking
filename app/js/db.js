@@ -1,11 +1,12 @@
 // IndexedDB 封装：无第三方库，全部 Promise 化
 export const DB_NAME = 'jc-life';
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 
 export const DATA_STORES = [
   'tasks', 'lessons', 'students', 'notes',
   'games', 'activities', 'shows', 'experiences',
-  'blobs', // v3：图片（便签插图、课次图片、背景底图），存压缩后的 dataURL
+  'posts', // v4：记录板块（博客式时间线；评论内嵌在 posts[].comments，配图走 blobs）
+  'blobs', // v3：图片（便签插图、课次图片、背景底图、记录配图），存压缩后的 dataURL
 ];
 
 export const ALL_STORES = [...DATA_STORES, 'meta', 'snapshots'];

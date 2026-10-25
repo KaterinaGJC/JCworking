@@ -11,6 +11,7 @@ export const state = {
   activities: [],
   shows: [],
   experiences: [],
+  posts: [],
   blobs: [],
   meta: {},
   settings: { ...DEFAULT_SETTINGS },

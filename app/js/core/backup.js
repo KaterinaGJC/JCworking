@@ -7,6 +7,7 @@ export const SCHEMA_VERSION = 1;
 export const DATA_STORES = [
   'tasks', 'lessons', 'students', 'notes',
   'games', 'activities', 'shows', 'experiences',
+  'posts', // 记录（含内嵌评论）：导出/导入/快照都要带上
   'blobs', // 图片：导出/导入/快照都要带上，否则换机后图片全丢
 ];
 
