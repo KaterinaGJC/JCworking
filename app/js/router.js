@@ -117,8 +117,9 @@ function updateChrome(id, mod) {
   document.title = title ? `${title} · 景臣的工作生活` : '景臣的工作生活';
 
   const fab = $('#fab');
-  fab.hidden = !(id === 'plan' || id === 'fun');
+  fab.hidden = !(id === 'plan' || id === 'fun' || id === 'schedule');
   fab.onclick = null;
+  fab.setAttribute('aria-label', id === 'schedule' ? '新加一节课' : '新增');
   // 顶栏那枚 ＋ 每次换页清空，由页面自己绑，避免上个页面的处理器残留
   const plusBtn = $('#btnPlus');
   if (plusBtn) plusBtn.onclick = null;
