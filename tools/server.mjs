@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -54,7 +55,10 @@ export function startServer(rootDir, port = 0, host = '127.0.0.1') {
 }
 
 // CLI: node tools/server.mjs [root] [port]
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
+// 注意：不要用 `import.meta.url === 'file://' + process.argv[1]` 判断入口——
+// Windows 下 argv[1] 是 `F:\...\server.mjs`，拼出来是 `file://F:/...`，
+// 而 import.meta.url 是 `file:///F:/...`（三斜杠），永远不相等，脚本会静默退出。
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = process.argv[2] ?? 'app';
   const port = Number(process.argv[3] ?? 8123);
   const s = await startServer(root, port);
