@@ -31,7 +31,8 @@ export async function freshPage({ path = '/index.html' } = {}) {
   }).catch(() => {});
   await page.send('Page.setDownloadBehavior', { behavior: 'deny' }).catch(() => {});
   await page.goto(`${server.url}${path}#/home`);
-  await page.waitFor(`document.querySelector('#view .page') !== null`, { message: '页面已渲染' });
+  await page.waitFor(`document.querySelector('#view .page') !== null`,
+    { message: '页面已渲染', timeout: 15000 });
   return page;
 }
 

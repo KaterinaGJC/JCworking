@@ -161,6 +161,24 @@ async function connect(wsUrl) {
       if (!ok) throw new Error(`click: not found ${selector}`);
       await new Promise((r) => setTimeout(r, 60));
     },
+    /** 真实的鼠标点击（会触发浏览器默认行为，比如 input 获得焦点） */
+    async realClick(selector) {
+      const pos = await page.eval(`(() => {
+        const el = document.querySelector(${JSON.stringify(selector)});
+        if (!el) return null;
+        el.scrollIntoView({ block: 'center' });
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      })()`);
+      if (!pos) throw new Error(`realClick: not found ${selector}`);
+      await page.send('Input.dispatchMouseEvent', {
+        type: 'mousePressed', x: pos.x, y: pos.y, button: 'left', clickCount: 1,
+      });
+      await page.send('Input.dispatchMouseEvent', {
+        type: 'mouseReleased', x: pos.x, y: pos.y, button: 'left', clickCount: 1,
+      });
+      await new Promise((r) => setTimeout(r, 120));
+    },
     async type(selector, text) {
       const ok = await page.eval(`(() => {
         const el = document.querySelector(${JSON.stringify(selector)});

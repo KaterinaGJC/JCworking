@@ -345,7 +345,10 @@ try {
   /* ================= G. 快速备忘 ================= */
   await goto(page, '#/memo');
   await page.waitFor(`document.querySelector('#memoInput') !== null`);
-  ok('G-01 打开即聚焦输入框', await page.eval(`document.activeElement?.id === 'memoInput'`));
+  // v2 需求变更：进入备忘页不再自动弹键盘，点一下才开始输入
+  ok('G-01 进入备忘页不自动聚焦', await page.eval(`document.activeElement?.id !== 'memoInput'`));
+  await page.realClick('#memoInput');
+  ok('G-01b 点输入框后可开始输入', await page.eval(`document.activeElement?.id === 'memoInput'`));
   await page.type('#memoInput', 'G2 一条');
   await page.press('Enter', '#memoInput');
   await new Promise((r) => setTimeout(r, 400));

@@ -64,10 +64,9 @@ export async function render(root) {
   root.replaceChildren(box);
   bind(box, root);
 
-  // 打开即聚焦（手机上是先聚焦再弹键盘）
+  // 进入备忘页不再自动聚焦（避免一进来就弹键盘），点输入框才进入输入状态
   const input = $('#memoInput', box);
   if (input) {
-    input.focus();
     const fit = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 200) + 'px'; };
     input.addEventListener('input', fit);
     requestAnimationFrame(fit);
@@ -94,8 +93,9 @@ function bind(box, root) {
     });
     input.value = '';
     input.style.height = 'auto';
-    input.focus(); // 保持焦点，方便连着记几条
     await render(root);
+    // 重渲染后旧的 input 已经不在文档里，重新聚焦新的那一个，方便连着记几条
+    document.querySelector('#memoInput')?.focus();
   };
 
   saveBtn?.addEventListener('click', save);

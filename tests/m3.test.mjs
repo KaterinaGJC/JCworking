@@ -13,7 +13,11 @@ try {
   await page.waitFor(`document.querySelector('#memoInput') !== null`, { message: '备忘页渲染' });
 
   // --- G-01 打开即聚焦 ---
-  ok('打开备忘页输入框自动聚焦（G-01）',
+  // 需求在 v2 变更：进入备忘页不再自动聚焦（避免一进来就弹键盘），点一下才开始输入
+  ok('进入备忘页不自动聚焦（v2 需求）',
+    await page.eval(`document.activeElement?.id !== 'memoInput'`));
+  await page.realClick('#memoInput');
+  ok('点输入框后可开始输入（G-01）',
     await page.eval(`document.activeElement?.id === 'memoInput'`));
 
   // --- G-02 回车保存、清空、焦点保留 ---
