@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>景臣的工作生活 · 复古风格预览</title>
+<style>
+  /* ================= 设计令牌（Luna 蓝 / XP 时代） ================= */
+  :root{
+    --xp1:#0054E3;            /* 标题栏主色 */
+    --xp2:#3A93FF;            /* 标题栏高光 */
+    --xp3:#0026A0;            /* 标题栏底部 */
+    --frame:#0A3FC4;          /* 窗体描边 */
+    --frame-soft:#7BA2E7;
+    --win:#ECE9D8;            /* XP 窗体米白 */
+    --panel:#FFFFFF;
+    --group:#D9E7FA;          /* 分组标题条 */
+    --group-2:#EDF4FE;
+    --line:#A7BCE0;           /* 分隔线 */
+    --line-soft:#DCE6F4;
+    --ink:#0A246A;            /* 深蓝正文 */
+    --ink-2:#4A5A73;
+    --ink-3:#7A8AA3;
+    --sel:#316AC5;            /* 选中蓝 */
+    --btn1:#FFFFFF; --btn2:#EAF0F9; --btn3:#D9E4F4;
+    --btn-edge:#7F9DB9;
+    --ok:#2E8B3D; --warn:#C77700; --danger:#B22A2A;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:#5A7FB5;
+    font-family:Tahoma,"MS Sans Serif","宋体",SimSun,"Microsoft YaHei",sans-serif;
+    font-size:13px; color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 手机壳体：430 宽，居中 */
+  .phone{
+    width:430px; max-width:100%; min-height:100dvh; margin:0 auto;
+    background:var(--win); display:flex; flex-direction:column;
+    border:1px solid var(--frame); box-shadow:0 0 0 1px rgba(255,255,255,.35) inset;
+    position:relative; overflow:hidden;
+  }
+  @media (max-width:430px){ .phone{border:0} }
+
+  /* ================= 标题栏 ================= */
+  .titlebar{
+    height:30px; flex:0 0 auto; display:flex; align-items:center; gap:7px;
+    padding:0 6px 0 8px;
+    background:linear-gradient(180deg,#0058EE 0%,#3A93FF 9%,#2E8BFF 38%,#0A5AE0 82%,#0046CE 100%);
+    border-bottom:1px solid #0026A0;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+    color:#fff; text-shadow:1px 1px 1px rgba(0,0,0,.45);
+    font-weight:700; font-size:13px; letter-spacing:.2px;
+  }
+  .titlebar .logo{
+    width:16px;height:16px;border-radius:3px;flex:0 0 auto;
+    background:linear-gradient(145deg,#8FD0FF,#0B54D8 70%);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.65);
+  }
+  .titlebar .t{flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+  .wbtn{
+    width:20px;height:18px;border-radius:3px;flex:0 0 auto;
+    background:linear-gradient(180deg,#69B4FF,#1C6DE0 55%,#0B4FC9);
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+    display:grid;place-items:center; color:#fff; font-size:10px; line-height:1;
+    font-family:Tahoma,sans-serif;
+  }
+  .wbtn.close{background:linear-gradient(180deg,#FF9C8A,#E24A2E 55%,#C22B10)}
+
+  /* ================= 工具条（快捷动作） ================= */
+  .toolbar{
+    flex:0 0 auto; display:flex; align-items:center; gap:4px;
+    padding:4px 6px; background:linear-gradient(180deg,#FBFDFF,#E4EEFB 60%,#D5E3F7);
+    border-bottom:1px solid var(--line);
+    box-shadow:inset 0 1px 0 #fff;
+  }
+  .tbtn{
+    display:flex; align-items:center; gap:4px; height:24px; padding:0 7px;
+    border:1px solid transparent; border-radius:3px; background:transparent;
+    color:var(--ink); font-size:12px; font-family:inherit; cursor:pointer;
+  }
+  .tbtn .ic{width:15px;height:15px}
+  .tbtn:active,.tbtn.on{
+    border-color:var(--btn-edge); background:linear-gradient(180deg,#D9E4F4,#F3F8FF);
+    box-shadow:inset 1px 1px 2px rgba(0,0,0,.16);
+  }
+  .spacer{flex:1}
+  .avatar-sm{
+    width:22px;height:22px;border-radius:3px;flex:0 0 auto;
+    background:linear-gradient(160deg,#9BD1FF,#2C6FD8);
+    border:1px solid #6E93C8; box-shadow:inset 0 0 0 1px rgba(255,255,255,.6);
+    display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;
+  }
+
+  /* ================= 主内容区 ================= */
+  .body{flex:1; min-height:0; overflow-y:auto; padding:7px; background:var(--win)}
+  .body::-webkit-scrollbar{width:0}
+
+  /* 面板（分组框） */
+  .panel{
+    background:var(--panel); border:1px solid var(--btn-edge);
+    box-shadow:inset 0 0 0 1px #fff, 0 1px 1px rgba(0,0,0,.06);
+    margin-bottom:7px;
+  }
+  .panel-h{
+    display:flex; align-items:center; gap:6px; height:23px; padding:0 7px;
+    background:linear-gradient(180deg,#F6FAFF,#DCE8F8 70%,#CFDDF3);
+    border-bottom:1px solid var(--line);
+    font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .panel-h .ic{width:14px;height:14px}
+  .panel-h .more{margin-left:auto;font-size:11px;color:var(--sel);font-weight:400}
+  .panel-b{padding:6px 8px}
+  .panel-b.flush{padding:0}
+
+  /* 列表行 */
+  .row{
+    display:flex; align-items:center; gap:7px; min-height:30px; padding:3px 8px;
+    border-bottom:1px solid #F1F5FB; font-size:13px; color:var(--ink);
+  }
+  .row:last-child{border-bottom:0}
+  .row .meta{margin-left:auto; font-size:11px; color:var(--ink-3); white-space:nowrap}
+  .row .when{width:36px; flex:0 0 auto; font-size:11.5px; color:var(--ink-2);
+    font-variant-numeric:tabular-nums}
+  .row .ic{width:15px;height:15px;flex:0 0 auto}
+  .row.sel{background:linear-gradient(180deg,#5A90E0,#316AC5); color:#fff}
+  .row.sel .meta{color:#D6E4F7}
+  .row.done .txt{color:var(--ink-3); text-decoration:line-through}
+
+  /* XP 复选框 */
+  .cb{
+    width:13px;height:13px;flex:0 0 auto;background:#fff;
+    border:1px solid #7F9DB9; box-shadow:inset 1px 1px 0 #E8E8E8;
+    display:grid;place-items:center;
+  }
+  .cb.on::after{content:"";width:7px;height:4px;border-left:2px solid #1B5E20;border-bottom:2px solid #1B5E20;transform:rotate(-45deg) translate(0,-1px)}
+
+  /* 按钮 */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:4px;
+    height:24px; padding:0 11px; border:1px solid var(--btn-edge); border-radius:3px;
+    background:linear-gradient(180deg,var(--btn1) 0%,var(--btn2) 48%,var(--btn3) 100%);
+    box-shadow:inset 0 1px 0 #fff, 0 1px 0 rgba(255,255,255,.6);
+    color:var(--ink); font-size:12px; font-family:inherit; cursor:pointer;
+  }
+  .btn:active{background:linear-gradient(180deg,#D9E4F4,#EEF4FD); box-shadow:inset 1px 1px 3px rgba(0,0,0,.2)}
+  .btn.primary{
+    border-color:#0443B8; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,.4);
+    background:linear-gradient(180deg,#8CBAFF,#3D7FE8 48%,#0B4FC9 100%);
+  }
+  .btn.primary:active{background:linear-gradient(180deg,#2F72E0,#0B4FC9)}
+  .btn.wide{width:100%}
+  .btn.sm{height:21px;padding:0 8px;font-size:11px}
+
+  /* 状态点 / 徽章 */
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+  .dot.green{background:#3FBF52}
+  .dot.amber{background:#F0A93B}
+  .dot.blue{background:#3D8BE8}
+  .dot.gray{background:#B9C4D2}
+  .lv{
+    font-size:10px; font-weight:700; color:#7A4B00; padding:0 5px; border-radius:2px;
+    background:linear-gradient(180deg,#FFE7A0,#FFC64B 60%,#F0A72B);
+    border:1px solid #C98A18; text-shadow:0 1px 0 rgba(255,255,255,.6);
+  }
+  .tag{
+    font-size:10.5px; padding:1px 5px; border:1px solid #A9BEDC; border-radius:2px;
+    background:linear-gradient(180deg,#F7FAFF,#E3EDFA); color:#2A4A7A; white-space:nowrap;
+  }
+
+  /* ================= 首页 ================= */
+  .hero{
+    padding:8px 9px; margin-bottom:7px; border:1px solid var(--btn-edge);
+    background:linear-gradient(180deg,#FFFFFF,#F2F7FE 65%,#E6F0FC);
+    box-shadow:inset 0 0 0 1px #fff;
+  }
+  .hero .d{font-size:17px; font-weight:700; color:var(--ink); letter-spacing:.3px}
+  .hero .s{margin-top:3px; font-size:12px; color:var(--ink-2)}
+  .hero .s b{color:#B2460E}
+
+  /* 助手卡（对应原图右侧那个“Codex 小蓝”） */
+  .buddy{
+    display:flex; gap:8px; padding:7px; margin-bottom:7px;
+    border:1px solid var(--btn-edge); box-shadow:inset 0 0 0 1px #fff;
+    background:linear-gradient(180deg,#F4F9FF,#E8F1FD);
+  }
+  .buddy .face{
+    width:46px;height:46px;flex:0 0 auto;border-radius:3px;
+    background:linear-gradient(160deg,#BFE1FF,#4C89DE 60%,#2A5FB8);
+    border:1px solid #6E93C8; box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);
+    display:grid;place-items:center; color:#0A246A; font-weight:700; font-size:16px;
+  }
+  .buddy .say{flex:1; min-width:0}
+  .buddy .name{display:flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:#0A246A}
+  .bubble{
+    position:relative; margin-top:4px; padding:6px 8px; font-size:12px; line-height:1.6;
+    color:#2A3B57; background:#fff; border:1px solid #A9BEDC; border-radius:3px;
+  }
+  .bubble::before{
+    content:""; position:absolute; left:-5px; top:9px; width:8px;height:8px;
+    background:#fff; border-left:1px solid #A9BEDC; border-bottom:1px solid #A9BEDC;
+    transform:rotate(45deg);
+  }
+
+  /* ================= 计划 ================= */
+  .datebar{
+    display:flex; align-items:center; gap:6px; padding:5px 7px; margin-bottom:7px;
+    border:1px solid var(--btn-edge); background:linear-gradient(180deg,#FBFDFF,#E9F1FC);
+    box-shadow:inset 0 0 0 1px #fff;
+  }
+  .datebar .d{flex:1; text-align:center; font-size:13px; font-weight:700; color:var(--ink)}
+  .arrow{
+    width:22px;height:22px;border:1px solid var(--btn-edge); border-radius:3px;
+    background:linear-gradient(180deg,#fff,#E4EDFA); display:grid;place-items:center;
+    color:#2A4A7A; font-size:12px; cursor:pointer;
+  }
+  .arrow:active{box-shadow:inset 1px 1px 2px rgba(0,0,0,.2)}
+  .tl{display:flex; align-items:flex-start; gap:7px; padding:5px 8px; border-bottom:1px solid #F1F5FB}
+  .tl .time{width:38px;flex:0 0 auto;font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px}
+  .tl .txt{flex:1;font-size:13px;line-height:1.45}
+  .tl .sub{font-size:11px;color:var(--ink-3);margin-top:1px}
+  .tl.done .txt{color:var(--ink-3);text-decoration:line-through}
+
+  /* ================= 课表网格 ================= */
+  .tt-wrap{overflow-x:auto; border:1px solid var(--btn-edge); box-shadow:inset 0 0 0 1px #fff; background:#fff;
+    position:relative;
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
+    mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);}
+  .tt{display:grid; grid-template-columns:42px repeat(7,86px); gap:0; width:max-content}
+  .tt .hd{
+    height:32px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#EAF2FE,#CFDFF6); border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line); font-size:11px; font-weight:700; color:var(--ink);
+  }
+  .tt .hd.today{background:linear-gradient(180deg,#BCD7FA,#8FB9EE)}
+  .tt .hd .dd{font-size:10px; font-weight:400; color:var(--ink-2)}
+  .tt .sl{
+    height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#F7FAFF,#E9F1FC); border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line-soft); font-size:11px; font-weight:700; color:#2A4A7A;
+  }
+  .tt .sl small{font-size:9.5px; font-weight:400; color:var(--ink-3)}
+  .tt .cell{
+    height:52px; border-right:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+    background:#fff; padding:2px; position:relative;
+  }
+  .tt .cell.today{background:#F4F9FF}
+  .tt .lesson{
+    height:100%; padding:3px 4px; border:1px solid #7FA8DC; border-radius:2px;
+    background:linear-gradient(180deg,#FFFFFF,#E8F2FF 70%,#D8E9FE);
+    font-size:11px; line-height:1.25; overflow:hidden;
+  }
+  .tt .lesson.small{background:linear-gradient(180deg,#FFFDF5,#FBF0D8 70%,#F6E5C2); border-color:#D8B364}
+  .tt .lesson b{display:block; font-weight:700; color:#123A6B; font-size:11.5px}
+  .tt .lesson span{color:var(--ink-3); font-size:10px}
+
+  /* ================= 记录（帖子流） ================= */
+  .post{padding:7px 8px; border-bottom:1px solid #F1F5FB}
+  .post:last-child{border-bottom:0}
+  .post .ph{display:flex; align-items:center; gap:6px}
+  .post .pf{
+    width:26px;height:26px;border-radius:3px;flex:0 0 auto;
+    background:linear-gradient(160deg,#A9D4FF,#3B7BD8); border:1px solid #6E93C8;
+    display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;
+  }
+  .post .pn{font-size:12px;font-weight:700;color:#123A6B}
+  .post .pt{font-size:10.5px;color:var(--ink-3);margin-left:auto}
+  .post .pb{margin-top:5px;font-size:12.5px;line-height:1.65;color:#22334D}
+  .post .pic{
+    margin-top:5px;height:74px;border:1px solid #A9BEDC;
+    background:linear-gradient(135deg,#DCE9FA,#F3F8FF 60%,#CFE0F7);
+    display:grid;place-items:center;color:#7A8AA3;font-size:11px;
+  }
+  .post .pa{display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--ink-3)}
+  .post .pa .a{color:var(--sel);cursor:pointer}
+
+  /* ================= 设置 ================= */
+  .srow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px solid #F1F5FB;font-size:13px}
+  .srow:last-child{border-bottom:0}
+  .srow .v{margin-left:auto;font-size:11.5px;color:var(--ink-3)}
+  .seg{display:flex; gap:0; border:1px solid var(--btn-edge); border-radius:3px; overflow:hidden}
+  .seg span{
+    padding:2px 8px; font-size:11px; color:var(--ink-2);
+    background:linear-gradient(180deg,#fff,#E6EEFA); border-left:1px solid var(--line-soft);
+  }
+  .seg span:first-child{border-left:0}
+  .seg span.on{background:linear-gradient(180deg,#2F72E0,#0B4FC9); color:#fff; font-weight:700}
+
+  /* ================= 底部标签 & 状态栏 ================= */
+  .tabbar{
+    flex:0 0 auto; display:flex; padding:3px 4px 4px; gap:2px;
+    background:linear-gradient(180deg,#F7FAFF,#DCE8F8);
+    border-top:1px solid var(--line); box-shadow:inset 0 1px 0 #fff;
+  }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:4px 0 3px; border:1px solid transparent; border-radius:3px;
+    font-size:10.5px; color:#2A4A7A; text-decoration:none; cursor:pointer;
+  }
+  .tab .ic{width:19px;height:19px}
+  .tab.on{
+    border-color:var(--btn-edge);
+    background:linear-gradient(180deg,#CFE0F7,#EFF5FE);
+    box-shadow:inset 1px 1px 3px rgba(0,0,0,.16); font-weight:700; color:#0A246A;
+  }
+  .statusbar{
+    flex:0 0 auto; display:flex; height:21px; font-size:10.5px; color:#3E5170;
+    background:linear-gradient(180deg,#F4F8FE,#DAE6F7); border-top:1px solid var(--line);
+  }
+  .statusbar div{
+    display:flex; align-items:center; padding:0 7px; border-right:1px solid #C3D2E8;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .statusbar div:last-child{border-right:0; margin-left:auto}
+  .statusbar .g{width:6px;height:6px;border-radius:50%;background:#3FBF52;margin-right:4px;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+
+  /* 滚动提示 */
+  .hint{font-size:10.5px;color:var(--ink-3);padding:2px 2px 0;text-align:right}
+</style>
+</head>
+<body>
+<div class="phone" id="app"></div>
+
+<script>
+const ICONS = {
+  home:  'M3 9.5 8 4.5l5 5V15H3z',
+  cal:   'M2.5 5.5h11v9h-11zM2.5 8.5h11M5 3.5v3M11 3.5v3',
+  game:  'M2.5 6.5h11v5h-11zM5 8v2M4 9h2M10.5 8.5h.01M11.5 10h.01',
+  note:  'M3.5 2.5h6l3 3v8h-9zM9.5 2.5v3h3M5.5 9h5M5.5 11h3',
+  post:  'M2.5 3.5h11v9h-11zM4.5 6h7M4.5 8h7M4.5 10h4',
+  plan:  'M2.5 3.5h11v9h-11zM4.5 6l1.5 1.5L8.5 5M10 6.5h2M10 9h2',
+  gear:  'M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14',
+  search:'M7 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM10.5 10.5 13.5 13.5',
+  plus:  'M8 3.5v9M3.5 8h9',
+  user:  'M8 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 13.5c0-2.5 2.2-4 5-4s5 1.5 5 4',
+  folder:'M2 4.5h4l1 1.5h5v7H2z',
+  star:  'M8 2.5l1.6 3.4 3.4.4-2.5 2.4.7 3.5L8 10.6 4.8 12.2l.7-3.5L3 6.3l3.4-.4z',
+  clock: 'M8 3.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM8 5.5V8l2 1'
+};
+// XP 风格的图标是彩色的，按模块给不同色相，避免整屏灰
+const ICON_COLOR = {
+  home:'#2E6BC8', cal:'#1F6FB2', game:'#7A4BC8', note:'#C88A1E', post:'#2E6BC8',
+  plan:'#2F8B45', gear:'#5A6B84', search:'#2E6BC8', plus:'#2F8B45', user:'#2E6BC8',
+  folder:'#D0A32A', star:'#D4A017', clock:'#2F8B45'
+};
+const ic = (n, cls='') => `<svg class="ic ${cls}" viewBox="0 0 16 16" fill="none"
+  stroke="${ICON_COLOR[n] || '#2A4A7A'}" stroke-width="1.2" stroke-linecap="round"
+  stroke-linejoin="round"><path d="${ICONS[n]||ICONS.note}"/></svg>`;
+
+const TABS = [
+  ['home','首页'],['schedule','课表'],['fun','娱乐'],['memo','备忘'],['post','记录']
+];
+
+function shell(active, body, statusLeft, statusMid) {
+  return `
+  <div class="titlebar">
+    <span class="logo"></span>
+    <span class="t">景臣的工作生活</span>
+    <span class="wbtn">─</span><span class="wbtn">□</span><span class="wbtn close">×</span>
+  </div>
+  <div class="toolbar">
+    <button class="tbtn">${ic('plus')}新增</button>
+    <button class="tbtn">${ic('search')}搜索</button>
+    <button class="tbtn">${ic('user')}学生</button>
+    <button class="tbtn">${ic('cal')}课表</button>
+    <span class="spacer"></span>
+    <span class="avatar-sm">景</span>
+  </div>
+  <div class="body">${body}</div>
+  <div class="tabbar">
+    ${TABS.map(([k,l]) => `<a class="tab ${k===active?'on':''}" href="#/${k}">${ic(k==='home'?'home':k==='schedule'?'cal':k==='fun'?'game':k==='memo'?'note':'post')}${l}</a>`).join('')}
+  </div>
+  <div class="statusbar">
+    <div><span class="g"></span>${statusLeft||'离线可用'}</div>
+    <div>${statusMid||''}</div>
+    <div>${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</div>
+  </div>`;
+}
+
+/* ---------------- 首页 ---------------- */
+const homeView = () => shell('home', `
+  <div class="hero">
+    <div class="d">10月25日 星期日</div>
+    <div class="s">今天还有 <b>3 件事</b> 没做完，1 个活动明天截止</div>
+  </div>
+
+  <div class="buddy">
+    <div class="face">景</div>
+    <div class="say">
+      <div class="name">小助手 <span class="lv">LV 07</span></div>
+      <div class="bubble">上午 09:00 有课（王小明），下午 14:00 小班 3 人。<br>今天的作业还没记，别忘了。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('plan')}今日计划<span class="more">4 / 7 ›</span></div>
+    <div class="panel-b flush">
+      <div class="row"><span class="cb"></span><span class="when">09:00</span><span class="txt">备下午的课</span></div>
+      <div class="row"><span class="cb"></span><span class="when">14:00</span><span class="txt">联系家长</span></div>
+      <div class="row done"><span class="cb on"></span><span class="txt">回学生微信</span><span class="meta">已完成</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('note')}快速备忘<span class="more">全部 ›</span></div>
+    <div class="panel-b flush">
+      <div class="row"><span class="txt">买电池（遥控器 5 号）</span><span class="meta">10 分钟前</span></div>
+      <div class="row"><span class="txt">问一下周四小班调课</span><span class="meta">1 小时前</span></div>
+    </div>
+    <div class="panel-b" style="border-top:1px solid #F1F5FB">
+      <div style="display:flex;gap:5px">
+        <input class="txt" placeholder="记点什么…" style="flex:1;height:22px;border:1px solid #7F9DB9;padding:0 6px;font-family:inherit;font-size:12px" />
+        <button class="btn sm">存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('game')}游戏娱乐<span class="more">全部 ›</span></div>
+    <div class="panel-b flush">
+      <div class="row"><span class="tag" style="border-color:#D8B364;background:#FDF3DA;color:#8A5A00">还剩 1 天</span><span class="txt">明日方舟 · 危机合约</span></div>
+      <div class="row"><span class="tag">今天更新</span><span class="txt">葬送的芙莉莲 第 9 集</span></div>
+      <div class="row"><span class="tag" style="border-color:#B9A9E0;background:#F3EFFC;color:#5B3FA0">体验</span><span class="txt">星露谷物语 通关了</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('star')}本周概况</div>
+    <div class="panel-b">
+      <div style="display:flex; text-align:center; font-size:11px; color:var(--ink-2)">
+        <div style="flex:1; padding:3px 0; border-right:1px solid var(--line-soft)">
+          <div style="font-size:16px; font-weight:700; color:var(--ink)">7</div>已上完</div>
+        <div style="flex:1; padding:3px 0; border-right:1px solid var(--line-soft)">
+          <div style="font-size:16px; font-weight:700; color:var(--ink)">3</div>待上</div>
+        <div style="flex:1; padding:3px 0; border-right:1px solid var(--line-soft)">
+          <div style="font-size:16px; font-weight:700; color:#B2460E">1</div>请假</div>
+        <div style="flex:1; padding:3px 0">
+          <div style="font-size:16px; font-weight:700; color:var(--ink)">5</div>记录</div>
+      </div>
+    </div>
+  </div>
+`, '离线可用', '数据 27 条');
+
+/* ---------------- 计划 ---------------- */
+const planView = () => shell('home', `
+  <div class="datebar">
+    <span class="arrow">‹</span>
+    <span class="d">10月25日 星期日</span>
+    <span class="arrow">›</span>
+    <button class="btn sm">今天</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('clock')}待安排<span class="more">2 项</span></div>
+    <div class="panel-b flush">
+      <div class="row"><span class="cb"></span><span class="txt">交季度总结</span><span class="meta">今天 18:00</span></div>
+      <div class="row"><span class="cb"></span><span class="txt">读完《给教师的建议》20 页</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('plan')}时间轴<span class="more">3 项</span></div>
+    <div class="panel-b flush">
+      <div class="tl"><span class="time">09:00</span><span class="cb"></span><span class="txt">备下午的课<div class="sub">小班 · 二次函数</div></span></div>
+      <div class="tl"><span class="time">14:00</span><span class="cb"></span><span class="txt">联系家长<div class="sub">韩梅梅这周请假</div></span></div>
+      <div class="tl done"><span class="time">20:00</span><span class="cb on"></span><span class="txt">去超市买电池</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h">${ic('star')}已完成<span class="more">4 项 ⌃</span></div>
+    <div class="panel-b flush">
+      <div class="row done"><span class="cb on"></span><span class="txt">改昨天学生的作业</span></div>
+      <div class="row done"><span class="cb on"></span><span class="txt">起床、洗漱</span></div>
+    </div>
+  </div>
+`, '当天 7 条', '计划');
+
+/* ---------------- 课表 ---------------- */
+const slotRows = [
+  ['第1节','08:00'],['第2节','08:55'],['第3节','10:00'],['第4节','10:55'],
+  ['第5节','14:00'],['第6节','14:55'],['第7节','16:00'],['第8节','19:00']
+];
+const days = [['周一','10/19'],['周二','10/20'],['周三','10/21'],['周四','10/22'],['周五','10/23'],['周六','10/24'],['周日','10/25']];
+const lessons = {
+  '0-7': ['王小明','one'],
+  '2-6': ['李雷、韩梅梅','small'],
+  '5-7': ['王小明','one'],
+  '5-4': ['李雷、韩梅梅、张三','small']
+};
+const ttCell = (d, s) => {
+  const k = d + '-' + s;
+  const l = lessons[k];
+  const today = days[d][1] === '10/25' ? ' today' : '';
+  if (!l) return `<div class="cell${today}"></div>`;
+  return `<div class="cell${today}"><div class="lesson ${l[1]}"><b>${l[0]}</b><span>${l[1]==='small'?'小班':'一对一'}</span></div></div>`;
+};
+const scheduleView = () => shell('schedule', `
+  <div class="datebar">
+    <span class="arrow">‹</span>
+    <span class="d">10/19 – 10/25</span>
+    <span class="arrow">›</span>
+    <button class="btn sm">学生</button>
+  </div>
+  <div class="tt-wrap">
+    <div class="tt">
+      <div class="hd" style="background:linear-gradient(180deg,#F7FAFF,#E9F1FC)"></div>
+      ${days.map(([w,d]) => `<div class="hd${d==='10/25'?' today':''}">${w}<span class="dd">${d}</span></div>`).join('')}
+      ${slotRows.map(([n,t],s) => `
+        <div class="sl">${n}<small>${t}</small></div>
+        ${days.map((_,d) => ttCell(d, s)).join('')}
+      `).join('')}
+    </div>
+  </div>
+  <div class="hint">← 左右滑动看完整一周 · 点格子加课 →</div>
+`, '4 节课', '秋季学期');
+
+/* ---------------- 记录 ---------------- */
+const postView = () => shell('post', `
+  <div class="panel">
+    <div class="panel-h">${ic('post')}记录<span class="more">写一条 ＋</span></div>
+    <div class="panel-b flush">
+      <div class="post">
+        <div class="ph"><span class="pf">景</span><span class="pn">景臣</span><span class="lv">LV 07</span><span class="pt">今天 22:48</span></div>
+        <div class="pb">今天小班讲二次函数，韩梅梅请假的作业得单独补一份。<br>顺手把家长的话记下来，省得忘。</div>
+        <div class="pb" style="margin-top:5px;color:#4A5A73"># 补课 &nbsp; # 作业</div>
+        <div class="pa"><span class="a">赞 3</span><span class="a">踩</span><span class="a">分享</span><span style="margin-left:auto">2 条评论</span></div>
+      </div>
+      <div class="post">
+        <div class="ph"><span class="pf" style="background:linear-gradient(160deg,#FFD9A9,#D8863C)">学</span><span class="pn">学生 · 王小明</span><span class="pt">昨天 20:12</span></div>
+        <div class="pb">这节课的顶点式总算推明白了，速度还是慢一点。</div>
+        <div class="pic">作业照片</div>
+        <div class="pa"><span class="a">赞 1</span><span class="a">踩</span><span class="a">分享</span><span style="margin-left:auto">1 条评论</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-h">${ic('star')}明天的提醒</div>
+    <div class="panel-b flush">
+      <div class="row"><span class="tag" style="border-color:#D8B364;background:#FDF3DA;color:#8A5A00">补作业</span><span class="txt">给韩梅梅单独留一份练习</span></div>
+    </div>
+  </div>
+`, '共 5 条', '记录');
+
+/* ---------------- 设置 ---------------- */
+const settingsView = () => shell('home', `
+  <div class="panel">
+    <div class="panel-h">${ic('folder')}数据</div>
+    <div class="panel-b flush">
+      <div class="srow"><span>导出备份文件</span><span class="v">昨天 21:40</span></div>
+      <div class="srow"><span>从文件导入</span><span class="v">›</span></div>
+      <div class="srow"><span>自动快照</span><span class="v">7 份 ›</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-h">${ic('gear')}外观</div>
+    <div class="panel-b flush">
+      <div class="srow"><span>主题</span>
+        <div class="seg" style="margin-left:auto"><span class="on">浅色</span><span>深色</span><span>跟随</span></div>
+      </div>
+      <div class="srow"><span>背景底图</span><span class="v">未设置 ›</span></div>
+      <div class="srow"><span>一周从哪天开始</span>
+        <div class="seg" style="margin-left:auto"><span class="on">周一</span><span>周日</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-h">${ic('cal')}课表时间段</div>
+    <div class="panel-b flush">
+      <div class="srow"><span>第1节</span><span class="v">08:00 – 08:45</span></div>
+      <div class="srow"><span>第2节</span><span class="v">08:55 – 09:40</span></div>
+      <div class="srow"><span>共 8 节</span><span class="v">管理 ›</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-b"><button class="btn wide" style="color:#B22A2A">清空所有数据</button></div>
+  </div>
+`, '设置', 'v3.0');
+
+const VIEWS = {
+  home: homeView, plan: planView, schedule: scheduleView,
+  post: postView, settings: settingsView,
+};
+function render() {
+  const id = (location.hash.replace(/^#\/?/, '') || 'home');
+  document.getElementById('app').innerHTML = (VIEWS[id] || homeView)();
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>

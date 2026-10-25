@@ -10,6 +10,13 @@
   --sp:4px;
   --font:15px;
   --dur:.18s;
+  /* 动效曲线：内置 ease-out 太软，UI 反馈要用更"有劲"的自定义曲线
+     （来自 Emil Kowalski 的设计工程指南） */
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-in-out:cubic-bezier(.77,0,.175,1);
+  --ease-drawer:cubic-bezier(.32,.72,0,1);
+  --dur-press:160ms;
+  --dur-sheet:240ms;
 }
 [data-theme="dark"]{
   --bg:#14161A; --card:#1E2126; --card2:#242830;
@@ -83,9 +90,19 @@ body.detail main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
   stroke-linecap:round; stroke-linejoin:round}
 
 /* 页面进出动效 */
-.page{animation:fadein .2s cubic-bezier(.2,.8,.3,1)}
+.page{animation:fadein .2s var(--ease-out)}
 @keyframes fadein{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-@keyframes slideup{from{transform:translateY(100%)} to{transform:none}}
+
+/* 无障碍：尊重"减少动态效果"。
+   保留淡入淡出（有助理解），去掉位移动画（会引起眩晕）。 */
+@media (prefers-reduced-motion: reduce){
+  .sheet-mask,.sheet,.toast,.confirm,.img-preview{animation:none !important; transition:none !important}
+  *,*::before,*::after{
+    transition-duration:.01ms !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+  }
+}
 
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:40;

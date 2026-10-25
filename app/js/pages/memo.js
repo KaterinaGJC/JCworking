@@ -286,8 +286,13 @@ async function doDelete(root, rec) {
 function enableSwipe(box, root) {
   let startX = 0;
   let startY = 0;
+  let startTime = 0;
   let target = null;
   let moved = false;
+
+  // 甩出去就算删：距离不够但速度够快也认（跟"甩卡片"的手感一致）
+  const DISMISS_PX = 90;
+  const DISMISS_VELOCITY = 0.11;   // px / ms，来自 Emil 的设计工程指南
 
   box.addEventListener('pointerdown', (ev) => {
     const note = ev.target.closest('[data-note]');
@@ -295,6 +300,7 @@ function enableSwipe(box, root) {
     target = note;
     startX = ev.clientX;
     startY = ev.clientY;
+    startTime = performance.now();
     moved = false;
     target.style.transition = 'none';
   });
@@ -317,10 +323,14 @@ function enableSwipe(box, root) {
   box.addEventListener('pointerup', async (ev) => {
     if (!target) return;
     const dx = ev.clientX - startX;
+    const elapsed = Math.max(1, performance.now() - startTime);
+    const velocity = Math.abs(dx) / elapsed;
     const note = target;
     target = null;
-    note.style.transition = 'transform .18s ease, opacity .18s ease';
-    if (moved && dx < -90) {
+    // 收起时的回弹比甩出更快（松手要跟手）
+    note.style.transition = 'transform .18s var(--ease-out), opacity .18s var(--ease-out)';
+    const flicked = moved && dx < 0 && velocity > DISMISS_VELOCITY;
+    if (moved && (dx < -DISMISS_PX || flicked)) {
       const rec = store.state.notes.find((n) => n.id === note.dataset.note);
       suppressClickUntil = Date.now() + 400;
       if (rec) await doDelete(root, rec);

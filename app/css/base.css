@@ -36,9 +36,10 @@
 .btn{
   border:1px solid var(--line-strong); background:transparent; color:var(--text2);
   font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:10px; cursor:pointer;
-  transition:transform .1s, background var(--dur);
+  /* 按下立刻缩、松开 160ms 回弹；曲线用强 ease-out，手感更"有劲" */
+  transition:transform var(--dur-press) var(--ease-out), background var(--dur);
 }
-.btn:active{transform:scale(.96)}
+.btn:active{transform:scale(.97)}
 .btn.primary{background:var(--card2); border-color:transparent; color:var(--text)}
 .btn.solid{background:var(--text); color:var(--bg); border-color:transparent}
 .btn.danger{color:var(--red); border-color:rgba(225,75,75,.3)}
@@ -46,7 +47,8 @@
 
 .bigbtn{
   width:100%; border:0; border-radius:16px; padding:16px; font-size:16px; font-weight:650;
-  background:var(--teal); color:#fff; cursor:pointer; transition:transform .1s;
+  background:var(--teal); color:#fff; cursor:pointer;
+  transition:transform var(--dur-press) var(--ease-out);
   box-shadow:0 8px 20px -10px rgba(31,157,139,.7); margin:4px 0 8px;
 }
 .bigbtn:active{transform:scale(.985)}
@@ -116,16 +118,23 @@ textarea.autogrow{overflow:hidden; min-height:44px}
 .cbox.done::after{content:""; width:10px; height:5px; border-left:1.9px solid #fff;
   border-bottom:1.9px solid #fff; transform:rotate(-45deg) translate(1px,-1px)}
 
-/* 底部弹出面板 */
+/* 底部弹出面板
+   入场改用 transition + @starting-style：
+   transition 可以被"打断并重定向"，面板连开两次也不会跳帧；
+   曲线用抽屉专用的 --ease-drawer（iOS 手感）。 */
 .sheet-mask{
   position:fixed; inset:0; background:rgba(10,12,16,.42); z-index:60;
-  animation:fadein .16s ease; display:flex; align-items:flex-end;
-  max-width:none;
+  display:flex; align-items:flex-end; max-width:none;
+  opacity:1; transition:opacity 160ms var(--ease-out);
+  @starting-style{ opacity:0; }
 }
 .sheet{
   width:100%; max-width:430px; margin:0 auto; background:var(--card);
   border-radius:20px 20px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom));
-  animation:slideup .22s cubic-bezier(.2,.8,.3,1); max-height:92vh; overflow-y:auto;
+  max-height:92vh; overflow-y:auto;
+  transform:translateY(0); opacity:1;
+  transition:transform var(--dur-sheet) var(--ease-drawer), opacity 200ms var(--ease-out);
+  @starting-style{ transform:translateY(100%); opacity:.6; }
 }
 .sheet h3{margin:0 0 14px; font-size:16px; font-weight:650}
 .sheet .row{display:flex; gap:10px; margin-top:16px}
@@ -136,11 +145,16 @@ textarea.autogrow{overflow:hidden; min-height:44px}
 /* 确认框 */
 .confirm{
   position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:28px;
-  background:rgba(10,12,16,.42); animation:fadein .14s ease;
+  background:rgba(10,12,16,.42);
+  opacity:1; transition:opacity 140ms var(--ease-out);
+  @starting-style{ opacity:0; }
 }
 .confirm .box{
   width:100%; max-width:330px; background:var(--card); border-radius:18px; padding:20px;
-  animation:fadein .18s ease;
+  /* 模态框从中心放大才对（弹层才需要 origin-aware）*/
+  transform:scale(1); opacity:1;
+  transition:transform 180ms var(--ease-out), opacity 140ms var(--ease-out);
+  @starting-style{ transform:scale(.96); opacity:0; }
 }
 .confirm .box h3{margin:0 0 8px; font-size:16px}
 .confirm .box p{margin:0 0 4px; font-size:14px; color:var(--text2); line-height:1.6}
@@ -149,12 +163,16 @@ textarea.autogrow{overflow:hidden; min-height:44px}
 
 /* 提示条 / 撤销条 */
 .toast{
-  position:fixed; left:50%; transform:translateX(-50%);
-  bottom:calc(88px + env(safe-area-inset-bottom)); z-index:80;
+  position:fixed; left:50%; z-index:80;
+  bottom:calc(88px + env(safe-area-inset-bottom));
   background:var(--text); color:var(--bg); font-size:13.5px; font-weight:500;
   padding:11px 16px; border-radius:12px; display:flex; align-items:center; gap:12px;
-  box-shadow:0 10px 30px -10px rgba(0,0,0,.5); animation:fadein .16s ease;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5);
   max-width:calc(100vw - 48px);
+  /* 提示条是"连着弹"的：用 transition 才能被打断重定向，关键帧会从零重播 */
+  transform:translate(-50%,0); opacity:1;
+  transition:transform 180ms var(--ease-out), opacity 140ms var(--ease-out);
+  @starting-style{ transform:translate(-50%,8px); opacity:0; }
 }
 .toast button{
   border:0; background:transparent; color:inherit; font-weight:700; font-size:13.5px;
