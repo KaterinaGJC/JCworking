@@ -216,17 +216,30 @@
 .note.b{background:#E9F1FF; color:#22406E}
 .note.g{background:#E7F7EF; color:#1B4F3B}
 .note.p{background:#FBEBF3; color:#6B2A47}
+/* v2 新增的四种颜色 */
+.note.o{background:#FFF0E1; color:#6B3A12}
+.note.c{background:#E2F6F7; color:#12474B}
+.note.v{background:#F0EAFF; color:#3E2A6B}
+.note.n{background:#EFF1F4; color:#3A4048}
 [data-theme="dark"] .note.y{background:#332C18; color:#EBDFB4}
 [data-theme="dark"] .note.b{background:#1D2A40; color:#BFCFEC}
 [data-theme="dark"] .note.g{background:#17302A; color:#B6E0CB}
 [data-theme="dark"] .note.p{background:#31202B; color:#EBC6D8}
-.colordots{display:flex; gap:10px; margin-top:4px}
+[data-theme="dark"] .note.o{background:#3A2A18; color:#F0CFA8}
+[data-theme="dark"] .note.c{background:#173338; color:#B5E4E8}
+[data-theme="dark"] .note.v{background:#2A233A; color:#D8C9F5}
+[data-theme="dark"] .note.n{background:#2A2E35; color:#C7CBD2}
+.colordots{display:flex; flex-wrap:wrap; gap:10px; margin-top:4px}
 .colordot{width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer}
 .colordot.on{border-color:var(--text)}
 .colordot.y{background:#FFF0BE}
 .colordot.b{background:#D8E6FF}
 .colordot.g{background:#D5F2E4}
 .colordot.p{background:#F9DCEA}
+.colordot.o{background:#FFDFC0}
+.colordot.c{background:#C8EEF0}
+.colordot.v{background:#DDD0FF}
+.colordot.n{background:#DFE3E9}
 
 /* ---------- 设置 ---------- */
 .sgroup{background:var(--card); border-radius:14px; margin-bottom:12px;

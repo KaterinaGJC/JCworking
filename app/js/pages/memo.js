@@ -6,8 +6,10 @@ import { tipHtml } from '../tips.js';
 
 let searchOn = false;
 let keyword = '';
+// v2：颜色从 4 种扩到 8 种（y 黄 / o 橙 / g 绿 / c 青 / b 蓝 / v 紫 / p 粉 / n 灰）
 const COLORS = [
-  ['y', '黄'], ['b', '蓝'], ['g', '绿'], ['p', '粉'],
+  ['y', '黄'], ['o', '橙'], ['g', '绿'], ['c', '青'],
+  ['b', '蓝'], ['v', '紫'], ['p', '粉'], ['n', '灰'],
 ];
 let suppressClickUntil = 0;
 
