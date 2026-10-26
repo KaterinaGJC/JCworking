@@ -10,9 +10,10 @@
    想改观感，基本只需要动下面 :root 里的值
    ========================================================================== */
 
-/* 中文手写体：霞鹜文楷（按 unicode-range 分 97 个子集，浏览器只取用到的那些）
+/* 中文衬线：思源宋体 Noto Serif SC（101 个 unicode-range 子集，只取用到的那些）
+   记录/参考图那种"细宋"的气质，比楷体更贴。
    注意 @import 必须在所有规则之前 */
-@import url("../fonts/lxgw.css");
+@import url("../fonts/notoserif.css");
 
 /* 拉丁花体 / 衬线斜体：随包附带（woff2，各几十 KB） */
 @font-face{
@@ -66,13 +67,14 @@
   --font:15.5px;
 
   /* ---- 字体：本地打包，离线可用 ----
-     中文 → 霞鹜文楷（4.4MB 子集，按需加载）
-     拉丁花体 → Caveat
-     拉丁衬线斜体 → Playfair Display Italic（数字/日期用，最像参考图） */
-  --font-hand:"LXGW WenKai","霞鹜文楷","Kaiti SC",KaiTi,"楷体",STKaiti,ui-serif,serif;
-  --font-script:"JC Script","Segoe Print","Bradley Hand","LXGW WenKai",cursive;
+     中文标题 → 思源宋体（细宋，最接近参考图）
+     中文正文 → 系统无衬线（小字在手机上更清楚）
+     拉丁花体 → Caveat；拉丁衬线斜体 → Playfair Display */
+  --font-hand:"Noto Serif SC","Source Han Serif SC","Songti SC",SimSun,
+              "宋体","Kaiti SC",KaiTi,ui-serif,serif;
+  --font-script:"JC Script","Segoe Print","Bradley Hand",cursive;
   --font-serif:"JC Serif","Playfair Display",Georgia,"Times New Roman",ui-serif,serif;
-  --font-hand-latin:"JC Script","Segoe Print","Bradley Hand","LXGW WenKai",ui-serif,serif;
+  --font-hand-latin:"JC Script","Segoe Print","Bradley Hand",ui-serif,serif;
   --font-body:"Nunito","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",
               system-ui,sans-serif;
 
@@ -705,13 +707,12 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    10. 蓝调心情记录（首页卡片）
    ========================================================================== */
 .home-body > .card[data-card="mood"]{--rot:.8deg; --paper:var(--card2)}
-/* 心情卡的胶带挪到卡片下沿（压在"手写句"上方那条虚线处），
-   这样不会盖住右上角的"已记录" */
+/* 心情卡的胶带放在顶部正中：左边是标题、右边是"已记录"，中间是空的 */
 .home-body > .card[data-card="mood"]::after{
-  left:50%; right:auto; top:auto; bottom:34px;
-  width:88px; height:18px;
-  margin-left:-44px;
-  transform:rotate(-1.8deg);
+  left:50%; right:auto; top:2px; bottom:auto;
+  width:80px; height:17px;
+  margin-left:-40px;
+  transform:rotate(-2deg);
 }
 
 .mood-row{

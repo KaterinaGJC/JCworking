@@ -134,20 +134,20 @@ try {
     const used = performance.getEntriesByType('resource')
       .map(e => e.name).filter(n => n.includes('/fonts/'));
     const css = await (await fetch('/css/scrapbook.css')).text();
-    const lxgw = await (await fetch('/fonts/lxgw.css')).text();
+    const lxgw = await (await fetch('/fonts/notoserif.css')).text();
     return {
       usedFiles: [...new Set(used.map(u => u.split('/').pop()))],
       external: /fonts\\.googleapis|fonts\\.gstatic/.test(css + lxgw),
-      hasKai: css.includes('LXGW WenKai'),
+      hasKai: css.includes('Noto Serif SC'),
       hasScript: css.includes('JC Script'),
       hasSerif: css.includes('JC Serif'),
       lxgwFaces: (lxgw.match(/@font-face/g) || []).length,
     };
   })()`);
   ok('CSS 里没有任何外部字体 CDN', fontInfo.external === false);
-  ok('打包了霞鹜文楷（中文）', fontInfo.hasKai === true);
+  ok('打包了思源宋体（中文衬线）', fontInfo.hasKai === true);
   ok('打包了花体与衬线斜体（拉丁）', fontInfo.hasScript && fontInfo.hasSerif);
-  ok('霞鹜文楷按子集拆分（@font-face > 50 段）', fontInfo.lxgwFaces > 50, String(fontInfo.lxgwFaces));
+  ok('中文衬线按子集拆分（@font-face > 50 段）', fontInfo.lxgwFaces > 50, String(fontInfo.lxgwFaces));
   ok('页面实际从本地加载了字体文件', fontInfo.usedFiles.length > 0, fontInfo.usedFiles.join(','));
 
   await page.close();
