@@ -4,20 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>景臣的工作生活</title>
-<meta http-equiv="refresh" content="0; url=./app/index.html">
-<meta name="theme-color" content="#F4F5F7">
+<!--
+  根路径跳转页：让 https://<user>.github.io/<repo>/ 直接进 App。
+  跳转目标写 ./app/ 而不是 ./app/index.html —— 这样地址栏里不会出现 index.html。
+-->
+<meta http-equiv="refresh" content="0; url=./app/">
+<meta name="theme-color" content="#F0F4F8">
 <style>
-  html,body{height:100%;margin:0;background:#F4F5F7;color:#16181D;
+  html,body{height:100%;margin:0;background:#F0F4F8;color:#4A4543;
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
     display:grid;place-items:center;text-align:center}
-  a{color:#3B6FE0}
+  a{color:#5F86A8}
+  p{font-size:15px;color:#7B736D;margin:6px 0}
 </style>
 </head>
 <body>
   <div>
-    <p style="font-size:15px;color:#6B7280">正在打开…</p>
-    <p><a href="./app/index.html">如果没反应，点这里打开</a></p>
+    <p>正在打开…</p>
+    <p><a href="./app/">如果没反应，点这里打开</a></p>
   </div>
-  <script>location.replace('./app/index.html');</script>
+  <script>location.replace('./app/');</script>
 </body>
 </html>
