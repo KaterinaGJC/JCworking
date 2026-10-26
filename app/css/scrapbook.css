@@ -923,82 +923,85 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    原则不变：只用现有的类名叠加造型，不动 DOM、不动逻辑。
    ========================================================================== */
 
-/* ---------- 17.1 教培课表 ---------- */
-.schedule-body{padding:10px 10px 26px}
+/* ---------- 17.1 教培课表（极简） ----------
+   课表是"每天要看很多次"的工具，不是装饰。
+   这里刻意不用撕边、不用胶带、不用渐变、不用投影：
+   纯平纸色 + 1px 细线 + 靠字重/颜色分层。 */
+.schedule-body{padding:12px 12px 26px}
 
-/* 课表是一张"贴在墙上的纸"：
-   不做撕边——撕边会把表头裁掉、格子也不好点。改用圆角纸 + 顶部胶带 + 虚线格线 */
 .schedule-body .timetable-wrap{
   position:relative;
+  margin:0 0 14px;
+  padding:0;
   background:var(--card);
   border:1px solid var(--line-strong);
-  border-radius:14px;
-  /* 覆盖 pages.css 里的负边距/内边距（那是给无边框版留的） */
-  margin:0 0 14px;
-  padding:30px 6px 6px;
-  overflow-x:auto; overflow-y:hidden;
-  box-shadow:var(--shadow);
+  border-radius:12px;
+  box-shadow:none;
   clip-path:none;
+  overflow-x:auto; overflow-y:hidden;
 }
-/* 表格要连续：去掉 6px 的格子间距，改用虚线分隔 */
+.schedule-body .timetable-wrap::before,
+.schedule-body .timetable-wrap::after{ content:none }
+
+/* 表格要连续：去掉 6px 的格子间距，改用 1px 细线分隔 */
 .schedule-body .timetable{gap:0}
-.schedule-body .timetable-wrap::before{ content:none }
-/* 顶部胶带 */
-.schedule-body .timetable-wrap::after{
-  content:""; position:absolute; top:6px; left:50%;
-  width:104px; height:17px; margin-left:-52px;
-  transform:rotate(-1.6deg);
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
-    var(--tape);
-  clip-path:polygon(2% 0,98% 6%,100% 92%,3% 100%);
-  opacity:.9; pointer-events:none;
-}
 
 .tt-corner{background:var(--card)}
+
+/* 表头：平色 + 一条底线；今天只靠文字颜色区分，不做高亮块 */
 .tt-day{
-  background:linear-gradient(180deg,#F6FAFF,#DFECFB);
-  border-right:1px dashed var(--line);
+  background:var(--card);
+  border-right:1px solid var(--line);
   border-bottom:1px solid var(--line-strong);
   border-radius:0;
-  padding:7px 0 9px;
+  padding:8px 0 9px;
 }
-.tt-day .d1{font-family:var(--font-hand); font-weight:600; letter-spacing:.4px}
-.tt-day .d2{font-variant-numeric:tabular-nums}
-.tt-day.today{background:linear-gradient(180deg,#D9E9FC,#C1DAF5)}
-.tt-day.today .d1{color:var(--blue-ink)}
+.tt-day .d1{
+  font-family:var(--font-body);
+  font-size:12px; font-weight:600; letter-spacing:.2px; color:var(--text2);
+}
+.tt-day .d2{font-size:11px; color:var(--text3); font-variant-numeric:tabular-nums}
+.tt-day.today{background:var(--card)}
+.tt-day.today .d1,.tt-day.today .d2{color:var(--blue-ink)}
+.tt-day.today .d1{font-weight:700}
+
+/* 节次列 */
 .tt-slot{
-  background:linear-gradient(180deg,#FBFDFF,#EFF6FD);
-  border-right:1px dashed var(--line-strong);
-  border-bottom:1px dashed var(--line);
+  background:var(--card);
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
   border-radius:0;
 }
-.tt-slot b{font-family:var(--font-hand); letter-spacing:.3px}
+.tt-slot b{font-family:var(--font-body); font-size:11px; font-weight:600; color:var(--text2)}
+.tt-slot span{font-size:10.5px; color:var(--text3); font-variant-numeric:tabular-nums}
+
+/* 格子：平色 + 细线 */
 .tt-cell{
   background:var(--card);
-  border-right:1px dashed var(--line);
-  border-bottom:1px dashed var(--line);
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
   border-radius:0;
-  padding:2px;
+  padding:3px;
 }
-.tt-cell.today{background:#F7FBFF}
-.tt-add{color:var(--text3); border-radius:8px}
+.tt-cell.today{background:#FBFDFF}       /* 今天一列只给极淡的底，几乎看不见 */
+.tt-add{color:var(--text3); border-radius:6px; background:transparent}
 .tt-add:hover{background:var(--card2)}
 
-/* 课块：小纸片，一对一=蓝、小班=黄 */
+/* 课块：平色小方块，一对一=淡蓝、小班=淡黄；不用渐变/投影 */
 .schedule-body .lesson{
-  background:linear-gradient(180deg,#FFFFFF,#E9F3FF 70%,#DCEBFC);
-  border:1px solid rgba(127,163,198,.55);
-  border-radius:10px;
-  box-shadow:0 3px 8px rgba(74,69,67,.10);
-  padding:8px 9px;
+  background:#EFF6FD;
+  border:1px solid #DAE8F6;
+  border-radius:8px;
+  box-shadow:none;
+  padding:7px 8px;
 }
 .schedule-body .lesson.small{
-  background:linear-gradient(180deg,#FFFDF6,#FCF1D9 70%,#F8E7C4);
-  border-color:rgba(216,179,100,.6);
+  background:#FDF8EA;
+  border-color:#EFE1C2;
 }
-.schedule-body .lesson .lbar{width:4px; border-radius:4px}
-.schedule-body .lesson .ltop{font-family:var(--font-hand); font-size:13px}
+.schedule-body .lesson .lbar{width:3px; border-radius:2px; background:#A9C7E4}
+.schedule-body .lesson.small .lbar{background:#E0C07C}
+.schedule-body .lesson .ltop{font-family:var(--font-body); font-size:12.5px; font-weight:600}
 
 /* ---------- 17.2 游戏娱乐 ---------- */
 .fun-body{padding:10px 10px 26px}
@@ -1209,3 +1212,37 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    只用 CSS 的 slap：新页面从下方贴上并回正（见第 13 节）。
    曾试过原生 View Transitions，但它的快照层会吞点击（动画期间点不动），已放弃。
    ========================================================================== */
+
+/* ==========================================================================
+   21. 夜间补丁：四屏里那些写死的浅色，在深色下要跟着变
+   ========================================================================== */
+[data-theme="dark"] .schedule-body .lesson{
+  background:#2C3B4C;
+  border-color:#3B4C60;
+}
+[data-theme="dark"] .schedule-body .lesson.small{
+  background:#3A3527;
+  border-color:#4C4433;
+}
+[data-theme="dark"] .schedule-body .lesson .lbar{background:#5B82A8}
+[data-theme="dark"] .schedule-body .lesson.small .lbar{background:#A98B4E}
+[data-theme="dark"] .tt-cell.today{background:#232B37}
+[data-theme="dark"] .schedule-body .timetable-wrap,
+[data-theme="dark"] .tt-day,
+[data-theme="dark"] .tt-slot,
+[data-theme="dark"] .tt-cell,
+[data-theme="dark"] .tt-corner{background:var(--card)}
+
+[data-theme="dark"] .fun-body .gcard,
+[data-theme="dark"] .fun-body .seg,
+[data-theme="dark"] .fun-body .chip,
+[data-theme="dark"] .fun-body .tag{background:var(--card2); border-color:var(--line-strong)}
+[data-theme="dark"] .fun-body .seg button.on{background:var(--blue); color:#1B2230}
+
+[data-theme="dark"] .memo-body .note::after{background:
+  repeating-linear-gradient(45deg, rgba(255,255,255,.12) 0 5px, rgba(255,255,255,.05) 5px 10px),
+  rgba(255,255,255,.10)}
+[data-theme="dark"] .memo-body .note-imgs img{border-color:#3A4254}
+
+[data-theme="dark"] .page[data-page="settings"] .stat{background:var(--card2); border-color:var(--line-strong)}
+[data-theme="dark"] .page[data-page="settings"] .card{border-color:var(--line)}
