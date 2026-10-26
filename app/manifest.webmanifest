@@ -2,7 +2,7 @@
   "name": "景臣的工作生活",
   "short_name": "景臣",
   "description": "个人工作生活：今日计划、教培课表、游戏娱乐、快速备忘。数据只存在本机。",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

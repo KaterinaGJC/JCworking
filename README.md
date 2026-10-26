@@ -45,7 +45,7 @@ node tools/server.mjs app 8123
 1. 在 GitHub 新建仓库（公开仓库即可，**仓库里只有代码，不含任何个人数据**）
 2. 把本目录推送上去
 3. 仓库 → Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`、目录 `/ (root)`，保存
-4. 等 1 分钟，得到 `https://<你的账号>.github.io/<仓库名>/app/index.html`
+4. 等 1 分钟，得到 `https://katerinagjc.github.io/JCworking/`（本项目实际地址）
 5. 手机 Chrome 打开这个地址 → 菜单 →「添加到主屏幕」/「安装应用」
 
 > 应用全部使用相对路径，部署在子目录下也能正常工作（有专门的测试 `tests/subpath.test.mjs` 验证）。
