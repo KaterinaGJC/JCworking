@@ -1,0 +1,710 @@
+/* ==========================================================================
+   清透蓝调手账拼贴风 · 皮肤层（Pastel Blue Scrapbook Collage）
+   --------------------------------------------------------------------------
+   只做"造型"，不改任何业务逻辑与 DOM 结构：
+     - 覆盖 tokens.css 的设计令牌（纸色 / 粉彩 / 暖灰阴影）
+     - 给卡片加撕纸边（clip-path）、微旋转、和纸胶带
+     - 首页 + 记录页重排成"手账拼贴"版面
+   ⚠️ 因为是覆盖层，本文件必须在 tokens.css / base.css / pages.css 之后加载
+   --------------------------------------------------------------------------
+   想改观感，基本只需要动下面 :root 里的值
+   ========================================================================== */
+
+/* ==========================================================================
+   0. 手写体：用 local() + unicode-range 把「拉丁手写体」和「中文楷体」分开
+   --------------------------------------------------------------------------
+   为什么需要这一层：字体栈是"整段字符串"匹配的，若把 Segoe Print 放第一个，
+   中文不会继续往后找 KaiTi，而是退回系统黑体（浏览器默认行为）。
+   用 @font-face 声明同一族名、按字符区间各取所长，才能中文楷体 + 拉丁手写。
+   零下载：只用系统已装字体；缺失的字体会被系统跳过（安卓上退回系统字体）。
+   ========================================================================== */
+@font-face{
+  font-family:"JC Hand";
+  src:local("Segoe Print"), local("Bradley Hand"), local("Comic Sans MS"),
+      local("Chalkboard SE"), local("Marker Felt");
+  unicode-range:U+0000-00FF, U+2000-206F;
+  font-display:swap;
+}
+@font-face{
+  font-family:"JC Hand";
+  src:local("KaiTi"), local("楷体"), local("Kaiti SC"), local("STKaiti"),
+      local("LXGW WenKai"), local("霞鹜文楷"), local("STXingkai"), local("华文行楷");
+  unicode-range:U+2E80-9FFF, U+F900-FAFF, U+FF00-FFEF;
+  font-display:swap;
+}
+
+:root{
+  /* ---- 纸张与背景 ---- */
+  --bg:#F0F4F8;                 /* 极浅灰蓝 */
+  --grid:#D5E1EE;               /* 方格线（要看得见） */
+  --grid-size:22px;             /* 方格大小 */
+  --card:#FDFAF5;               /* 纸色：暖白，不是纯白 */
+  --card2:#F1F7FD;              /* 蓝调纸 */
+
+  /* ---- 文字（禁止纯黑） ---- */
+  --text:#4A4543;
+  --text2:#7B736D;
+  --text3:#A79E96;
+
+  /* ---- 线条与阴影 ---- */
+  --line:#E9E1D8;
+  --line-strong:#DCD2C7;
+  --shadow:0 4px 12px rgba(74,69,67,.08);
+  --shadow-lift:0 12px 28px rgba(74,69,67,.12);
+
+  /* ---- 粉彩主色（低饱和） ---- */
+  --blue:#A8C8E8;               /* 主色：粉彩蓝 */
+  --blue-ink:#5F86A8;           /* 蓝色文字用（比主色深，保证可读） */
+  --teal:#B5CDB6;               /* 薄荷绿 */
+  --purple:#C6BCDD;
+  --amber:#F2D06B;              /* 鹅黄 */
+  --red:#E3A6A6;                /* 浅粉红 */
+  --green:#A9C9AE;
+  --pink:#F2C4C4;               /* 浅粉 */
+
+  --r:18px;                     /* 圆角 14–20px 区间 */
+  --r-sm:14px;
+  --font:15.5px;
+
+  /* ---- 字体：不打包字体，靠系统兜底 ----
+     中文楷体放最前（字体栈不会为中文"跳过"前面的拉丁字体继续找，必须在栈首）；
+     需要拉丁手写感的少量元素（开屏标语）单独用 --font-hand-latin。 */
+  --font-hand:"Kaiti SC",KaiTi,"楷体",STKaiti,"LXGW WenKai","霞鹜文楷",
+              "STXingkai","华文行楷","Segoe Print",ui-serif,serif;
+  --font-hand-latin:"Segoe Print","Bradley Hand","Comic Sans MS","Chalkboard SE",
+                    "Kaiti SC",KaiTi,ui-serif,serif;
+  --font-body:"Nunito","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",
+              system-ui,sans-serif;
+
+  /* ---- 撕纸边（细密毛边：点距不等、幅度不均，才像手撕而不是波浪） ---- */
+  --torn:polygon(
+    0.8% 1.1%, 1.6% 0.5%, 2.8% 1.4%, 3.9% 0.4%, 5.2% 1.2%, 6.8% 0.5%,
+    8.1% 1.5%, 9.4% 0.6%, 11.2% 1.3%, 13% 0.4%, 14.8% 1.4%, 16.4% 0.5%,
+    18.2% 1.2%, 20.1% 0.4%, 22% 1.5%, 23.8% 0.6%, 25.6% 1.3%, 27.4% 0.4%,
+    29.2% 1.4%, 31% 0.6%, 32.8% 1.2%, 34.6% 0.4%, 36.4% 1.5%, 38.2% 0.5%,
+    40% 1.3%, 41.8% 0.4%, 43.6% 1.4%, 45.4% 0.6%, 47.2% 1.2%, 49% 0.5%,
+    50.8% 1.5%, 52.6% 0.4%, 54.4% 1.3%, 56.2% 0.6%, 58% 1.4%, 59.8% 0.5%,
+    61.6% 1.2%, 63.4% 0.4%, 65.2% 1.5%, 67% 0.6%, 68.8% 1.3%, 70.6% 0.4%,
+    72.4% 1.4%, 74.2% 0.5%, 76% 1.2%, 77.8% 0.4%, 79.6% 1.5%, 81.4% 0.6%,
+    83.2% 1.3%, 85% 0.4%, 86.8% 1.4%, 88.6% 0.5%, 90.4% 1.2%, 92.2% 0.4%,
+    94% 1.5%, 95.8% 0.6%, 97.4% 1.2%, 98.6% 0.5%, 99.4% 1.1%,
+    98.9% 4.6%, 99.5% 8.4%, 98.8% 12.2%, 99.4% 16%, 98.9% 19.8%,
+    99.5% 23.6%, 98.8% 27.4%, 99.4% 31.2%, 98.9% 35%, 99.5% 38.8%,
+    98.8% 42.6%, 99.4% 46.4%, 98.9% 50.2%, 99.5% 54%, 98.8% 57.8%,
+    99.4% 61.6%, 98.9% 65.4%, 99.5% 69.2%, 98.8% 73%, 99.4% 76.8%,
+    98.9% 80.6%, 99.5% 84.4%, 98.8% 88.2%, 99.4% 92%, 98.9% 95.4%, 99.3% 98.4%,
+    97.6% 99.2%, 95.4% 98.6%, 93% 99.4%, 90.6% 98.7%, 88% 99.3%,
+    85.4% 98.6%, 82.8% 99.4%, 80.2% 98.7%, 77.6% 99.3%, 75% 98.6%,
+    72.4% 99.4%, 69.8% 98.7%, 67.2% 99.3%, 64.6% 98.6%, 62% 99.4%,
+    59.4% 98.7%, 56.8% 99.3%, 54.2% 98.6%, 51.6% 99.4%, 49% 98.7%,
+    46.4% 99.3%, 43.8% 98.6%, 41.2% 99.4%, 38.6% 98.7%, 36% 99.3%,
+    33.4% 98.6%, 30.8% 99.4%, 28.2% 98.7%, 25.6% 99.3%, 23% 98.6%,
+    20.4% 99.4%, 17.8% 98.7%, 15.2% 99.3%, 12.6% 98.6%, 10% 99.4%,
+    7.4% 98.7%, 4.8% 99.3%, 2.4% 98.6%, 0.9% 99%,
+    0.5% 95.2%, 1.2% 91.4%, 0.6% 87.6%, 1.1% 83.8%, 0.5% 80%,
+    1.2% 76.2%, 0.6% 72.4%, 1.1% 68.6%, 0.5% 64.8%, 1.2% 61%,
+    0.6% 57.2%, 1.1% 53.4%, 0.5% 49.6%, 1.2% 45.8%, 0.6% 42%,
+    1.1% 38.2%, 0.5% 34.4%, 1.2% 30.6%, 0.6% 26.8%, 1.1% 23%,
+    0.5% 19.2%, 1.2% 15.4%, 0.6% 11.6%, 1.1% 7.8%, 0.7% 4.4%
+  );
+  --torn-alt:polygon(
+    1.2% 1.4%, 2.4% 0.6%, 3.8% 1.5%, 5.4% 0.5%, 7.2% 1.3%, 9% 0.4%,
+    10.8% 1.5%, 12.6% 0.6%, 14.4% 1.2%, 16.2% 0.4%, 18% 1.4%, 19.8% 0.5%,
+    21.6% 1.3%, 23.4% 0.4%, 25.2% 1.5%, 27% 0.6%, 28.8% 1.2%, 30.6% 0.4%,
+    32.4% 1.4%, 34.2% 0.5%, 36% 1.3%, 37.8% 0.4%, 39.6% 1.5%, 41.4% 0.6%,
+    43.2% 1.2%, 45% 0.4%, 46.8% 1.4%, 48.6% 0.5%, 50.4% 1.3%, 52.2% 0.4%,
+    54% 1.5%, 55.8% 0.6%, 57.6% 1.2%, 59.4% 0.4%, 61.2% 1.4%, 63% 0.5%,
+    64.8% 1.3%, 66.6% 0.4%, 68.4% 1.5%, 70.2% 0.6%, 72% 1.2%, 73.8% 0.4%,
+    75.6% 1.4%, 77.4% 0.5%, 79.2% 1.3%, 81% 0.4%, 82.8% 1.5%, 84.6% 0.6%,
+    86.4% 1.2%, 88.2% 0.4%, 90% 1.4%, 91.8% 0.5%, 93.6% 1.3%, 95.4% 0.4%,
+    97% 1.4%, 98.4% 0.6%, 99.2% 1.2%,
+    98.7% 4.8%, 99.3% 8.8%, 98.6% 12.8%, 99.2% 16.8%, 98.7% 20.8%,
+    99.3% 24.8%, 98.6% 28.8%, 99.2% 32.8%, 98.7% 36.8%, 99.3% 40.8%,
+    98.6% 44.8%, 99.2% 48.8%, 98.7% 52.8%, 99.3% 56.8%, 98.6% 60.8%,
+    99.2% 64.8%, 98.7% 68.8%, 99.3% 72.8%, 98.6% 76.8%, 99.2% 80.8%,
+    98.7% 84.8%, 99.3% 88.8%, 98.6% 92.4%, 99.1% 98.2%,
+    97.2% 99.1%, 94.8% 98.5%, 92.4% 99.3%, 90% 98.6%, 87.6% 99.2%,
+    85.2% 98.5%, 82.8% 99.3%, 80.4% 98.6%, 78% 99.2%, 75.6% 98.5%,
+    73.2% 99.3%, 70.8% 98.6%, 68.4% 99.2%, 66% 98.5%, 63.6% 99.3%,
+    61.2% 98.6%, 58.8% 99.2%, 56.4% 98.5%, 54% 99.3%, 51.6% 98.6%,
+    49.2% 99.2%, 46.8% 98.5%, 44.4% 99.3%, 42% 98.6%, 39.6% 99.2%,
+    37.2% 98.5%, 34.8% 99.3%, 32.4% 98.6%, 30% 99.2%, 27.6% 98.5%,
+    25.2% 99.3%, 22.8% 98.6%, 20.4% 99.2%, 18% 98.5%, 15.6% 99.3%,
+    13.2% 98.6%, 10.8% 99.2%, 8.4% 98.5%, 6% 99.3%, 3.6% 98.6%, 1.4% 99%,
+    0.9% 95%, 1.5% 91%, 0.8% 87%, 1.4% 83%, 0.9% 79%,
+    1.5% 75%, 0.8% 71%, 1.4% 67%, 0.9% 63%, 1.5% 59%,
+    0.8% 55%, 1.4% 51%, 0.9% 47%, 1.5% 43%, 0.8% 39%,
+    1.4% 35%, 0.9% 31%, 1.5% 27%, 0.8% 23%, 1.4% 19%,
+    0.9% 15%, 1.5% 11%, 0.9% 7%, 1.3% 4%
+  );
+  --torn-top:polygon(
+    0.4% 1.3%, 1.8% 0.5%, 3.4% 1.4%, 5.2% 0.5%, 7% 1.3%, 8.8% 0.4%,
+    10.6% 1.5%, 12.4% 0.6%, 14.2% 1.2%, 16% 0.4%, 17.8% 1.4%, 19.6% 0.5%,
+    21.4% 1.3%, 23.2% 0.4%, 25% 1.5%, 26.8% 0.6%, 28.6% 1.2%, 30.4% 0.4%,
+    32.2% 1.4%, 34% 0.5%, 35.8% 1.3%, 37.6% 0.4%, 39.4% 1.5%, 41.2% 0.6%,
+    43% 1.2%, 44.8% 0.4%, 46.6% 1.4%, 48.4% 0.5%, 50.2% 1.3%, 52% 0.4%,
+    53.8% 1.5%, 55.6% 0.6%, 57.4% 1.2%, 59.2% 0.4%, 61% 1.4%, 62.8% 0.5%,
+    64.6% 1.3%, 66.4% 0.4%, 68.2% 1.5%, 70% 0.6%, 71.8% 1.2%, 73.6% 0.4%,
+    75.4% 1.4%, 77.2% 0.5%, 79% 1.3%, 80.8% 0.4%, 82.6% 1.5%, 84.4% 0.6%,
+    86.2% 1.2%, 88% 0.4%, 89.8% 1.4%, 91.6% 0.5%, 93.4% 1.3%, 95.2% 0.4%,
+    96.8% 1.4%, 98.2% 0.6%, 99.2% 1.2%,
+    100% 100%, 0% 100%
+  );
+
+  /* ---- 和纸胶带 ---- */
+  --tape:rgba(168,200,232,.62);
+  --tape-pink:rgba(242,196,196,.62);
+  --tape-mint:rgba(181,205,182,.62);
+  --tape-yellow:rgba(242,208,107,.55);
+}
+
+/* ==========================================================================
+   1. 方格手账底
+   ========================================================================== */
+html{background:var(--bg)}
+body{
+  font-family:var(--font-body);
+  font-size:var(--font);
+  color:var(--text);
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px var(--grid-size)),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px var(--grid-size));
+  background-position:-1px -1px;
+}
+.app{background:transparent}
+@media (min-width:481px){
+  body{background-color:#E7EEF5}
+  .app{
+    box-shadow:0 0 0 1px rgba(74,69,67,.05), 0 28px 60px -34px rgba(74,69,67,.35);
+    background-color:var(--bg);
+    background-image:
+      repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px var(--grid-size)),
+      repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px var(--grid-size));
+  }
+}
+[data-theme="dark"] body{background-color:var(--bg)}
+html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方格纸感 */
+
+/* ==========================================================================
+   2. 顶部栏 = 一条贴在页首的纸胶带
+   ========================================================================== */
+.topbar{
+  background:color-mix(in srgb, var(--card) 92%, transparent);
+  border-bottom:1px dashed var(--line-strong);
+  backdrop-filter:saturate(140%) blur(10px);
+  -webkit-backdrop-filter:saturate(140%) blur(10px);
+}
+.topbar .t{font-family:var(--font-hand); font-size:18px; letter-spacing:.3px; color:var(--text)}
+.topbar .sub{font-size:11px; color:var(--text3); letter-spacing:.4px}
+.icon-btn{border-radius:50%; color:var(--text2)}
+.icon-btn:active{background:var(--blue)}
+
+/* ==========================================================================
+   3. 卡片 = 撕纸便签
+   --------------------------------------------------------------------------
+   注意：clip-path 会把 box-shadow 一起裁掉，所以"纸的厚度"改用内阴影 +
+   内侧渐变来表现（视觉上一样有层叠感，但不会在撕边外侧漏出阴影）。
+   ========================================================================== */
+/* 只有"页面第一层的卡片"才是贴上去的便签。
+   ⚠️ 计划页内部又用 .card.tight 分块，如果全局套撕纸，每一行都会变成一张便签。 */
+.home-body > .card{
+  position:relative;
+  background:var(--paper, var(--card));
+  border:0;
+  border-radius:0;
+  clip-path:var(--torn);
+  box-shadow:none;
+  padding:15px 15px 13px;
+  margin-bottom:16px;
+  transform:rotate(var(--rot,0deg));
+  transition:transform 260ms var(--ease-out);
+}
+/* 纸面质感：顶部受光 + 底部微暗边 + 一圈极淡纸边（clip 后 box-shadow 会被裁，
+   所以"纸的厚度"只能用内阴影和内侧渐变表达） */
+.home-body > .card::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0) 24%),
+    linear-gradient(0deg, rgba(74,69,67,.075), rgba(74,69,67,0) 14%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(74,69,67,.06),
+    inset 0 -10px 18px -12px rgba(74,69,67,.22);
+}
+/* 卡片内的分组小标题（待安排 / 时间轴 / 已完成）：统一成手写体 */
+.sec-title{
+  font-family:var(--font-hand);
+  font-size:14.5px;
+  font-weight:600;
+  color:var(--text2);
+  letter-spacing:.6px;
+  padding-bottom:1px;
+  margin:10px 2px 3px;          /* 压紧间距：手机上别浪费竖向空间 */
+}
+.sec-title::after{
+  content:"";
+  display:block;
+  width:34px; height:2px;
+  margin-top:3px;
+  background:linear-gradient(90deg, var(--blue), rgba(168,200,232,0));
+  border-radius:2px;
+}
+
+/* 卡片里的输入框：像写在横线本上，不要色块 */
+.home-body > .card input[type="text"],
+.home-body > .card input:not([type]) {
+  border:0;
+  border-bottom:1px dashed var(--line-strong);
+  background:transparent;
+  border-radius:0;
+}
+
+
+.home-body > .card .card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  border-radius:0;
+  padding:0;
+  margin:0;
+}
+/* 和纸胶带：贴在便签顶端内侧（clip-path 会裁掉出界的部分，所以放在里面） */
+.home-body > .card::after{
+  content:"";
+  position:absolute;
+  top:7px; left:14px;
+  width:74px; height:20px;
+  transform:rotate(-3.5deg);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+    var(--tape);
+  clip-path:polygon(2% 0,98% 5%,100% 94%,3% 100%);
+  opacity:.92;
+  pointer-events:none;
+}
+/* 每张便签贴歪一点点（-1.5° ~ 1.5°）
+   用 data-card 而不是 nth-of-type：页面顶部还有 tipcard/hero，序号会漂 */
+.home-body .card[data-card="plan"]{--rot:-1.2deg; --paper:var(--card)}
+.home-body .card[data-card="memo"]{--rot:1deg;   --paper:var(--card2)}
+.home-body .card[data-card="fun"]{--rot:-.7deg;  --paper:var(--card)}
+/* 记录卡交替旋向 + 交替纸色（暖白 / 淡蓝），像不同批次的便签纸 */
+.post-body .post-card:nth-of-type(odd){--rot:-.9deg;  --paper:var(--card)}
+.post-body .post-card:nth-of-type(even){--rot:.8deg;  --paper:var(--card2)}
+.post-card{background:var(--paper, var(--card))}
+
+/* 胶带换个颜色和位置，避免整页一模一样 */
+.home-body .card[data-card="memo"]::after{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+    var(--tape-pink);
+  left:auto; right:18px; transform:rotate(2.5deg);
+}
+.home-body .card[data-card="fun"]::after{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+    var(--tape-mint);
+  left:auto; right:22px; transform:rotate(-2deg);
+}
+/* 记录卡：一条横向胶带压在顶上 */
+.post-card::after{
+  content:"";
+  position:absolute;
+  top:8px; left:50%;
+  width:96px; height:19px;
+  margin-left:-48px;
+  transform:rotate(-1.6deg);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+    var(--tape);
+  clip-path:polygon(2% 0,98% 6%,100% 92%,3% 100%);
+  opacity:.85;
+  pointer-events:none;
+}
+.post-body .post-card:nth-of-type(even)::after{background:
+  repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+  var(--tape-yellow)}
+
+.home-body > .card:hover{transform:rotate(0deg)}
+.card-head{padding-top:6px}
+.card-title{
+  font-family:var(--font-hand);
+  font-size:16.5px;
+  font-weight:600;
+  letter-spacing:.3px;
+  color:var(--text);
+}
+.card-meta{font-size:11.5px; color:var(--text3)}
+.frac{color:var(--blue-ink); font-weight:700}
+
+/* 卡片里的小加号：做成圆形贴纸 */
+.mini-add{
+  width:26px; height:26px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff, var(--blue) 58%, #7FA3C6 100%);
+  color:#fff;
+  box-shadow:0 3px 8px rgba(74,69,67,.14), inset 0 -1px 3px rgba(95,134,168,.4);
+  border:0;
+}
+.mini-add .ico{width:15px; height:15px; stroke-width:2.4}
+
+/* ==========================================================================
+   4. 首页：手写标题 + 便签墙
+   ========================================================================== */
+.home-body{padding:12px 12px 26px}
+
+.hero{
+  position:relative;
+  background:var(--card2);
+  clip-path:var(--torn-alt);
+  padding:9px 14px 8px;
+  margin-bottom:16px;
+  transform:rotate(-.5deg);
+}
+/* 标题旁的手绘日期圆（数字由 home.js 塞进 .dnum）
+   ⚠️ hero 总高必须 ≤72px（验收 v2-11「顶部栏别太长」），所以整体压紧 */
+.hero::after{
+  content:"";
+  position:absolute; right:12px; top:8px;
+  width:44px; height:44px; border-radius:50%;
+  border:1.4px dashed rgba(95,134,168,.45);
+  background:radial-gradient(circle at 34% 30%, rgba(255,255,255,.95), rgba(168,200,232,.35));
+}
+.hero .dnum{
+  position:absolute; right:12px; top:8px;
+  width:44px; height:44px;
+  display:grid; place-items:center;
+  font-family:var(--font-hand);
+  font-size:22px;
+  font-weight:700;
+  color:var(--blue-ink);
+  letter-spacing:-.5px;
+}
+.hero .date{
+  font-family:var(--font-hand);
+  font-size:18.5px;
+  font-weight:600;
+  color:var(--blue-ink);
+  letter-spacing:.5px;
+  line-height:1.25;
+  max-width:70%;
+}
+.hero .sum{
+  margin-top:3px;
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--text2);
+  max-width:72%;
+}
+.hero .sum b{color:var(--text); font-weight:700}
+
+/* 便签里的清单（计划卡）*/
+.plan-slot .row, .plan-slot .titem{border-color:var(--line)}
+.titem .t{font-size:14.5px}
+.cbox{
+  border-radius:6px;
+  border:1.4px solid #C9BFB4;
+  background:#FFFDF9;
+}
+.cbox.done{background:var(--teal); border-color:#93B396}
+
+/* ==========================================================================
+   5. 记录页：拍立得式的记录卡
+   ========================================================================== */
+.post-body{padding:12px 12px 26px}
+
+.post-compose{
+  position:relative;
+  background:var(--card);
+  clip-path:var(--torn);
+  padding:14px 14px 12px;
+  margin-bottom:18px;
+  transform:rotate(.6deg);
+}
+.post-compose .textarea{
+  border:0;
+  border-bottom:1px dashed var(--line-strong);
+  background:transparent;
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.7;
+  border-radius:0;
+  padding:4px 2px 8px;
+  resize:none;
+}
+.post-compose .textarea::placeholder{color:var(--text3)}
+
+.post-card{
+  position:relative;
+  background:var(--paper, var(--card));
+  clip-path:var(--torn-alt);
+  padding:26px 15px 12px;      /* 上面留出胶带的位置，别压住正文 */
+  margin-bottom:16px;
+  transform:rotate(var(--rot,0deg));
+  transition:transform 260ms var(--ease-out);
+}
+.post-card::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0) 26%),
+    linear-gradient(0deg, rgba(74,69,67,.07), rgba(74,69,67,0) 16%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(74,69,67,.055),
+    inset 0 -10px 18px -12px rgba(74,69,67,.2);
+}
+.post-card:hover{transform:rotate(0deg)}
+.post-text{
+  font-size:15px;
+  line-height:1.85;
+  color:var(--text);
+  letter-spacing:.2px;
+}
+.post-imgs .img-thumb{border-radius:10px; border:2px solid #fff; box-shadow:var(--shadow)}
+.post-foot{border-top:1px dashed var(--line); padding-top:9px; margin-top:10px}
+.post-when{font-family:var(--font-hand); font-size:12.5px; color:var(--text3)}
+.post-stats{font-size:11.5px; color:var(--text3)}
+.like-btn{
+  border-radius:999px;
+  border:1px solid var(--line-strong);
+  background:#FFFDF9;
+  color:var(--text2);
+  box-shadow:0 2px 5px rgba(74,69,67,.06);
+}
+.like-btn.on{color:#D98080; border-color:rgba(217,128,128,.45); background:#FDF2F2}
+.post-del{color:var(--text3)}
+
+/* ==========================================================================
+   6. 底部标签栏 = 贴在页脚的一条纸带
+   ========================================================================== */
+.tabbar{
+  background:color-mix(in srgb, var(--card) 90%, transparent);
+  border-top:1px dashed var(--line-strong);
+}
+.tab{
+  border-radius:12px;
+  color:var(--text3);
+  font-family:var(--font-hand);
+  font-size:11.5px;
+  letter-spacing:.3px;
+}
+.tab.on{
+  color:var(--blue-ink);
+  background:radial-gradient(circle at 50% 0%, rgba(168,200,232,.5), rgba(168,200,232,.14));
+}
+.tab[data-act="home"].on,.tab[data-act="schedule"].on,.tab[data-act="fun"].on,
+.tab[data-act="memo"].on,.tab[data-act="post"].on{color:var(--blue-ink)}
+.tab.on .ico{stroke-width:2}
+
+/* 悬浮按钮 = 一枚圆贴纸 */
+.fab{
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff 0%, var(--blue) 56%, #7FA3C6 100%);
+  color:#fff;
+  border:0;
+  box-shadow:0 8px 18px rgba(74,69,67,.16), inset 0 -2px 6px rgba(95,134,168,.45);
+}
+.fab:active{transform:scale(.94)}
+
+/* ==========================================================================
+   7. 弹层 / 确认框 / 提示条 = 贴上来的一张纸
+   ========================================================================== */
+.sheet-mask{background:rgba(74,69,67,.28)}
+.sheet{
+  background:var(--card);
+  clip-path:var(--torn-top);
+  border-radius:0;
+  box-shadow:0 -8px 30px rgba(74,69,67,.12);
+}
+.sheet h3{font-family:var(--font-hand); font-size:18px; letter-spacing:.3px}
+
+.confirm{background:rgba(74,69,67,.28)}
+.confirm .box{
+  background:var(--card);
+  clip-path:var(--torn);
+  border-radius:0;
+  box-shadow:var(--shadow-lift);
+}
+.confirm .box h3{font-family:var(--font-hand); font-size:18px}
+
+.toast{
+  background:var(--card);
+  color:var(--text);
+  border:1px dashed var(--line-strong);
+  box-shadow:var(--shadow-lift);
+  font-family:var(--font-body);
+}
+.toast button{color:var(--blue-ink)}
+
+/* ==========================================================================
+   8. 通用控件手账化
+   ========================================================================== */
+
+/* 说明卡：一张淡黄便签，贴在页面顶上 */
+.tipcard{
+  position:relative;
+  background:#FEF9E9;
+  border:0;
+  border-radius:0;
+  clip-path:var(--torn-alt);
+  box-shadow:none;
+  padding:15px 40px 15px 15px;
+  margin-bottom:16px;
+  font-size:13px;
+  line-height:1.75;
+  color:#6E6355;
+  transform:rotate(-.6deg);
+}
+.tipcard::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0) 30%);
+  box-shadow:inset 0 0 0 1.5px rgba(150,130,90,.12);
+}
+.tipcard .x{
+  position:absolute; right:10px; top:8px;
+  width:24px; height:24px; border-radius:50%;
+  border:0; background:rgba(255,255,255,.7);
+  color:#9A8E7C; font-size:15px; line-height:1;
+}
+.tipcard b{color:#5E5445}
+
+/* 空状态：别占太大地方，像随手写的一行字 */
+.empty{
+  padding:16px 8px;
+  color:var(--text3);
+}
+.empty .big,
+.empty .t{
+  font-family:var(--font-hand);
+  font-size:16px;
+  color:var(--text2);
+}
+.empty .act{margin-top:8px}
+
+.btn{
+  border-radius:var(--r-sm);
+  border:1px dashed var(--line-strong);
+  background:#FFFDF9;
+  color:var(--text2);
+  box-shadow:0 2px 6px rgba(74,69,67,.06);
+}
+.btn.solid,.btn.blue{background:var(--blue); color:#fff; border:0; border-style:solid}
+.btn.danger{color:#C98A8A; border-color:rgba(201,138,138,.5)}
+.bigbtn{
+  border-radius:var(--r);
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 10px 22px -12px rgba(95,134,168,.8);
+}
+.empty{color:var(--text3)}
+.empty .big{font-family:var(--font-hand); font-size:17px; color:var(--text2)}
+.badge{background:var(--card2); border:1px solid var(--line); color:var(--text2)}
+
+/* 输入框：像写在横线本上 */
+.field input,.field textarea,.textarea,input[type="text"],input[type="time"],input[type="date"]{
+  border-radius:10px;
+  border:1px dashed var(--line-strong);
+  background:#FFFDF9;
+}
+
+/* 分段控件 / 标签 */
+.seg, .chips .chip, .tag{
+  border-radius:999px;
+}
+
+/* ==========================================================================
+   9. 开屏：手账本翻开
+   --------------------------------------------------------------------------
+   两片纸从中间向两侧翻开（rotateY），中间先撕开一条胶带。
+   纯 CSS 动画，无 JS 参与；prefers-reduced-motion 下整体跳过（见 main.js）。
+   ========================================================================== */
+.splash{
+  position:fixed; inset:0; z-index:200;
+  display:flex;
+  perspective:1500px;
+  pointer-events:none;          /* 不挡点击：即使正在播，页面也能正常用 */
+  transition:opacity 320ms var(--ease-out);
+}
+.splash.hide{opacity:0}
+
+.splash .half{
+  flex:1;
+  position:relative;
+  background-color:var(--card);
+  background-image:
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px var(--grid-size)),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px var(--grid-size));
+  box-shadow:inset 0 0 60px rgba(74,69,67,.10);
+  backface-visibility:hidden;
+}
+.splash .half.l{
+  transform-origin:right center;
+  border-right:1px solid rgba(74,69,67,.10);
+  animation:fold-l 980ms var(--ease-out) 240ms both;
+}
+.splash .half.r{
+  transform-origin:left center;
+  animation:fold-r 980ms var(--ease-out) 240ms both;
+}
+@keyframes fold-l{
+  0%{transform:rotateY(0deg)}
+  40%{transform:rotateY(-16deg)}
+  100%{transform:rotateY(-102deg)}
+}
+@keyframes fold-r{
+  0%{transform:rotateY(0deg)}
+  40%{transform:rotateY(16deg)}
+  100%{transform:rotateY(102deg)}
+}
+
+/* 中间那条"胶带"，先撕开 */
+.splash .seam{
+  position:absolute; left:50%; top:50%;
+  width:34px; height:190px;
+  margin:-95px 0 0 -17px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.6) 0 6px, rgba(255,255,255,.2) 6px 12px),
+    var(--tape);
+  clip-path:polygon(6% 0,100% 3%,96% 97%,0 100%);
+  transform:rotate(-1.5deg);
+  animation:seam-peel 420ms var(--ease-out) both;
+  box-shadow:0 6px 16px rgba(74,69,67,.12);
+}
+@keyframes seam-peel{
+  0%{opacity:1; transform:rotate(-1.5deg) translateY(0) scaleY(1)}
+  100%{opacity:0; transform:rotate(-1.5deg) translateY(-26px) scaleY(.4)}
+}
+
+/* 开屏中央的标题（跟着左半页一起翻走） */
+.splash .mark{
+  position:absolute; left:0; right:0; top:46%;
+  text-align:center;
+  font-family:var(--font-hand-latin);
+  font-size:26px;
+  color:var(--blue-ink);
+  letter-spacing:1px;
+  animation:fade-mark 900ms var(--ease-out) both;
+}
+@keyframes fade-mark{
+  0%{opacity:0; transform:translateY(6px)}
+  22%{opacity:1; transform:translateY(0)}
+  62%{opacity:1}
+  100%{opacity:0}
+}
+
+/* 减少动态效果：直接不播（main.js 里也会跳过创建） */
+@media (prefers-reduced-motion: reduce){
+  .splash{display:none !important}
+}
+
+/* ==========================================================================
+   10. 窄屏微调
+   ========================================================================== */
+@media (max-width:360px){
+  :root{--font:15px; --grid-size:20px}
+  .hero .date{font-size:19px}
+  .card{padding:13px 13px 11px}
+}

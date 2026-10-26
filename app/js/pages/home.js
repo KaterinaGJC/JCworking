@@ -60,6 +60,7 @@ export async function render(root, ctx = {}) {
     <div class="hero">
       <div class="date">${fmtFullCN(today)}</div>
       <div class="sum" id="homeSummary">${summary}</div>
+      <span class="dnum" aria-hidden="true">${new Date().getDate()}</span>
     </div>
 
     ${await tipHtml('home')}

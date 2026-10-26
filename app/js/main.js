@@ -25,6 +25,7 @@ window.addEventListener('error', (e) => console.error('[app error]', e.error || 
 window.addEventListener('unhandledrejection', (e) => console.error('[app rejection]', e.reason));
 
 async function boot() {
+  playSplash();
   try {
     await loadAll();
     applyTheme(storeState.settings.theme);
@@ -38,6 +39,28 @@ async function boot() {
     console.warn('[boot] 快照失败', err);
   }
   await startRouter();
+}
+
+/**
+ * 开屏：手账本翻开。
+ * - 尊重 prefers-reduced-motion：直接不播（动画全在 CSS 里）
+ * - 同一浏览器会话只播一次，避免每次刷新都挡一下
+ * - 元素本身 pointer-events:none，绝不阻塞操作；到点自动移除
+ */
+function playSplash() {
+  const el = document.getElementById('splash');
+  if (!el) return;
+  let seen = false;
+  try { seen = sessionStorage.getItem('jc-splash') === '1'; } catch { /* 隐私模式 */ }
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  if (seen || reduce) { el.remove(); return; }
+  try { sessionStorage.setItem('jc-splash', '1'); } catch { /* ignore */ }
+  const finish = () => {
+    el.classList.add('hide');
+    setTimeout(() => el.remove(), 340);
+  };
+  setTimeout(finish, 1360);   // 与 CSS 里的动画时长/延迟对齐（240ms + 980ms）
+  el.addEventListener('click', finish, { once: true });
 }
 
 boot().catch((err) => {
