@@ -463,6 +463,16 @@ export function resetPlan() {
   carryHandled = false;
 }
 
+/** 供首页月历点日期用：把计划卡切到指定那天（只改视图，不落库） */
+export function setPlanDate(date) {
+  viewDate = date || null;
+}
+
+/** 当前计划卡看的是哪天（首页月历据此高亮） */
+export function getPlanDate() {
+  return viewDate || todayStr();
+}
+
 /** 供首页卡片头的 ＋ 调用：就地新增/编辑一条计划（复用同一套面板与落库逻辑） */
 export function openTaskEditor(task = null) {
   openEditor(task);

@@ -3,10 +3,92 @@
 import * as store from '../store.js';
 import { buildSummary } from '../core/summary.js';
 import { $, esc, uid, todayStr, fmtFullCN, diffDays, weekdayIndex1, relativeCN } from '../util.js';
+import { monthMatrix, WEEK_SHORT } from '../core/dates.js';
 import { toast } from '../ui.js';
 import { tipHtml } from '../tips.js';
-import { renderPlan, resetPlan, openTaskEditor } from './plan.js';
-import { MOODS, getMood, setMood, moodLine, moodWeek, MOOD_COLORS } from '../core/mood.js';
+import { renderPlan, resetPlan, openTaskEditor, setPlanDate, getPlanDate } from './plan.js';
+import {
+  MOODS, getMood, setMood, moodLine, moodWeek, MOOD_COLORS,
+  moodMapOfMonth, moodStats,
+} from '../core/mood.js';
+
+/* ---------------- 首页月历 ---------------- */
+// 显示的月份（模块级：切页再回来还停在同一个月）
+let calAnchor = null;
+const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+function calState() {
+  const now = new Date();
+  if (!calAnchor) calAnchor = new Date(now.getFullYear(), now.getMonth(), 1);
+  return {
+    year: calAnchor.getFullYear(),
+    month: calAnchor.getMonth() + 1,       // 1-12
+    weekStart: store.state.settings.weekStart === 7 ? 7 : 1,
+  };
+}
+
+/** 月历内部 HTML（不含外层卡片壳，方便只换这一块） */
+function calInnerHtml() {
+  const { year, month, weekStart } = calState();
+  const today = todayStr();
+  const planDate = getPlanDate();
+  const cells = monthMatrix(year, month, weekStart);
+
+  // 每天有没有计划、有没有心情
+  const taskDays = new Set(store.state.tasks.map((t) => t.date));
+  const moodMap = moodMapOfMonth(year, month);
+
+  // 星期表头按"一周从哪天开始"排
+  const order = weekStart === 7 ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 0];
+  const weekRow = order.map((i) => `<span>${WEEK_SHORT[i]}</span>`).join('');
+
+  const dayCells = cells.map((c) => {
+    const isToday = c.date === today;
+    const isPlan = c.date === planDate;
+    const moodId = moodMap[c.date];
+    const cls = [
+      'cal-d',
+      c.inMonth ? '' : 'out',
+      isToday ? 'today' : '',
+      isPlan && !isToday ? 'picked' : '',
+      taskDays.has(c.date) ? 'has-task' : '',
+    ].filter(Boolean).join(' ');
+    return `<button class="${cls}" data-cal-day="${c.date}" aria-label="${c.date}${isToday ? ' 今天' : ''}">
+      <span class="n">${c.day}</span>
+      ${moodId ? `<span class="mdot" style="--mood-bg:${MOOD_COLORS[moodId]}"></span>` : ''}
+    </button>`;
+  }).join('');
+
+  // 本月心情小结
+  const from = `${year}-${String(month).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const to = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const stats = moodStats(from, to).filter((s) => s.days > 0);
+  const statHtml = stats.length
+    ? stats.map((s) => `<span class="ms"><i style="background:${s.color}"></i>${s.label} ${s.days}</span>`).join('')
+    : '<span class="ms muted">这个月还没记心情</span>';
+
+  const isCurMonth = year === new Date().getFullYear() && month === new Date().getMonth() + 1;
+
+  return `
+    <div class="cal-head">
+      <div class="cal-title">
+        <b>${month}月</b>
+        <i>${MONTH_EN[month - 1]}</i>
+        <em>${year}</em>
+      </div>
+      <div class="cal-nav">
+        <button class="cal-arrow" data-cal-prev aria-label="上个月">‹</button>
+        <button class="cal-arrow" data-cal-next aria-label="下个月">›</button>
+        <button class="cal-today${isCurMonth ? ' is-cur' : ''}" data-cal-today>今天</button>
+      </div>
+    </div>
+    <div class="cal-week">${weekRow}</div>
+    <div class="cal-grid">${dayCells}</div>
+    <div class="cal-foot">${statHtml}</div>`;
+}
+
 
 /** 五种心情的小圆脸（内联 SVG，不依赖外部图片） */
 function moodFace(id) {
@@ -106,6 +188,10 @@ export async function render(root, ctx = {}) {
       </div>
     </div>
 
+    <div class="card cal-card" data-card="cal">
+      ${calInnerHtml()}
+    </div>
+
     <div class="card" data-card="plan">
       <div class="card-head">
         <div class="card-title">
@@ -190,6 +276,26 @@ export async function render(root, ctx = {}) {
 
 function bind(box, root, ctx) {
   $('#btnGear').onclick = () => { location.hash = '#/settings'; };
+
+  // 月历：翻月只重画这一块；点日期把下面的计划卡切到那天
+  box.addEventListener('click', async (ev) => {
+    const nav = ev.target.closest('[data-cal-prev],[data-cal-next],[data-cal-today]');
+    if (nav) {
+      const now = new Date();
+      const s = calState();
+      if (nav.hasAttribute('data-cal-prev')) calAnchor = new Date(s.year, s.month - 2, 1);
+      else if (nav.hasAttribute('data-cal-next')) calAnchor = new Date(s.year, s.month, 1);
+      else calAnchor = new Date(now.getFullYear(), now.getMonth(), 1);
+      const card = box.querySelector('.cal-card');
+      if (card) card.innerHTML = calInnerHtml();
+      return;
+    }
+    const day = ev.target.closest('[data-cal-day]');
+    if (day) {
+      setPlanDate(day.dataset.calDay);
+      await render(root, ctx);       // 整页重画：计划卡跟着换日期
+    }
+  });
 
   // 心情：点一个圈 → 落库 → 就地更新（不整页重渲染，避免打断别处输入）
   box.querySelectorAll?.('[data-mood]').forEach((btn) => {

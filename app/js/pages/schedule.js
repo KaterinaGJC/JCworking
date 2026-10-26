@@ -208,8 +208,11 @@ function bind(box, root) {
   $('#btnStu').onclick = () => { location.hash = '#/students'; };
 
   // 点网格里的空格子 → 直接新建该天该节次的课
+  // （＋ 按钮在视觉上默认隐藏，所以整格都能点）
   box.addEventListener('click', (ev) => {
-    const add = ev.target.closest('[data-add-day]');
+    const cell = ev.target.closest('.tt-cell');
+    const add = ev.target.closest('[data-add-day]')
+      || (cell && !cell.classList.contains('has-lesson') ? cell.querySelector('[data-add-day]') : null);
     if (!add) return;
     openLessonForm(root, null, add.dataset.addDay, null, add.dataset.addSlot);
   });

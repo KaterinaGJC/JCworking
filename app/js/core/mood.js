@@ -54,6 +54,24 @@ export function recentMoods(days = 7) {
   return out;
 }
 
+/**
+ * 统计某个范围内每种心情各几天（给"本月心情"小结用）
+ * @returns {{id:string,label:string,color:string,days:number}[]}
+ */
+export function moodStats(fromDate, toDate) {
+  const count = {};
+  const start = new Date(`${fromDate}T00:00:00`);
+  const end = new Date(`${toDate}T00:00:00`);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const m = store.getMeta(moodKey(key), null);
+    if (m?.id) count[m.id] = (count[m.id] || 0) + 1;
+  }
+  return MOODS.map((m) => ({
+    id: m.id, label: m.label, color: MOOD_COLORS[m.id], days: count[m.id] || 0,
+  }));
+}
+
 /** 每种心情的圆点颜色（与首页心情圈同源，深色模式下也够用） */
 export const MOOD_COLORS = {
   happy: '#F7DCB2',
@@ -62,6 +80,18 @@ export const MOOD_COLORS = {
   calm: '#CBE4CD',
   tired: '#D9D0EA',
 };
+
+/** 某月里每天的心情（key = YYYY-MM-DD），给月历打点用 */
+export function moodMapOfMonth(year, month /* 1-12 */) {
+  const map = {};
+  const last = new Date(year, month, 0).getDate();
+  for (let day = 1; day <= last; day += 1) {
+    const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const m = store.getMeta(moodKey(key), null);
+    if (m?.id) map[key] = m.id;
+  }
+  return map;
+}
 
 /**
  * 最近 N 天（含没记的），从旧到新，给"心情历史条"用。
