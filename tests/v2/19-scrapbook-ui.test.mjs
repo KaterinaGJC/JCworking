@@ -88,7 +88,10 @@ try {
   ok('配图有拍立得式的底部留白（下边框 > 上边框）',
     polaroid.bottom > polaroid.top + 8, JSON.stringify(polaroid));
   ok('拍立得白边是暖白（不是纯白）', polaroid.color !== 'rgb(255, 255, 255)', polaroid.color);
-  ok('拍立得相纸带轻微倾斜', polaroid.rotate !== 'none', polaroid.rotate);
+  // 2026-10-26 用户明确要求：记录页的配图要摆正，斜着不好看
+  ok('拍立得相纸必须是正的（不许倾斜）',
+    polaroid.rotate === 'none' || polaroid.rotate === 'matrix(1, 0, 0, 1, 0, 0)',
+    polaroid.rotate);
 
   // ---------- 5. 夜间纸（深色模式） ----------
   await goto(page, '#/home');
@@ -125,6 +128,27 @@ try {
   const homeText = await page.eval(`document.querySelector('.home-body').textContent`);
   ok('首页仍不出现课表内容（C-01）',
     !homeText.includes('教培') && !homeText.includes('一对一') && !homeText.includes('小班'));
+
+  // ---------- 7. 字体：本地打包、离线可用 ----------
+  const fontInfo = await page.eval(`(async () => {
+    const used = performance.getEntriesByType('resource')
+      .map(e => e.name).filter(n => n.includes('/fonts/'));
+    const css = await (await fetch('/css/scrapbook.css')).text();
+    const lxgw = await (await fetch('/fonts/lxgw.css')).text();
+    return {
+      usedFiles: [...new Set(used.map(u => u.split('/').pop()))],
+      external: /fonts\\.googleapis|fonts\\.gstatic/.test(css + lxgw),
+      hasKai: css.includes('LXGW WenKai'),
+      hasScript: css.includes('JC Script'),
+      hasSerif: css.includes('JC Serif'),
+      lxgwFaces: (lxgw.match(/@font-face/g) || []).length,
+    };
+  })()`);
+  ok('CSS 里没有任何外部字体 CDN', fontInfo.external === false);
+  ok('打包了霞鹜文楷（中文）', fontInfo.hasKai === true);
+  ok('打包了花体与衬线斜体（拉丁）', fontInfo.hasScript && fontInfo.hasSerif);
+  ok('霞鹜文楷按子集拆分（@font-face > 50 段）', fontInfo.lxgwFaces > 50, String(fontInfo.lxgwFaces));
+  ok('页面实际从本地加载了字体文件', fontInfo.usedFiles.length > 0, fontInfo.usedFiles.join(','));
 
   await page.close();
   exitCode = report('验证项 19 · 手账风五套');

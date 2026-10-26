@@ -10,29 +10,28 @@
    想改观感，基本只需要动下面 :root 里的值
    ========================================================================== */
 
-/* ==========================================================================
-   0. 手写体：用 local() + unicode-range 把「拉丁手写体」和「中文楷体」分开
-   --------------------------------------------------------------------------
-   为什么需要这一层：字体栈是"整段字符串"匹配的，若把 Segoe Print 放第一个，
-   中文不会继续往后找 KaiTi，而是退回系统黑体（浏览器默认行为）。
-   用 @font-face 声明同一族名、按字符区间各取所长，才能中文楷体 + 拉丁手写。
-   零下载：只用系统已装字体；缺失的字体会被系统跳过（安卓上退回系统字体）。
-   ========================================================================== */
+/* 中文手写体：霞鹜文楷（按 unicode-range 分 97 个子集，浏览器只取用到的那些）
+   注意 @import 必须在所有规则之前 */
+@import url("../fonts/lxgw.css");
+
+/* 拉丁花体 / 衬线斜体：随包附带（woff2，各几十 KB） */
 @font-face{
-  font-family:"JC Hand";
-  src:local("Segoe Print"), local("Bradley Hand"), local("Comic Sans MS"),
-      local("Chalkboard SE"), local("Marker Felt");
-  unicode-range:U+0000-00FF, U+2000-206F;
+  font-family:"JC Script";
+  src:url("../fonts/caveat.woff2") format("woff2");
+  font-weight:600;
   font-display:swap;
 }
 @font-face{
-  font-family:"JC Hand";
-  src:local("KaiTi"), local("楷体"), local("Kaiti SC"), local("STKaiti"),
-      local("LXGW WenKai"), local("霞鹜文楷"), local("STXingkai"), local("华文行楷");
-  unicode-range:U+2E80-9FFF, U+F900-FAFF, U+FF00-FFEF;
+  font-family:"JC Serif";
+  src:url("../fonts/playfair.woff2") format("woff2");
+  font-weight:500;
+  font-style:italic;
   font-display:swap;
 }
 
+/* ==========================================================================
+   设计令牌：改这里就能换整套观感
+   ========================================================================== */
 :root{
   /* ---- 纸张与背景 ---- */
   --bg:#F0F4F8;                 /* 极浅灰蓝 */
@@ -66,13 +65,14 @@
   --r-sm:14px;
   --font:15.5px;
 
-  /* ---- 字体：不打包字体，靠系统兜底 ----
-     中文楷体放最前（字体栈不会为中文"跳过"前面的拉丁字体继续找，必须在栈首）；
-     需要拉丁手写感的少量元素（开屏标语）单独用 --font-hand-latin。 */
-  --font-hand:"Kaiti SC",KaiTi,"楷体",STKaiti,"LXGW WenKai","霞鹜文楷",
-              "STXingkai","华文行楷","Segoe Print",ui-serif,serif;
-  --font-hand-latin:"Segoe Print","Bradley Hand","Comic Sans MS","Chalkboard SE",
-                    "Kaiti SC",KaiTi,ui-serif,serif;
+  /* ---- 字体：本地打包，离线可用 ----
+     中文 → 霞鹜文楷（4.4MB 子集，按需加载）
+     拉丁花体 → Caveat
+     拉丁衬线斜体 → Playfair Display Italic（数字/日期用，最像参考图） */
+  --font-hand:"LXGW WenKai","霞鹜文楷","Kaiti SC",KaiTi,"楷体",STKaiti,ui-serif,serif;
+  --font-script:"JC Script","Segoe Print","Bradley Hand","LXGW WenKai",cursive;
+  --font-serif:"JC Serif","Playfair Display",Georgia,"Times New Roman",ui-serif,serif;
+  --font-hand-latin:"JC Script","Segoe Print","Bradley Hand","LXGW WenKai",ui-serif,serif;
   --font-body:"Nunito","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",
               system-ui,sans-serif;
 
@@ -374,11 +374,12 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
   position:absolute; right:12px; top:8px;
   width:44px; height:44px;
   display:grid; place-items:center;
-  font-family:var(--font-hand);
-  font-size:22px;
-  font-weight:700;
+  font-family:var(--font-serif);      /* 衬线斜体数字，最接近参考图那种"15" */
+  font-style:italic;
+  font-size:24px;
+  font-weight:500;
   color:var(--blue-ink);
-  letter-spacing:-.5px;
+  letter-spacing:-.8px;
 }
 .hero .date{
   font-family:var(--font-hand);
@@ -682,8 +683,8 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
 .splash .mark{
   position:absolute; left:0; right:0; top:46%;
   text-align:center;
-  font-family:var(--font-hand-latin);
-  font-size:26px;
+  font-family:var(--font-script);
+  font-size:31px;
   color:var(--blue-ink);
   letter-spacing:1px;
   animation:fade-mark 900ms var(--ease-out) both;
@@ -704,9 +705,13 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    10. 蓝调心情记录（首页卡片）
    ========================================================================== */
 .home-body > .card[data-card="mood"]{--rot:.8deg; --paper:var(--card2)}
-/* 心情卡的胶带挪到右上，别压住标题和 ♡ 图标 */
+/* 心情卡的胶带挪到卡片下沿（压在"手写句"上方那条虚线处），
+   这样不会盖住右上角的"已记录" */
 .home-body > .card[data-card="mood"]::after{
-  left:auto; right:16px; transform:rotate(2.4deg);
+  left:50%; right:auto; top:auto; bottom:34px;
+  width:88px; height:18px;
+  margin-left:-44px;
+  transform:rotate(-1.8deg);
 }
 
 .mood-row{
@@ -770,16 +775,16 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    ========================================================================== */
 .post-card .img-thumb-wrap{
   position:relative;
-  transform:rotate(-1.4deg);
+  transform:none;                     /* 照片摆正：斜着像随手扔的，不好看 */
   transition:transform 240ms var(--ease-out);
 }
-.post-card .img-thumb-wrap:nth-child(even){transform:rotate(1.6deg)}
 .post-card .img-thumb{
   border:6px solid #FFFDF8;
   border-bottom-width:24px;          /* 拍立得下方的留白 */
   border-radius:2px;
   box-shadow:0 6px 16px rgba(74,69,67,.16);
   background:#F3F7FB;
+  display:block;
 }
 /* 拍立得下沿再压一条细阴影，像真的相纸厚度 */
 .post-card .img-thumb-wrap::after{
@@ -794,9 +799,9 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
    ========================================================================== */
 .hero::before{
   content:"";
-  position:absolute; right:10px; bottom:2px;   /* 放在日期圆下方，不会被撕边裁掉 */
-  width:34px; height:24px;
-  transform:rotate(7deg);
+  position:absolute; right:6px; bottom:-2px;   /* 日期圆右下角，不压住圆 */
+  width:30px; height:21px;
+  transform:rotate(9deg);
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 34'%3E%3Cpath d='M23 17C18.5 9.5 12 6 7.6 9.4S6.2 21 12.6 22.2C17 23 21 20.4 23 17z' fill='%23C6DDF3' stroke='%238FB3D8' stroke-width='1.2'/%3E%3Cpath d='M25 17c4.5-7.5 11-11 15.4-7.6S41.8 21 35.4 22.2C31 23 27 20.4 25 17z' fill='%23C6DDF3' stroke='%238FB3D8' stroke-width='1.2'/%3E%3Cpath d='M23 17l-2 12M25 17l2 12' stroke='%238FB3D8' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='17' r='3.6' fill='%23E2EEFA' stroke='%238FB3D8' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;
   pointer-events:none;
 }
@@ -827,8 +832,8 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
 .tab::before{
   content:attr(data-num);
   display:block;
-  font-family:var(--font-hand);
-  font-size:8.5px; line-height:1;
+  font-family:var(--font-script);
+  font-size:10px; line-height:1;
   color:var(--text3);
   opacity:.75;
   margin-bottom:2px;
