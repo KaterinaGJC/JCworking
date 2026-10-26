@@ -916,3 +916,296 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
   .hero .date{font-size:19px}
   .card{padding:13px 13px 11px}
 }
+
+/* ==========================================================================
+   17. 另外四屏：课表 / 娱乐 / 备忘 / 设置
+   --------------------------------------------------------------------------
+   原则不变：只用现有的类名叠加造型，不动 DOM、不动逻辑。
+   ========================================================================== */
+
+/* ---------- 17.1 教培课表 ---------- */
+.schedule-body{padding:10px 10px 26px}
+
+/* 课表是一张"贴在墙上的纸"：
+   不做撕边——撕边会把表头裁掉、格子也不好点。改用圆角纸 + 顶部胶带 + 虚线格线 */
+.schedule-body .timetable-wrap{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+  /* 覆盖 pages.css 里的负边距/内边距（那是给无边框版留的） */
+  margin:0 0 14px;
+  padding:30px 6px 6px;
+  overflow-x:auto; overflow-y:hidden;
+  box-shadow:var(--shadow);
+  clip-path:none;
+}
+/* 表格要连续：去掉 6px 的格子间距，改用虚线分隔 */
+.schedule-body .timetable{gap:0}
+.schedule-body .timetable-wrap::before{ content:none }
+/* 顶部胶带 */
+.schedule-body .timetable-wrap::after{
+  content:""; position:absolute; top:6px; left:50%;
+  width:104px; height:17px; margin-left:-52px;
+  transform:rotate(-1.6deg);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 5px, rgba(255,255,255,.16) 5px 10px),
+    var(--tape);
+  clip-path:polygon(2% 0,98% 6%,100% 92%,3% 100%);
+  opacity:.9; pointer-events:none;
+}
+
+.tt-corner{background:var(--card)}
+.tt-day{
+  background:linear-gradient(180deg,#F6FAFF,#DFECFB);
+  border-right:1px dashed var(--line);
+  border-bottom:1px solid var(--line-strong);
+  border-radius:0;
+  padding:7px 0 9px;
+}
+.tt-day .d1{font-family:var(--font-hand); font-weight:600; letter-spacing:.4px}
+.tt-day .d2{font-variant-numeric:tabular-nums}
+.tt-day.today{background:linear-gradient(180deg,#D9E9FC,#C1DAF5)}
+.tt-day.today .d1{color:var(--blue-ink)}
+.tt-slot{
+  background:linear-gradient(180deg,#FBFDFF,#EFF6FD);
+  border-right:1px dashed var(--line-strong);
+  border-bottom:1px dashed var(--line);
+  border-radius:0;
+}
+.tt-slot b{font-family:var(--font-hand); letter-spacing:.3px}
+.tt-cell{
+  background:var(--card);
+  border-right:1px dashed var(--line);
+  border-bottom:1px dashed var(--line);
+  border-radius:0;
+  padding:2px;
+}
+.tt-cell.today{background:#F7FBFF}
+.tt-add{color:var(--text3); border-radius:8px}
+.tt-add:hover{background:var(--card2)}
+
+/* 课块：小纸片，一对一=蓝、小班=黄 */
+.schedule-body .lesson{
+  background:linear-gradient(180deg,#FFFFFF,#E9F3FF 70%,#DCEBFC);
+  border:1px solid rgba(127,163,198,.55);
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(74,69,67,.10);
+  padding:8px 9px;
+}
+.schedule-body .lesson.small{
+  background:linear-gradient(180deg,#FFFDF6,#FCF1D9 70%,#F8E7C4);
+  border-color:rgba(216,179,100,.6);
+}
+.schedule-body .lesson .lbar{width:4px; border-radius:4px}
+.schedule-body .lesson .ltop{font-family:var(--font-hand); font-size:13px}
+
+/* ---------- 17.2 游戏娱乐 ---------- */
+.fun-body{padding:10px 10px 26px}
+
+/* 分区卡片也变成便签纸 */
+.fun-body > .card,
+.fun-body .card.tight{
+  position:relative;
+  background:var(--card);
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  padding:14px 14px 12px;
+  margin-bottom:16px;
+}
+.fun-body > .card{
+  clip-path:var(--torn);
+  transform:rotate(var(--rot,0deg));
+}
+.fun-body > .card:nth-of-type(odd){--rot:-.7deg}
+.fun-body > .card:nth-of-type(even){--rot:.6deg}
+.fun-body > .card::before,
+.fun-body > .card .card.tight::before{ display:none }
+
+.fun-body .card-title{font-family:var(--font-hand); font-size:16px; font-weight:600}
+.fun-body .card-head{padding-top:4px}
+
+/* 游戏卡（Steam 风格的封面卡）→ 拍立得式小卡 */
+.fun-body .gcard{
+  background:#FFFDF8;
+  border:1px solid var(--line-strong);
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(74,69,67,.10);
+  overflow:hidden;
+}
+.fun-body .gcard:nth-child(odd){transform:rotate(-.9deg)}
+.fun-body .gcard:nth-child(even){transform:rotate(.8deg)}
+/* 自动生成的封面（.gcover）是高饱和色，和手账风打架 ——
+   用滤镜压成粉彩，保留每张卡各自的色相，也不影响用户自己上传的封面图 */
+.fun-body .gcover.ph{
+  filter:saturate(.18) brightness(1.34) contrast(.86);
+}
+
+/* 体验卡 */
+.fun-body .ecard{
+  background:var(--card);
+  clip-path:var(--torn-alt);
+  border:0;
+  box-shadow:none;
+  padding:14px;
+  margin-bottom:14px;
+}
+
+/* 分段/标签 → 粉彩胶囊 */
+.fun-body .seg{
+  border:1px dashed var(--line-strong);
+  border-radius:999px;
+  background:#FFFDF9;
+  padding:2px;
+}
+.fun-body .seg button{border-radius:999px; font-family:var(--font-hand)}
+.fun-body .seg button.on{background:var(--blue); color:#fff; border:0}
+.fun-body .chip,
+.fun-body .tag{
+  border:1px dashed var(--line-strong);
+  background:#FFFDF9;
+}
+
+/* ---------- 17.3 快速备忘 ---------- */
+.memo-body{padding:10px 10px 26px}
+
+.memo-body .memo-entry .textarea{
+  background:var(--card);
+  border:0;
+  border-bottom:1px dashed var(--line-strong);
+  border-radius:12px 12px 0 0;
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.75;
+}
+.memo-body .memo-entry .savebtn{
+  background:radial-gradient(circle at 34% 30%, #fff, var(--blue) 58%, #7FA3C6 100%);
+  color:#fff; border:0;
+  box-shadow:0 6px 14px rgba(74,69,67,.14), inset 0 -2px 5px rgba(95,134,168,.35);
+}
+
+/* 便签卡：保留原有颜色，但换成"撕下来的一张纸" */
+.memo-body .note{
+  position:relative;
+  border:0;
+  border-radius:0;
+  clip-path:var(--torn-alt);
+  box-shadow:none;
+  padding:26px 14px 12px;      /* 顶部留出胶带位置 */
+  margin-bottom:14px;
+  transform:rotate(var(--rot,0deg));
+  transition:transform 240ms var(--ease-out);
+}
+/* 每张换一种撕边、换个角度，避免所有便签长得一模一样 */
+.memo-body .note:nth-child(3n+1){--rot:-1.2deg; clip-path:var(--torn)}
+.memo-body .note:nth-child(3n+2){--rot:.9deg}
+.memo-body .note:nth-child(3n+3){--rot:-.6deg; clip-path:var(--torn)}
+.memo-body .note::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 26%),
+    linear-gradient(0deg, rgba(74,69,67,.06), rgba(74,69,67,0) 16%);
+  box-shadow:inset 0 0 0 1.5px rgba(74,69,67,.06);
+}
+/* 顶部一条小胶带 */
+.memo-body .note::after{
+  content:""; position:absolute; top:5px; left:50%;
+  width:64px; height:16px; margin-left:-32px;
+  transform:rotate(-2deg);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.6) 0 5px, rgba(255,255,255,.2) 5px 10px),
+    rgba(255,255,255,.45);
+  clip-path:polygon(2% 0,98% 6%,100% 92%,3% 100%);
+  opacity:.75; pointer-events:none;
+}
+/* 便签里的图片也走拍立得（摆正，不歪） */
+.memo-body .note-imgs img{
+  border:5px solid #FFFDF8;
+  border-bottom-width:16px;
+  border-radius:2px;
+  box-shadow:0 4px 12px rgba(74,69,67,.14);
+}
+
+/* ---------- 17.4 数据与设置 ---------- */
+.page[data-page="settings"] .srow{
+  border-bottom:1px dashed var(--line);
+  font-size:14.5px;
+}
+.page[data-page="settings"] .srow:last-child{border-bottom:0}
+.page[data-page="settings"] .srow .sl{font-family:var(--font-hand); font-size:14px}
+.page[data-page="settings"] .card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  clip-path:none;              /* 长列表用撕边会把右侧切得参差，这里保持整齐 */
+  box-shadow:var(--shadow);
+  padding:14px;
+  margin-bottom:16px;
+  transform:rotate(var(--rot,0deg));
+}
+.page[data-page="settings"] .card:nth-of-type(odd){--rot:-.35deg}
+.page[data-page="settings"] .card:nth-of-type(even){--rot:.35deg}
+
+/* 顶部三块统计：小纸片，数字用衬线斜体 */
+.page[data-page="settings"] .stat{
+  background:var(--card);
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+  box-shadow:0 3px 10px rgba(74,69,67,.08);
+  padding:12px 12px 10px;
+}
+.page[data-page="settings"] .stat .n{font-family:var(--font-serif); font-style:italic; font-size:22px}
+.page[data-page="settings"] .stat .l{font-family:var(--font-hand)}
+.page[data-page="settings"] .sec-title{margin-top:4px}
+
+/* ==========================================================================
+   18. 心情历史：最近 7 天一条小圆点
+   ========================================================================== */
+.mood-week{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:4px; margin-top:8px;
+  padding-top:8px;
+  border-top:1px dashed var(--line);
+}
+.mood-week .wd{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  font-size:9.5px; color:var(--text3);
+  font-family:var(--font-hand);
+}
+.mood-week .dot{
+  width:15px; height:15px; border-radius:50%;
+  background:rgba(74,69,67,.07);
+  box-shadow:inset 0 0 0 1px rgba(74,69,67,.08);
+}
+.mood-week .dot.has{background:var(--mood-bg); box-shadow:inset 0 0 0 1px rgba(74,69,67,.12)}
+.mood-week .wd.today .dot{box-shadow:0 0 0 2px rgba(168,200,232,.7), inset 0 0 0 1px rgba(74,69,67,.12)}
+.mood-week .wd.today{color:var(--blue-ink); font-weight:700}
+
+/* ==========================================================================
+   19. 记录页多图：2×2 拼贴（单图仍占满）
+   ========================================================================== */
+.post-card .post-imgs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.post-card .post-imgs > .img-thumb-wrap{
+  overflow:visible;      /* 让拍立得白边露出来，别被容器裁掉 */
+  height:auto;
+}
+.post-card .post-imgs .img-thumb{
+  width:100%;
+  height:auto;
+  display:block;
+}
+.post-card .post-imgs > .img-thumb-wrap:only-child{grid-column:span 2}
+.post-card .post-imgs > .img-thumb-wrap:nth-child(3):last-child{grid-column:span 2}
+
+/* ==========================================================================
+   20. 页面切换
+   --------------------------------------------------------------------------
+   只用 CSS 的 slap：新页面从下方贴上并回正（见第 13 节）。
+   曾试过原生 View Transitions，但它的快照层会吞点击（动画期间点不动），已放弃。
+   ========================================================================== */

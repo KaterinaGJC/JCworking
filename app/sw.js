@@ -2,7 +2,7 @@
 // 缓存名一变，浏览器就会装新 SW、删掉旧缓存、立即接管 —— 保证手机上所有文件同代更新。
 // v2：DB_VERSION 3→4（新增 posts 表），新旧文件混用会读到没有该表的库而启动失败。
 // v3：换「手账拼贴」皮肤（新增 css/scrapbook.css），不升版本手机会一直用旧样式。
-const CACHE = 'jc-cache-v6';
+const CACHE = 'jc-cache-v7';
 
 const CORE = [
   './index.html',

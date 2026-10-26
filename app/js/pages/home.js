@@ -6,7 +6,7 @@ import { $, esc, uid, todayStr, fmtFullCN, diffDays, weekdayIndex1, relativeCN }
 import { toast } from '../ui.js';
 import { tipHtml } from '../tips.js';
 import { renderPlan, resetPlan, openTaskEditor } from './plan.js';
-import { MOODS, getMood, setMood, moodLine } from '../core/mood.js';
+import { MOODS, getMood, setMood, moodLine, moodWeek, MOOD_COLORS } from '../core/mood.js';
 
 /** 五种心情的小圆脸（内联 SVG，不依赖外部图片） */
 function moodFace(id) {
@@ -97,6 +97,13 @@ export async function render(root, ctx = {}) {
           </button>`).join('')}
       </div>
       <div class="mood-line" data-mood-line>${esc(moodLine(mood))}</div>
+      <div class="mood-week" aria-label="最近七天的心情">
+        ${moodWeek(7).map((d) => `
+          <span class="wd${d.today ? ' today' : ''}" title="${esc(d.date)}">
+            <span class="dot${d.moodId ? ' has' : ''}"${d.moodId ? ` style="--mood-bg:${MOOD_COLORS[d.moodId]}"` : ''}></span>
+            ${d.label}
+          </span>`).join('')}
+      </div>
     </div>
 
     <div class="card" data-card="plan">
@@ -198,6 +205,12 @@ function bind(box, root, ctx) {
       if (line) line.textContent = moodLine(rec);
       const meta = box.querySelector('.mood-card .card-meta');
       if (meta) meta.textContent = '已记录';
+      // 历史条上"今天"那颗点也要立刻变实心（否则要刷新才看到）
+      const todayDot = box.querySelector('.mood-week .wd.today .dot');
+      if (todayDot) {
+        todayDot.classList.add('has');
+        todayDot.style.setProperty('--mood-bg', MOOD_COLORS[id] || '#CBE0F4');
+      }
       toast(`记下了：${MOODS.find((m) => m.id === id)?.label || ''}`);
     });
   });

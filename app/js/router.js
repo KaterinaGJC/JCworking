@@ -127,6 +127,14 @@ function updateChrome(id, mod) {
 }
 
 export async function renderRoute() {
+  // 注：曾尝试用 document.startViewTransition 做"旧卡淡出"，
+  // 但 Chrome 的过渡快照层会盖住页面并吞掉点击（连 400ms 内点输入框都聚焦不了），
+  // 对"随手就点"的个人 App 是硬伤，所以放弃快照方案，改用 CSS 的 slap 动画
+  // （新便签从下方贴上并回正），交互零风险。
+  await renderInto();
+}
+
+async function renderInto() {
   const { id, params } = parseHash();
   const prev = currentId;
   currentId = id;

@@ -40,7 +40,7 @@ export function moodLine(mood) {
   return mood.note || m?.phrase || '';
 }
 
-/** 最近 N 天的心情（给"本周心情"用，暂时只用于无障碍文案） */
+/** 最近 N 天的心情（只返回记过的） */
 export function recentMoods(days = 7) {
   const out = [];
   const base = new Date();
@@ -50,6 +50,39 @@ export function recentMoods(days = 7) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const m = store.getMeta(moodKey(key), null);
     if (m?.id) out.push({ date: key, ...m });
+  }
+  return out;
+}
+
+/** 每种心情的圆点颜色（与首页心情圈同源，深色模式下也够用） */
+export const MOOD_COLORS = {
+  happy: '#F7DCB2',
+  sad: '#CBE0F4',
+  angry: '#F4C8C6',
+  calm: '#CBE4CD',
+  tired: '#D9D0EA',
+};
+
+/**
+ * 最近 N 天（含没记的），从旧到新，给"心情历史条"用。
+ * @returns {{date:string, label:string, moodId:string|null, today:boolean}[]}
+ */
+export function moodWeek(days = 7) {
+  const out = [];
+  const base = new Date();
+  const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+  const todayKey = todayStr();
+  for (let i = days - 1; i >= 0; i -= 1) {
+    const d = new Date(base);
+    d.setDate(base.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const m = store.getMeta(moodKey(key), null);
+    out.push({
+      date: key,
+      label: i === 0 ? '今' : WEEK[d.getDay()],
+      moodId: m?.id || null,
+      today: key === todayKey,
+    });
   }
   return out;
 }
