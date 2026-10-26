@@ -27,6 +27,7 @@ const CORE = [
   './js/core/summary.js',
   './js/core/backup.js',
   './js/core/slots.js',
+  './js/core/mood.js',
   './js/pages/home.js',
   './js/pages/plan.js',
   './js/pages/schedule.js',

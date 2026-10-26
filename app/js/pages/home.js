@@ -6,6 +6,21 @@ import { $, esc, uid, todayStr, fmtFullCN, diffDays, weekdayIndex1, relativeCN }
 import { toast } from '../ui.js';
 import { tipHtml } from '../tips.js';
 import { renderPlan, resetPlan, openTaskEditor } from './plan.js';
+import { MOODS, getMood, setMood, moodLine } from '../core/mood.js';
+
+/** 五种心情的小圆脸（内联 SVG，不依赖外部图片） */
+function moodFace(id) {
+  const eye = '<circle cx="8.2" cy="9" r=".95"/><circle cx="15.8" cy="9" r=".95"/>';
+  const faces = {
+    happy: `${eye}<path d="M7.6 13.4c1.2 2 2.8 3 4.4 3s3.2-1 4.4-3"/>`,
+    sad: `${eye}<path d="M7.6 15.6c1.2-2 2.8-3 4.4-3s3.2 1 4.4 3"/>`,
+    angry: '<path d="M6.4 7.2l3.2 1.4M17.6 7.2l-3.2 1.4"/><path d="M7.8 15h8.4"/>',
+    calm: '<path d="M7 9.2h2.6M14.4 9.2H17"/><path d="M8.6 14.6h6.8"/>',
+    tired: '<path d="M7 9.2h2.6M14.4 9.2H17"/><ellipse cx="12" cy="14.8" rx="1.9" ry="2.3"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+    stroke-linecap="round" stroke-linejoin="round">${faces[id] || faces.calm}</svg>`;
+}
 
 function todayTasks() {
   const today = todayStr();
@@ -46,6 +61,7 @@ export async function render(root, ctx = {}) {
   const notes = [...store.state.notes].sort(
     (a, b) => (b.updatedAt ?? b.createdAt ?? 0) - (a.updatedAt ?? a.createdAt ?? 0),
   );
+  const mood = getMood(today);
 
   const summary = buildSummary({
     pendingTasks: pending.length,
@@ -64,6 +80,24 @@ export async function render(root, ctx = {}) {
     </div>
 
     ${await tipHtml('home')}
+
+    <div class="card mood-card" data-card="mood">
+      <div class="card-head">
+        <div class="card-title">
+          <svg class="ico" style="color:#C6A9C9"><use href="#i-heart"/></svg>今天的心情
+        </div>
+        <div class="card-meta">${mood ? '已记录' : '点一个圈圈'}</div>
+      </div>
+      <div class="mood-row" role="group" aria-label="今天的心情">
+        ${MOODS.map((m) => `
+          <button class="mood${mood?.id === m.id ? ' on' : ''}" data-mood="${m.id}"
+                  aria-label="${m.label}" aria-pressed="${mood?.id === m.id ? 'true' : 'false'}">
+            <span class="mood-face">${moodFace(m.id)}</span>
+            <span class="mood-cap">${m.label}</span>
+          </button>`).join('')}
+      </div>
+      <div class="mood-line" data-mood-line>${esc(moodLine(mood))}</div>
+    </div>
 
     <div class="card" data-card="plan">
       <div class="card-head">
@@ -149,6 +183,24 @@ export async function render(root, ctx = {}) {
 
 function bind(box, root, ctx) {
   $('#btnGear').onclick = () => { location.hash = '#/settings'; };
+
+  // 心情：点一个圈 → 落库 → 就地更新（不整页重渲染，避免打断别处输入）
+  box.querySelectorAll?.('[data-mood]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.mood;
+      const rec = await setMood(todayStr(), id);
+      box.querySelectorAll('[data-mood]').forEach((b) => {
+        const on = b.dataset.mood === id;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      const line = box.querySelector('[data-mood-line]');
+      if (line) line.textContent = moodLine(rec);
+      const meta = box.querySelector('.mood-card .card-meta');
+      if (meta) meta.textContent = '已记录';
+      toast(`记下了：${MOODS.find((m) => m.id === id)?.label || ''}`);
+    });
+  });
 
   // 卡片头的 ＋：就地新增一条计划（不占用全局悬浮按钮）
   $('[data-plan-add]', box)?.addEventListener('click', (ev) => {

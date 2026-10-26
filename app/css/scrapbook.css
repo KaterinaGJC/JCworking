@@ -701,7 +701,209 @@ html.has-bg body::before{opacity:.42}   /* 自定义底图调淡，别压住方�
 }
 
 /* ==========================================================================
-   10. 窄屏微调
+   10. 蓝调心情记录（首页卡片）
+   ========================================================================== */
+.home-body > .card[data-card="mood"]{--rot:.8deg; --paper:var(--card2)}
+/* 心情卡的胶带挪到右上，别压住标题和 ♡ 图标 */
+.home-body > .card[data-card="mood"]::after{
+  left:auto; right:16px; transform:rotate(2.4deg);
+}
+
+.mood-row{
+  display:flex; align-items:flex-end; gap:4px;
+  margin:10px 0 4px;
+  position:relative;
+}
+.mood{
+  flex:1; min-width:0;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  border:0; background:transparent; padding:5px 0 3px;
+  border-radius:14px; cursor:pointer; color:#6C7F92;
+  transition:transform 220ms var(--ease-out), background 200ms var(--ease-out);
+}
+.mood-face{
+  width:42px; height:42px; border-radius:50%;
+  display:grid; place-items:center;
+  background:radial-gradient(circle at 34% 30%, #fff 0%, var(--mood-bg) 58%, var(--mood-edge) 100%);
+  box-shadow:0 3px 8px rgba(74,69,67,.10), inset 0 -2px 5px rgba(95,134,168,.22);
+  transition:transform 240ms var(--ease-out), box-shadow 240ms var(--ease-out);
+}
+.mood-face svg{width:25px; height:25px; color:#5F7286}
+.mood-cap{
+  font-family:var(--font-hand); font-size:10.5px; color:var(--text3);
+  letter-spacing:.3px; white-space:nowrap;
+}
+/* 五种心情的圆面色（低饱和） */
+.mood:nth-of-type(1){--mood-bg:#F7DCB2; --mood-edge:#DFB375}
+.mood:nth-of-type(2){--mood-bg:#CBE0F4; --mood-edge:#93B5D8}
+.mood:nth-of-type(3){--mood-bg:#F4C8C6; --mood-edge:#D89A96}
+.mood:nth-of-type(4){--mood-bg:#CBE4CD; --mood-edge:#96BA99}
+.mood:nth-of-type(5){--mood-bg:#D9D0EA; --mood-edge:#A99BC9}
+
+.mood.on{background:rgba(255,255,255,.66)}
+.mood.on .mood-face{
+  transform:scale(1.1) translateY(-2px);
+  box-shadow:0 8px 16px rgba(74,69,67,.16), 0 0 0 3px rgba(168,200,232,.55);
+}
+.mood.on .mood-cap{color:var(--blue-ink); font-weight:700}
+
+.mood-line{
+  margin-top:6px; padding:8px 6px 2px;
+  border-top:1px dashed var(--line);
+  font-family:var(--font-hand); font-size:15px; letter-spacing:.4px;
+  color:var(--blue-ink); text-align:center;
+  min-height:34px;
+}
+
+/* 卡片标题右上角的小星星贴纸 */
+.mood-card .card-title{position:relative; padding-right:20px}
+.mood-card .card-title::after{
+  content:"";
+  position:absolute; right:0; top:-3px;
+  width:15px; height:15px;
+  transform:rotate(14deg);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3.2l2.4 5.3 5.8.7-4.3 3.9 1.2 5.7L12 15.9 6.9 18.8l1.2-5.7L3.8 9.2l5.8-.7z' fill='%23F2D06B' stroke='%23D8B45E' stroke-width='1'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* ==========================================================================
+   11. 拍立得白边相框（记录页配图）
+   ========================================================================== */
+.post-card .img-thumb-wrap{
+  position:relative;
+  transform:rotate(-1.4deg);
+  transition:transform 240ms var(--ease-out);
+}
+.post-card .img-thumb-wrap:nth-child(even){transform:rotate(1.6deg)}
+.post-card .img-thumb{
+  border:6px solid #FFFDF8;
+  border-bottom-width:24px;          /* 拍立得下方的留白 */
+  border-radius:2px;
+  box-shadow:0 6px 16px rgba(74,69,67,.16);
+  background:#F3F7FB;
+}
+/* 拍立得下沿再压一条细阴影，像真的相纸厚度 */
+.post-card .img-thumb-wrap::after{
+  content:"";
+  position:absolute; left:8px; right:8px; bottom:6px; height:1px;
+  background:rgba(74,69,67,.08);
+  pointer-events:none;
+}
+
+/* ==========================================================================
+   12. 蝴蝶结贴纸（hero 左上角，纯 CSS 背景图，不新增 DOM）
+   ========================================================================== */
+.hero::before{
+  content:"";
+  position:absolute; right:10px; bottom:2px;   /* 放在日期圆下方，不会被撕边裁掉 */
+  width:34px; height:24px;
+  transform:rotate(7deg);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 34'%3E%3Cpath d='M23 17C18.5 9.5 12 6 7.6 9.4S6.2 21 12.6 22.2C17 23 21 20.4 23 17z' fill='%23C6DDF3' stroke='%238FB3D8' stroke-width='1.2'/%3E%3Cpath d='M25 17c4.5-7.5 11-11 15.4-7.6S41.8 21 35.4 22.2C31 23 27 20.4 25 17z' fill='%23C6DDF3' stroke='%238FB3D8' stroke-width='1.2'/%3E%3Cpath d='M23 17l-2 12M25 17l2 12' stroke='%238FB3D8' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='17' r='3.6' fill='%23E2EEFA' stroke='%238FB3D8' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;
+  pointer-events:none;
+}
+
+/* ==========================================================================
+   13. 页面切换 = 新便签"贴上来"
+   ========================================================================== */
+.page{
+  animation:slap 420ms var(--ease-out) both;
+}
+@keyframes slap{
+  0%   {opacity:0; transform:translateY(18px) rotate(-1.2deg)}
+  62%  {opacity:1; transform:translateY(-2px) rotate(.35deg)}
+  100% {opacity:1; transform:translateY(0) rotate(0)}
+}
+
+/* ==========================================================================
+   14. 底部标签 = 一排"页码贴纸"
+   --------------------------------------------------------------------------
+   页码写在 HTML 的 data-num 上（而不是 CSS counter）：
+   counter() 在 getComputedStyle 里拿不到解析值，测试就没法守住这条。
+   ========================================================================== */
+.tab{
+  position:relative;
+  padding-top:3px;
+  transition:transform 220ms var(--ease-out), background 200ms var(--ease-out), color var(--dur);
+}
+.tab::before{
+  content:attr(data-num);
+  display:block;
+  font-family:var(--font-hand);
+  font-size:8.5px; line-height:1;
+  color:var(--text3);
+  opacity:.75;
+  margin-bottom:2px;
+  letter-spacing:.5px;
+}
+.tab.on::before{color:var(--blue-ink); opacity:1; font-weight:700}
+.tab.on{transform:translateY(-2px)}
+
+/* ==========================================================================
+   15. 夜间纸（深色模式）
+   --------------------------------------------------------------------------
+   手账风本来是纸，深色不是"变黑"，而是"换一批深色纸"：
+   冷灰蓝的底 + 米白字 + 更暗的胶带，保留撕边和层叠感。
+   ========================================================================== */
+[data-theme="dark"]{
+  --bg:#1B2230;
+  --grid:#2A3444;
+  --card:#2B3242;        /* 夜间纸：冷灰蓝，不是纯黑 */
+  --card2:#262E3C;
+  --text:#E8E0D5;        /* 米白，不是纯白 */
+  --text2:#B9B0A2;
+  --text3:#8C857A;
+  --line:#3A4354;
+  --line-strong:#4A5568;
+  --shadow:0 4px 12px rgba(0,0,0,.38);
+  --shadow-lift:0 12px 28px rgba(0,0,0,.45);
+  --blue:#7FA8CF;
+  --blue-ink:#A9CBE8;
+  --teal:#8FB795;
+  --pink:#D8A9A9;
+  --amber:#D9BC6B;
+  --tape:rgba(120,152,190,.40);
+  --tape-pink:rgba(180,132,142,.36);
+  --tape-mint:rgba(122,160,140,.38);
+  --tape-yellow:rgba(190,166,92,.34);
+}
+[data-theme="dark"] body{background-color:var(--bg)}
+[data-theme="dark"] .app{background-color:var(--bg)}
+/* 纸面高光在夜间要压暗，否则会发灰 */
+[data-theme="dark"] .home-body > .card::before,
+[data-theme="dark"] .post-card::before,
+[data-theme="dark"] .tipcard::before{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,0) 26%),
+    linear-gradient(0deg, rgba(0,0,0,.20), rgba(0,0,0,0) 16%);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.05);
+}
+[data-theme="dark"] .tipcard{background:#33301F; color:#C9C0A8}
+[data-theme="dark"] .tipcard .x{background:rgba(255,255,255,.10); color:#B6AE9C}
+[data-theme="dark"] .mood.on{background:rgba(255,255,255,.10)}
+[data-theme="dark"] .mood-face{
+  box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 -2px 5px rgba(0,0,0,.35);
+}
+[data-theme="dark"] .post-card .img-thumb{
+  border-color:#3A4254;
+  box-shadow:0 6px 16px rgba(0,0,0,.45);
+}
+[data-theme="dark"] .btn,
+[data-theme="dark"] .post-compose .textarea,
+[data-theme="dark"] .like-btn,
+[data-theme="dark"] .cbox{
+  background:rgba(255,255,255,.045);
+}
+[data-theme="dark"] .tab.on{
+  background:radial-gradient(circle at 50% 0%, rgba(127,168,207,.35), rgba(127,168,207,.08));
+}
+/* 夜间：日期圆别太白，否则整页就它最亮 */
+[data-theme="dark"] .hero::after{
+  border-color:rgba(169,203,232,.35);
+  background:radial-gradient(circle at 34% 30%, rgba(255,255,255,.14), rgba(127,168,207,.18));
+}
+[data-theme="dark"] .hero .dnum{color:#C7DEF2}
+
+/* ==========================================================================
+   16. 窄屏微调
    ========================================================================== */
 @media (max-width:360px){
   :root{--font:15px; --grid-size:20px}
